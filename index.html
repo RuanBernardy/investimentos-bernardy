@@ -217,7 +217,7 @@
           </div>
         </div>
 
-        <!-- Seção 1: Metas de Liquidez Imediata (Colchão R$ 100k) com TODOS OS COFRINHOS DETALHADOS -->
+        <!-- Seção 1: Metas de Liquidez Imediata (Colchão R$ 100k) -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-slate-800">
             <div class="flex items-center gap-2">
@@ -269,7 +269,7 @@
             </div>
           </div>
 
-          <!-- NOVO: Cofrinho Mercado Livre (140% CDI até R$ 2k) -->
+          <!-- Cofrinho Mercado Livre (140% CDI até R$ 2k) -->
           <div class="space-y-1.5 p-3 rounded-xl bg-slate-950/70 border border-yellow-700/40">
             <div class="flex justify-between items-center text-xs">
               <span class="text-yellow-400 font-semibold flex items-center gap-1.5">
@@ -290,7 +290,7 @@
             </div>
           </div>
 
-          <!-- NOVO: Cofrinho MP Reservas Pontuais (120% CDI até R$ 8k) -->
+          <!-- Cofrinho MP Reservas Pontuais (120% CDI até R$ 8k) -->
           <div class="space-y-1.5 p-3 rounded-xl bg-slate-950/70 border border-emerald-900/40">
             <div class="flex justify-between items-center text-xs">
               <span class="text-emerald-300 font-semibold flex items-center gap-1.5">
@@ -474,7 +474,7 @@
           </div>
         </div>
 
-        <!-- Allocation Checklist Section COM BARRAS DE PROGRESSO PARCIAIS -->
+        <!-- Allocation Checklist Section SEM PERDER FOCO AO DIGITAR -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
             <div>
@@ -482,7 +482,7 @@
                 <i data-lucide="check-square" class="w-5 h-5 text-emerald-400"></i>
                 Checklist Mensal com Progresso de Aportes
               </h2>
-              <p class="text-xs text-slate-400">Acompanhe aportes parciais (ex: 99Pay) até atingir a meta. Marque o check mesmo que parcial.</p>
+              <p class="text-xs text-slate-400">Digite o valor aportado de forma contínua sem que a tela saia do campo</p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
               <button onclick="addNewAllocationPrompt()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm">
@@ -639,9 +639,9 @@
         mpGiroTarget: 1000,
         pay99Balance: 6513.41,
         pay99Target: 10000,
-        cofrinhoMeliBalance: 0, // 140% CDI até R$ 2.000
+        cofrinhoMeliBalance: 0,
         cofrinhoMeliTarget: 2000,
-        cofrinhoPontuaisBalance: 0, // 120% CDI até R$ 8.000
+        cofrinhoPontuaisBalance: 0,
         cofrinhoPontuaisTarget: 8000,
         cofrinhoTurboBalance: 5088.24,
         cdb102Balance: 11222.77,
@@ -789,7 +789,7 @@
       showToast(`Saldo do ${titleName} atualizado para ${formatBRL(valor)}!`);
     }
 
-    // Gestão Dinâmica do Checklist com Progresso Parcial
+    // Gestão Dinâmica do Checklist
     function addNewAllocationPrompt() {
       const nome = prompt("Nome da nova meta/aporte (Ex: Fundo Imobiliário, Cripto, Reserva Extra):");
       if (!nome || !nome.trim()) return;
@@ -849,15 +849,31 @@
       }
     }
 
+    // DIGITAÇÃO SEM PERDER O FOCO
     function handleAllocationCurrentAmountChange(id, value) {
       const item = state.allocations.find(a => a.id === id);
       if (item) {
         item.currentAmount = parseFloat(value) || 0;
-        if (item.currentAmount >= item.amount && !item.checked) {
-          item.checked = true;
-          item.checkedAt = new Date().toLocaleDateString('pt-BR');
-        }
-        saveState();
+        
+        // Atualiza a mini barra de progresso no DOM diretamente
+        const itemTarget = Number(item.amount) || 0;
+        const progressPct = itemTarget > 0 ? Math.min(100, Math.round((item.currentAmount / itemTarget) * 100)) : 0;
+        
+        const progLabel = document.getElementById(`prog_label_${id}`);
+        const progBar = document.getElementById(`prog_bar_${id}`);
+        const progPctEl = document.getElementById(`prog_pct_${id}`);
+        
+        if (progLabel) progLabel.innerText = formatBRL(item.currentAmount);
+        if (progBar) progBar.style.width = `${progressPct}%`;
+        if (progPctEl) progPctEl.innerText = `${progressPct}%`;
+
+        // Atualiza totais de execução no topo e rodapé
+        const totalExec = getTotalExecutedAllocations();
+        document.getElementById('kpiExecutedAmount').innerText = formatBRL(totalExec);
+        document.getElementById('totalChecklistExecuted').innerText = formatBRL(totalExec);
+
+        // Salva silenciosamente sem rodar o render() que destruiria a célula
+        saveState(true);
       }
     }
 
@@ -865,7 +881,22 @@
       const item = state.allocations.find(a => a.id === id);
       if (item) {
         item.amount = parseFloat(value) || 0;
-        saveState();
+        
+        const itemCurrent = Number(item.currentAmount) || 0;
+        const progressPct = item.amount > 0 ? Math.min(100, Math.round((itemCurrent / item.amount) * 100)) : 0;
+        
+        const targetLabel = document.getElementById(`target_label_${id}`);
+        const progBar = document.getElementById(`prog_bar_${id}`);
+        const progPctEl = document.getElementById(`prog_pct_${id}`);
+
+        if (targetLabel) targetLabel.innerText = formatBRL(item.amount);
+        if (progBar) progBar.style.width = `${progressPct}%`;
+        if (progPctEl) progPctEl.innerText = `${progressPct}%`;
+
+        const plannedTotal = getTotalPlannedAllocations();
+        document.getElementById('totalChecklistPlanned').innerText = formatBRL(plannedTotal);
+
+        saveState(true);
       }
     }
 
@@ -873,7 +904,7 @@
       const item = state.allocations.find(a => a.id === id);
       if (item) {
         item.customRate = value;
-        saveState();
+        saveState(true);
       }
     }
 
@@ -982,7 +1013,15 @@
       if (exp) {
         exp.amount = parseFloat(value) || 0;
         recalculateAllocationsAuto();
-        saveState();
+        saveState(true);
+
+        const totalExp = getTotalExpenses();
+        const netSurplus = getNetSurplus();
+        const savingsRate = state.income > 0 ? ((netSurplus / state.income) * 100).toFixed(1) : 0;
+        document.getElementById('badgeTotalExpenses').innerText = formatBRL(totalExp);
+        document.getElementById('kpiExpenses').innerText = formatBRL(totalExp);
+        document.getElementById('labelNetSurplus').innerText = formatBRL(netSurplus);
+        document.getElementById('labelSavingsRate').innerText = `${savingsRate}%`;
       }
     }
 
@@ -1082,7 +1121,13 @@
       state.income = parseFloat(value) || 0;
       state.activePhase = 0;
       recalculateAllocationsAuto();
-      saveState();
+      saveState(true);
+
+      const netSurplus = getNetSurplus();
+      const savingsRate = state.income > 0 ? ((netSurplus / state.income) * 100).toFixed(1) : 0;
+      document.getElementById('kpiIncome').innerText = formatBRL(state.income);
+      document.getElementById('labelNetSurplus').innerText = formatBRL(netSurplus);
+      document.getElementById('labelSavingsRate').innerText = `${savingsRate}%`;
     }
 
     function handleMonthChange(value) {
@@ -1299,7 +1344,7 @@
       document.getElementById('kpiIncome').innerText = formatBRL(state.income);
       document.getElementById('kpiExpenses').innerText = formatBRL(totalExp);
 
-      // Atualiza KPI e Card de Títulos do Tesouro Direto com Dados dos Arquivos
+      // Atualiza KPI e Card de Títulos do Tesouro Direto
       const totalTesouro = getTotalTesouro();
       document.getElementById('kpiTotalTesouro').innerText = formatBRL(totalTesouro);
       document.getElementById('badgeTesouroTotalCard').innerText = formatBRL(totalTesouro);
@@ -1347,7 +1392,7 @@
       const pay99Diff = pay99Target - pay99Bal;
       document.getElementById('status99PayProgress').innerText = pay99Diff > 0 ? `Faltam ${formatBRL(pay99Diff)} para o teto` : '🎉 TETO 10K ATINGIDO!';
 
-      // Barra Cofrinho Mercado Livre (140% CDI até R$ 2k)
+      // Barra Cofrinho Mercado Livre (140% até 2k)
       const cofMeliBal = state.vault.cofrinhoMeliBalance || 0;
       const cofMeliTarget = state.vault.cofrinhoMeliTarget || 2000;
       const cofMeliPct = Math.min(100, (cofMeliBal / cofMeliTarget) * 100).toFixed(1);
@@ -1357,7 +1402,7 @@
       const cofMeliDiff = cofMeliTarget - cofMeliBal;
       document.getElementById('statusCofrinhoMeli').innerText = cofMeliDiff > 0 ? `Faltam ${formatBRL(cofMeliDiff)} para o teto de 140%` : '🎉 TETO 140% ATINGIDO!';
 
-      // Barra Cofrinho MP Reservas Pontuais (120% CDI até R$ 8k)
+      // Barra Cofrinho MP Reservas Pontuais (120% até 8k)
       const cofPontuaisBal = state.vault.cofrinhoPontuaisBalance || 0;
       const cofPontuaisTarget = state.vault.cofrinhoPontuaisTarget || 8000;
       const cofPontuaisPct = Math.min(100, (cofPontuaisBal / cofPontuaisTarget) * 100).toFixed(1);
@@ -1392,7 +1437,7 @@
 
       document.getElementById('labelAmortTotal').innerText = `${formatBRL(state.vault.amortAccumulated)} amortizados`;
 
-      // Render Checklist com Barras de Progresso Parciais e Edição
+      // Render Checklist com IDs fixos para não perder o foco ao digitar
       const checklistContainer = document.getElementById('checklistContainer');
       checklistContainer.innerHTML = state.allocations.map(item => {
         const itemTarget = Number(item.amount) || 0;
@@ -1425,20 +1470,20 @@
                   </div>
                   <p class="text-[11px] text-slate-400 mt-1 italic">${item.instruction}</p>
 
-                  <!-- Barra de Progresso Parcial do Item -->
+                  <!-- Barra de Progresso Parcial com IDs fixos -->
                   <div class="mt-2.5 max-w-md">
                     <div class="flex justify-between text-[10px] text-slate-400 mb-1">
-                      <span>Progresso: <b>${formatBRL(itemCurrent)}</b> de ${formatBRL(itemTarget)}</span>
-                      <span class="font-bold text-emerald-400">${progressPct}%</span>
+                      <span>Progresso: <b id="prog_label_${item.id}">${formatBRL(itemCurrent)}</b> de <span id="target_label_${item.id}">${formatBRL(itemTarget)}</span></span>
+                      <span class="font-bold text-emerald-400" id="prog_pct_${item.id}">${progressPct}%</span>
                     </div>
                     <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                      <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
+                      <div id="prog_bar_${item.id}" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <!-- Inputs de Valores: Realizado e Meta Planejada -->
+              <!-- Inputs de Valores -->
               <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 self-end sm:self-start shrink-0 pt-1">
                 ${isTreasury ? `
                   <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1" title="Taxa real contratada na data da aplicação">
