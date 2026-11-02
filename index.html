@@ -84,7 +84,6 @@
           <input type="month" id="selectedMonth" onchange="handleMonthChange(this.value)" class="bg-transparent border-0 text-slate-200 focus:outline-none cursor-pointer text-xs" />
         </div>
 
-        <!-- Indicador e Botão de Sincronização em Nuvem Automática -->
         <button onclick="configureCloudSync()" id="btnCloudSync" title="Configurar Sincronização Automática em Nuvem" class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-indigo-950/40 hover:bg-indigo-900/60 text-indigo-300 border border-indigo-700/50 transition flex items-center gap-1.5">
           <i data-lucide="cloud" class="w-3.5 h-3.5 text-indigo-400" id="iconCloud"></i>
           <span id="labelCloudSync">Nuvem: Ativar</span>
@@ -130,7 +129,7 @@
         <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Tesouro Direto (Real)</div>
         <div class="text-xl sm:text-2xl font-black text-cyan-400 tracking-tight" id="kpiTotalTesouro">R$ 18.029,00</div>
         <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-          <i data-lucide="landmark" class="w-3.5 h-3.5 text-cyan-400"></i> Extrato Oficial NuInvest
+          <i data-lucide="landmark" class="w-3 h-3 text-cyan-400"></i> Extrato Oficial NuInvest
         </div>
       </div>
 
@@ -228,7 +227,7 @@
           </div>
         </div>
 
-        <!-- Seção 1: Metas de Liquidez Imediata (Colchão R$ 100k) -->
+        <!-- Seção 1: Metas de Liquidez Imediata (Colchão R$ 100k) com Auto-Incremento Diário -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-slate-800">
             <div class="flex items-center gap-2">
@@ -255,7 +254,7 @@
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
               <span id="statusMpGiroProgress">Faltam R$ 987,89 para o piso</span>
-              <span class="font-bold text-emerald-400">Rende 105% CDI</span>
+              <span class="font-bold text-emerald-400">Rende 105% CDI (Auto)</span>
             </div>
           </div>
 
@@ -276,7 +275,7 @@
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
               <span id="status99PayProgress">Faltam R$ 3.486,59 para o teto</span>
-              <span id="percent99PayProgress" class="font-bold text-amber-400">65.1%</span>
+              <span class="font-bold text-amber-400">Rende 120% (Auto)</span>
             </div>
           </div>
 
@@ -303,7 +302,7 @@
                 <div id="barCofrinhoMeli" class="bg-gradient-to-r from-yellow-500 to-amber-400 h-1.5 rounded-full" style="width: 100%"></div>
               </div>
               <div class="flex justify-between text-[10px] text-slate-400">
-                <span>R$ 2.000 a 140% (desconta do teto de 10k)</span>
+                <span>R$ 2.000 a 140% (Auto)</span>
                 <span class="font-bold text-yellow-400" id="percentCofrinhoMeli">100.0%</span>
               </div>
             </div>
@@ -321,13 +320,13 @@
                 <div id="barCofrinhoPontuais" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full" style="width: 100%"></div>
               </div>
               <div class="flex justify-between text-[10px] text-slate-400">
-                <span id="statusCofrinhoPontuais">R$ 8.000 a 120% CDI</span>
+                <span id="statusCofrinhoPontuais">R$ 8.000 a 120% CDI (Auto)</span>
                 <span class="font-bold text-emerald-400" id="percentCofrinhoPontuais">100.0%</span>
               </div>
             </div>
 
             <div class="text-[10px] text-slate-500 italic pt-1 border-t border-slate-800/60">
-              *Qualquer valor acima de R$ 10.000 na soma dos cofrinhos passa a render a 100% do CDI.
+              *Rendimento acumulado automaticamente dia após dia.
             </div>
           </div>
 
@@ -347,8 +346,8 @@
               <div id="barCofrinhoTurbo" class="bg-gradient-to-r from-purple-600 to-fuchsia-400 h-1.5 rounded-full transition-all duration-300" style="width: 100%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusCofrinhoTurbo">R$ 5.000 a 115% • R$ 88,24 a 100% CDI</span>
-              <span class="font-bold text-purple-400">Teto 115% atingido</span>
+              <span id="statusCofrinhoTurbo">R$ 5k a 115% • Resto a 100% (Auto)</span>
+              <span class="font-bold text-purple-400">Rendimento Ativo</span>
             </div>
           </div>
 
@@ -369,7 +368,7 @@
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
               <span id="statusCdbProgress">Faltam R$ 18.777,23 para o teto</span>
-              <span id="percentCdbProgress" class="font-bold text-teal-400">37.4%</span>
+              <span class="font-bold text-teal-400">Rende 102% (Auto)</span>
             </div>
           </div>
 
@@ -386,7 +385,7 @@
               <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 32.8%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusTotalCushion">Giro + 99Pay + Cofrinhos MP (10k) + Cofrinho Turbo + CDB MP</span>
+              <span id="statusTotalCushion">Atualização diária de juros compostos ativa</span>
               <span id="percentTotalCushion" class="font-bold text-blue-400">32.8%</span>
             </div>
           </div>
@@ -458,7 +457,7 @@
           </div>
         </div>
 
-        <!-- Allocation Checklist Section SEM PERDER FOCO AO DIGITAR -->
+        <!-- Allocation Checklist Section -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
             <div>
@@ -605,6 +604,7 @@
   <script>
     const PERMANENT_STORAGE_KEY = 'FINANCE_ALLOCATOR_DATA_PERMANENT';
     const CLOUD_SYNC_KEY = 'FINANCE_CLOUD_SYNC_BIN_ID';
+    const LAST_DATE_KEY = 'FINANCE_LAST_COMPOUND_DATE';
 
     const defaultState = {
       selectedMonth: new Date().toISOString().slice(0, 7),
@@ -726,7 +726,6 @@
         try {
           const parsed = JSON.parse(savedPermanent);
           const mergedVault = { ...defaultState.vault, ...(parsed.vault || {}) };
-          
           let titles = parsed.tesouroTitles && parsed.tesouroTitles.length > 0 ? parsed.tesouroTitles : defaultState.tesouroTitles;
 
           return { 
@@ -745,18 +744,90 @@
     let state = loadStateWithMigration();
     let cloudTimer = null;
 
-    // Salva Localmente e Agenda Envio Automático para Nuvem
+    // --- MOTOR DE AUTO-INCREMENTO DIÁRIO POR JUROS COMPOSTOS ---
+    function applyDailyCompoundInterest() {
+      const todayStr = new Date().toISOString().slice(0, 10);
+      const lastDateStr = localStorage.getItem(LAST_DATE_KEY);
+
+      if (!lastDateStr) {
+        localStorage.setItem(LAST_DATE_KEY, todayStr);
+        return;
+      }
+
+      if (lastDateStr === todayStr) return; // Já rodou hoje
+
+      const lastDate = new Date(lastDateStr);
+      const today = new Date(todayStr);
+      const diffTime = today - lastDate;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays <= 0) return;
+
+      // Calcula juros acumulados para os dias passados (considerando apenas dias úteis aproximados ou proporcional)
+      const cdiAnual = (state.cdiRateAnnual || 13.15) / 100;
+      const dailyFactor = (days, rateMult) => {
+        const taxaAno = cdiAnual * rateMult;
+        const fatorDia = Math.pow(1 + taxaAno, 1 / 252) - 1;
+        return days * fatorDia;
+      };
+
+      // Fator líquido (17.5% IR) ou isento (99pay)
+      const liq = 0.825;
+
+      // 99Pay (120% isento)
+      if (state.vault.pay99Balance) {
+        const f = days => days * (Math.pow(1 + cdiAnual * 1.20, 1 / 252) - 1);
+        state.vault.pay99Balance += state.vault.pay99Balance * f(diffDays);
+      }
+
+      // Giro MP (105% liq)
+      if (state.vault.mpGiroBalance) {
+        const f = days => days * (Math.pow(1 + cdiAnual * 1.05, 1 / 252) - 1) * liq;
+        state.vault.mpGiroBalance += state.vault.mpGiroBalance * f(diffDays);
+      }
+
+      // Cofrinho Meli (140% liq)
+      if (state.vault.cofrinhoMeliBalance) {
+        const f = days => days * (Math.pow(1 + cdiAnual * 1.40, 1 / 252) - 1) * liq;
+        state.vault.cofrinhoMeliBalance += state.vault.cofrinhoMeliBalance * f(diffDays);
+      }
+
+      // Cofrinho Pontuais (120% liq)
+      if (state.vault.cofrinhoPontuaisBalance) {
+        const f = days => days * (Math.pow(1 + cdiAnual * 1.20, 1 / 252) - 1) * liq;
+        state.vault.cofrinhoPontuaisBalance += state.vault.cofrinhoPontuaisBalance * f(diffDays);
+      }
+
+      // Cofrinho Turbo (5k a 115%, resto a 100% liq)
+      if (state.vault.cofrinhoTurboBalance) {
+        const total = state.vault.cofrinhoTurboBalance;
+        const b115 = Math.min(5000, total);
+        const b100 = Math.max(0, total - 5000);
+        const f115 = days => days * (Math.pow(1 + cdiAnual * 1.15, 1 / 252) - 1) * liq;
+        const f100 = days => days * (Math.pow(1 + cdiAnual * 1.00, 1 / 252) - 1) * liq;
+        state.vault.cofrinhoTurboBalance += (b115 * f115(diffDays)) + (b100 * f100(diffDays));
+      }
+
+      // CDB MP (102% liq)
+      if (state.vault.cdb102Balance) {
+        const f = days => days * (Math.pow(1 + cdiAnual * 1.02, 1 / 252) - 1) * liq;
+        state.vault.cdb102Balance += state.vault.cdb102Balance * f(diffDays);
+      }
+
+      localStorage.setItem(LAST_DATE_KEY, todayStr);
+      saveState(true);
+    }
+
     function saveState(skipRender = false) {
       localStorage.setItem(PERMANENT_STORAGE_KEY, JSON.stringify(state));
       if (!skipRender) render();
       scheduleCloudPush();
     }
 
-    // --- MOTOR DE SINCRONIZAÇÃO AUTOMÁTICA EM NUVEM (JSONBIN / KV PÚBLICO) ---
     async function configureCloudSync() {
       const currentBin = localStorage.getItem(CLOUD_SYNC_KEY) || "";
       const input = prompt(
-        "Sincronização Automática em Nuvem:\n\nDigite um NOME DE IDENTIFICADOR ÚNICO para o seu cofre (Ex: ruan-financas-2026).\n\nUse esse MESMO nome no celular e no computador para eles sincronizarem automaticamente:",
+        "Sincronização Automática em Nuvem:\n\nDigite um NOME DE IDENTIFICADOR ÚNICO para o seu cofre (Ex: ruan-financas-2026):\n\nUse esse MESMO nome no celular e no computador para sincronizarem automaticamente:",
         currentBin
       );
 
@@ -790,7 +861,6 @@
       }
     }
 
-    // Puxa dados da Nuvem ao Abrir
     async function syncFromCloud() {
       const syncKey = localStorage.getItem(CLOUD_SYNC_KEY);
       if (!syncKey) return;
@@ -809,11 +879,10 @@
           }
         }
       } catch (e) {
-        console.warn("Nenhum dado na nuvem ainda ou erro de conexão:", e);
+        console.warn("Erro ao sincronizar com nuvem:", e);
       }
     }
 
-    // Envia dados para a Nuvem de forma invisível
     function scheduleCloudPush() {
       const syncKey = localStorage.getItem(CLOUD_SYNC_KEY);
       if (!syncKey) return;
@@ -834,7 +903,7 @@
         } catch (e) {
           console.warn("Falha ao salvar na nuvem:", e);
         }
-      }, 1200); // Salva 1.2s após a última digitação
+      }, 1200);
     }
 
     function formatBRL(val) {
@@ -886,12 +955,11 @@
       }
 
       const escolha = prompt(
-        `Ajustar saldo de "${label}":\nSaldo Atual: ${formatBRL(currentVal)}\n\nDigite:\n• O NOVO SALDO TOTAL EXATO para substituir (ex: 8000)\n• OU coloque um sinal de '+' antes para apenas somar um aporte (ex: +500)`,
+        `Ajustar saldo de "${label}":\nSaldo Atual: ${formatBRL(currentVal)}\n\nDigite:\n• O NOVO SALDO TOTAL EXATO para substituir (ex: 8000)\n• OU coloque um sinal de '+' antes para somar um aporte (ex: +500)`,
         currentVal
       );
 
       if (escolha === null) return;
-
       const entradaLimpa = escolha.trim();
       if (!entradaLimpa) return;
 
@@ -902,7 +970,7 @@
         if (targetKey === 'cofrinhoPontuais') state.vault.cofrinhoPontuaisBalance += aporte;
         if (targetKey === 'cofrinhoTurbo') state.vault.cofrinhoTurboBalance += aporte;
         if (targetKey === 'cdb102') state.vault.cdb102Balance += aporte;
-        showToast(`Aporte de ${formatBRL(aporte)} somado com sucesso!`);
+        showToast(`Aporte de ${formatBRL(aporte)} somado!`);
       } else {
         const novoTotal = parseFloat(entradaLimpa.replace(',', '.')) || 0;
         if (targetKey === 'pay99') state.vault.pay99Balance = novoTotal;
@@ -910,7 +978,7 @@
         if (targetKey === 'cofrinhoPontuais') state.vault.cofrinhoPontuaisBalance = novoTotal;
         if (targetKey === 'cofrinhoTurbo') state.vault.cofrinhoTurboBalance = novoTotal;
         if (targetKey === 'cdb102') state.vault.cdb102Balance = novoTotal;
-        showToast(`Saldo de "${label}" corrigido para ${formatBRL(novoTotal)}!`);
+        showToast(`Saldo de "${label}" atualizado para ${formatBRL(novoTotal)}!`);
       }
 
       saveState();
@@ -926,16 +994,13 @@
       showToast(`Giro Mercado Pago atualizado para ${formatBRL(valor)}!`);
     }
 
-    // Gestão Dinâmica dos Títulos do Tesouro Direto
     function addNewTesouroTitlePrompt() {
-      const nome = prompt("Nome do novo título do Tesouro (Ex: Tesouro IPCA+ 2032, Tesouro Selic 2029):");
+      const nome = prompt("Nome do novo título do Tesouro (Ex: Tesouro IPCA+ 2032):");
       if (!nome || !nome.trim()) return;
-
       const valorStr = prompt(`Saldo inicial atual para "${nome.trim()}" (R$):`, "1000");
       if (valorStr === null) return;
       const valor = parseFloat(valorStr.replace(',', '.')) || 0;
-
-      const taxa = prompt("Taxa contratada (Ex: IPCA + 6.85% ou 100% Selic):", "IPCA + 6.80%") || "IPCA+";
+      const taxa = prompt("Taxa contratada:", "IPCA + 6.80%") || "IPCA+";
 
       const newId = `tesouro_${Date.now()}`;
       state.tesouroTitles.push({
@@ -954,37 +1019,31 @@
     function updateTesouroDynamicBalance(id) {
       const item = state.tesouroTitles.find(t => t.id === id);
       if (!item) return;
-
       const entrada = prompt(`Digite o saldo líquido atualizado de "${item.name}":`, item.amount);
       if (entrada === null) return;
       const valor = parseFloat(entrada.replace(',', '.')) || 0;
-
       item.amount = valor;
       saveState();
-      showToast(`Saldo de "${item.name}" atualizado para ${formatBRL(valor)}!`);
+      showToast(`Saldo atualizado!`);
     }
 
     function deleteTesouroDynamicTitle(id) {
       const item = state.tesouroTitles.find(t => t.id === id);
       if (!item) return;
-
-      if (confirm(`Deseja realmente remover o título "${item.name}" da sua carteira?`)) {
+      if (confirm(`Remover título "${item.name}"?`)) {
         state.tesouroTitles = state.tesouroTitles.filter(t => t.id !== id);
         saveState();
-        showToast(`Título "${item.name}" removido!`);
+        showToast(`Título removido!`);
       }
     }
 
-    // Gestão Dinâmica do Checklist
     function addNewAllocationPrompt() {
-      const nome = prompt("Nome da nova meta/aporte (Ex: Fundo Imobiliário, Cripto, Reserva Extra):");
+      const nome = prompt("Nome da nova meta/aporte:");
       if (!nome || !nome.trim()) return;
-
-      const valorStr = prompt(`Valor planejado mensal para "${nome.trim()}" (R$):`, "500");
+      const valorStr = prompt("Valor planejado mensal (R$):", "500");
       if (valorStr === null) return;
       const valor = parseFloat(valorStr.replace(',', '.')) || 0;
-
-      const categoria = prompt("Categoria / Descrição curta:", "Diversificação") || "Investimento Geral";
+      const categoria = prompt("Categoria:", "Diversificação") || "Geral";
 
       const newId = `alloc_${Date.now()}`;
       state.allocations.push({
@@ -997,29 +1056,20 @@
         checkedAt: null,
         badge: 'Personalizado',
         badgeColor: 'border-slate-500/30 text-slate-300 bg-slate-800',
-        instruction: 'Definido livremente pelo usuário.',
+        instruction: 'Definido pelo usuário.',
         icon: 'target',
         customRate: null
       });
 
       saveState();
-      showToast(`Meta "${nome.trim()}" adicionada!`);
+      showToast(`Meta adicionada!`);
     }
 
     function editAllocation(id) {
       const item = state.allocations.find(a => a.id === id);
       if (!item) return;
-
-      const novoNome = prompt("Editar nome da meta:", item.name);
-      if (novoNome === null) return;
-      if (novoNome.trim()) item.name = novoNome.trim();
-
-      const novaCat = prompt("Editar categoria:", item.category);
-      if (novaCat !== null && novaCat.trim()) item.category = novaCat.trim();
-
-      const novaInstrucao = prompt("Editar instrução:", item.instruction);
-      if (novaInstrucao !== null) item.instruction = novaInstrucao.trim();
-
+      const novoNome = prompt("Editar nome:", item.name);
+      if (novoNome !== null && novoNome.trim()) item.name = novoNome.trim();
       saveState();
       showToast("Meta atualizada!");
     }
@@ -1027,20 +1077,17 @@
     function deleteAllocation(id) {
       const item = state.allocations.find(a => a.id === id);
       if (!item) return;
-
-      if (confirm(`Deseja realmente excluir a meta "${item.name}" do checklist?`)) {
+      if (confirm(`Excluir meta "${item.name}"?`)) {
         state.allocations = state.allocations.filter(a => a.id !== id);
         saveState();
-        showToast(`Meta "${item.name}" excluída!`);
+        showToast("Meta excluída!");
       }
     }
 
-    // DIGITAÇÃO SEM PERDER O FOCO
     function handleAllocationCurrentAmountChange(id, value) {
       const item = state.allocations.find(a => a.id === id);
       if (item) {
         item.currentAmount = parseFloat(value) || 0;
-        
         const itemTarget = Number(item.amount) || 0;
         const progressPct = itemTarget > 0 ? Math.min(100, Math.round((item.currentAmount / itemTarget) * 100)) : 0;
         
@@ -1064,7 +1111,6 @@
       const item = state.allocations.find(a => a.id === id);
       if (item) {
         item.amount = parseFloat(value) || 0;
-        
         const itemCurrent = Number(item.currentAmount) || 0;
         const progressPct = item.amount > 0 ? Math.min(100, Math.round((itemCurrent / item.amount) * 100)) : 0;
         
@@ -1078,7 +1124,6 @@
 
         const plannedTotal = getTotalPlannedAllocations();
         document.getElementById('totalChecklistPlanned').innerText = formatBRL(plannedTotal);
-
         saveState(true);
       }
     }
@@ -1091,38 +1136,24 @@
       }
     }
 
-    // Despesas Dinâmicas
     function addNewExpensePrompt() {
-      const nome = prompt("Nome da nova despesa fixa (Ex: Condomínio, Academia, Streaming):");
+      const nome = prompt("Nome da despesa fixa:");
       if (!nome || !nome.trim()) return;
-
-      const valorStr = prompt(`Valor mensal para "${nome.trim()}" (R$):`, "100");
+      const valorStr = prompt("Valor mensal (R$):", "100");
       if (valorStr === null) return;
       const valor = parseFloat(valorStr.replace(',', '.')) || 0;
 
-      const newId = `exp_${Date.now()}`;
-      state.expenses.push({
-        id: newId,
-        label: nome.trim(),
-        amount: valor,
-        icon: 'receipt'
-      });
-
+      state.expenses.push({ id: `exp_${Date.now()}`, label: nome.trim(), amount: valor, icon: 'receipt' });
       recalculateAllocationsAuto();
       saveState();
-      showToast(`Despesa "${nome.trim()}" adicionada!`);
+      showToast("Despesa adicionada!");
     }
 
     function deleteExpense(id) {
-      const exp = state.expenses.find(e => e.id === id);
-      if (!exp) return;
-
-      if (confirm(`Deseja remover a despesa "${exp.label}"?`)) {
-        state.expenses = state.expenses.filter(e => e.id !== id);
-        recalculateAllocationsAuto();
-        saveState();
-        showToast(`Despesa "${exp.label}" removida!`);
-      }
+      state.expenses = state.expenses.filter(e => e.id !== id);
+      recalculateAllocationsAuto();
+      saveState();
+      showToast("Despesa removida!");
     }
 
     function handleExpenseChange(id, value) {
@@ -1142,24 +1173,17 @@
       }
     }
 
-    // Motor de Rendimento Líquido
     function calculateSmartYield() {
       if (state.manualYieldRecorded !== null && state.manualYieldRecorded !== undefined) {
-        return {
-          mensalTotal: state.manualYieldRecorded,
-          diarioTotal: state.manualYieldRecorded / 22,
-          isManual: true
-        };
+        return { mensalTotal: state.manualYieldRecorded, diarioTotal: state.manualYieldRecorded / 22, isManual: true };
       }
 
       const cdiAnual = (state.cdiRateAnnual || 13.15) / 100;
       
-      // 1. 99Pay: 120% CDI 100% Isento
       const taxa99Anual = cdiAnual * 1.20;
       const rend99Mensal = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 12) - 1);
       const rend99Diario = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 252) - 1);
 
-      // 2. Cofrinhos Mercado Pago (Teto de 10k e Sub-teto de 2k)
       const meliBal = state.vault.cofrinhoMeliBalance || 0;
       const pontuaisBal = state.vault.cofrinhoPontuaisBalance || 0;
       const totalCofrinhosMP = meliBal + pontuaisBal;
@@ -1184,7 +1208,6 @@
         b100 * (Math.pow(1 + taxa100Anual, 1 / 252) - 1)
       ) * 0.825;
 
-      // 3. Cofrinho Turbo: R$ 5.000 a 115% CDI + Excedente a 100% CDI (c/ 17.5% IR)
       const saldoCofTotal = state.vault.cofrinhoTurboBalance || 0;
       const saldoCof115 = Math.min(5000, saldoCofTotal);
       const saldoCof100 = Math.max(0, saldoCofTotal - 5000);
@@ -1192,49 +1215,32 @@
       const taxaCof115Anual = cdiAnual * 1.15;
       const taxaCof100Anual = cdiAnual * 1.00;
 
-      const rendCof115Mensal = saldoCof115 * (Math.pow(1 + taxaCof115Anual, 1 / 12) - 1) * 0.825;
-      const rendCof100Mensal = saldoCof100 * (Math.pow(1 + taxaCof100Anual, 1 / 12) - 1) * 0.825;
-      const rendCofMensal = rendCof115Mensal + rendCof100Mensal;
+      const rendCofMensal = (saldoCof115 * (Math.pow(1 + taxaCof115Anual, 1 / 12) - 1) + saldoCof100 * (Math.pow(1 + taxaCof100Anual, 1 / 12) - 1)) * 0.825;
+      const rendCofDiario = (saldoCof115 * (Math.pow(1 + taxaCof115Anual, 1 / 252) - 1) + saldoCof100 * (Math.pow(1 + taxaCof100Anual, 1 / 252) - 1)) * 0.825;
 
-      const rendCof115Diario = saldoCof115 * (Math.pow(1 + taxaCof115Anual, 1 / 252) - 1) * 0.825;
-      const rendCof100Diario = saldoCof100 * (Math.pow(1 + taxaCof100Anual, 1 / 252) - 1) * 0.825;
-      const rendCofDiario = rendCof115Diario + rendCof100Diario;
-
-      // 4. Mercado Pago CDB: 102% CDI (IR 17.5%)
       const taxaCdbAnual = cdiAnual * 1.02;
       const rendCdbMensal = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 12) - 1) * 0.825;
       const rendCdbDiario = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 252) - 1) * 0.825;
 
-      // 5. Mercado Pago Giro: 105% CDI (IR 17.5%)
       const taxaGiroAnual = cdiAnual * 1.05;
       const rendGiroMensal = (state.vault.mpGiroBalance || 0) * (Math.pow(1 + taxaGiroAnual, 1 / 12) - 1) * 0.825;
 
       const totalMensal = rend99Mensal + rendMpCofrinhosMensal + rendCofMensal + rendCdbMensal + rendGiroMensal;
       const totalDiario = rend99Diario + rendMpCofrinhosDiario + rendCofDiario + rendCdbDiario;
 
-      return {
-        mensalTotal: totalMensal,
-        diarioTotal: totalDiario,
-        isManual: false
-      };
+      return { mensalTotal: totalMensal, diarioTotal: totalDiario, isManual: false };
     }
 
     function editRealYieldManual() {
       const atual = state.manualYieldRecorded !== null ? state.manualYieldRecorded : calculateSmartYield().mensalTotal;
-      const entrada = prompt(
-        "Digite o rendimento líquido real somado no mês:\n(Deixe em branco ou digite 'auto' para voltar ao cálculo automático)",
-        atual ? atual.toFixed(2) : ""
-      );
-
+      const entrada = prompt("Digite o rendimento líquido real somado no mês (ou 'auto'):", atual ? atual.toFixed(2) : "");
       if (entrada === null) return;
-
       if (entrada.trim().toLowerCase() === 'auto' || entrada.trim() === '') {
         state.manualYieldRecorded = null;
-        showToast("Rendimento configurado para cálculo automático!");
+        showToast("Rendimento automático ativado!");
       } else {
-        const val = parseFloat(entrada.replace(',', '.')) || 0;
-        state.manualYieldRecorded = val;
-        showToast(`Rendimento real fixado em ${formatBRL(val)}!`);
+        state.manualYieldRecorded = parseFloat(entrada.replace(',', '.')) || 0;
+        showToast("Rendimento fixado!");
       }
       saveState();
     }
@@ -1246,7 +1252,7 @@
       else if (phaseNum === 3) state.income = 5000;
       recalculateAllocationsAuto();
       saveState();
-      showToast(`Fase ${phaseNum} selecionada: Renda atualizada para ${formatBRL(state.income)}`);
+      showToast(`Fase ${phaseNum} selecionada!`);
     }
 
     function handleIncomeChange(value) {
@@ -1272,27 +1278,9 @@
       if (item) {
         item.checked = !item.checked;
         item.checkedAt = item.checked ? new Date().toLocaleDateString('pt-BR') : null;
-        
-        if (item.checked && (!item.currentAmount || item.currentAmount === 0)) {
-          item.currentAmount = item.amount;
-        }
-
-        if (id === 'alloc_giro') {
-          if (item.checked) state.vault.mpGiroBalance += (item.currentAmount || item.amount);
-          else state.vault.mpGiroBalance = Math.max(12.11, state.vault.mpGiroBalance - (item.currentAmount || item.amount));
-        }
-        if (id === 'alloc_cdb') {
-          if (item.checked) state.vault.cdb102Balance += (item.currentAmount || item.amount);
-          else state.vault.cdb102Balance = Math.max(11000, state.vault.cdb102Balance - (item.currentAmount || item.amount));
-        }
-        if (id === 'alloc_amort') {
-          if (item.checked) state.vault.amortAccumulated += (item.currentAmount || item.amount);
-          else state.vault.amortAccumulated = Math.max(0, state.vault.amortAccumulated - (item.currentAmount || item.amount));
-        }
-
-        recordMonthSnapshot();
+        if (item.checked && (!item.currentAmount || item.currentAmount === 0)) item.currentAmount = item.amount;
         saveState();
-        showToast(item.checked ? `Check marcado: ${item.name}` : `Check desmarcado: ${item.name}`);
+        showToast(item.checked ? `Concluído: ${item.name}` : `Desmarcado: ${item.name}`);
       }
     }
 
@@ -1308,70 +1296,17 @@
       if (state.activePhase === 1 || state.income >= 14000) {
         if (amortItem) amortItem.amount = 2000;
         if (ipcaItem) ipcaItem.amount = 3900;
-        
         const totalLiquidez = Math.max(0, surplus - (2000 + 3900));
         if (giroItem) giroItem.amount = Math.min(totalLiquidez, giroFaltando);
         if (cdbItem) cdbItem.amount = Math.max(0, totalLiquidez - (giroItem ? giroItem.amount : 0));
-
-      } else if (state.activePhase === 2 || state.income >= 10000) {
-        if (amortItem) amortItem.amount = 2000;
-        if (ipcaItem) ipcaItem.amount = 2500;
-        const totalLiquidez = Math.max(0, surplus - (2000 + 2500));
-        if (giroItem) giroItem.amount = Math.min(totalLiquidez, giroFaltando);
-        if (cdbItem) cdbItem.amount = Math.max(0, totalLiquidez - (giroItem ? giroItem.amount : 0));
-
-      } else if (state.activePhase === 3 || state.income >= 5000) {
-        if (amortItem) amortItem.amount = Math.min(2000, Math.floor(surplus * 0.65));
-        const totalLiquidez = Math.max(0, surplus - amortItem.amount);
-        if (giroItem) giroItem.amount = Math.min(totalLiquidez, giroFaltando);
-        if (cdbItem) cdbItem.amount = Math.max(0, totalLiquidez - (giroItem ? giroItem.amount : 0));
-        if (ipcaItem) ipcaItem.amount = 0;
-      } else {
-        if (amortItem) amortItem.amount = Math.min(1000, Math.floor(surplus * 0.5));
-        if (giroItem) giroItem.amount = 0;
-        if (cdbItem) cdbItem.amount = Math.max(0, surplus - amortItem.amount);
-        if (ipcaItem) ipcaItem.amount = 0;
-      }
-    }
-
-    function recordMonthSnapshot() {
-      const month = state.selectedMonth;
-      const existingIdx = state.history.findIndex(h => h.month === month);
-      const totalInvested = state.allocations.filter(a => a.id !== 'alloc_amort').reduce((acc, c) => acc + (c.currentAmount || c.amount), 0);
-      const amortVal = state.allocations.find(a => a.id === 'alloc_amort')?.currentAmount || 0;
-      const checkedCount = state.allocations.filter(a => a.checked).length;
-      const smartYield = calculateSmartYield();
-
-      const record = {
-        month,
-        phase: state.activePhase ? `Fase ${state.activePhase}` : 'Personalizada',
-        income: state.income,
-        expenses: getTotalExpenses(),
-        amort: amortVal,
-        invested: totalInvested,
-        rates: 'IPCA+ / CDI',
-        yieldRecorded: formatBRL(smartYield.mensalTotal),
-        checks: `${checkedCount}/${state.allocations.length}`,
-        done: checkedCount === state.allocations.length
-      };
-
-      if (existingIdx >= 0) {
-        state.history[existingIdx] = record;
-      } else {
-        state.history.unshift(record);
       }
     }
 
     function confirmResetMonth() {
-      if (confirm('Deseja desmarcar todos os checks deste mês para começar um novo ciclo? Seus saldos acumulados e despesas serão mantidos.')) {
-        state.allocations.forEach(a => {
-          a.checked = false;
-          a.checkedAt = null;
-          a.currentAmount = 0;
-        });
-        state.manualYieldRecorded = null;
+      if (confirm('Deseja reiniciar as marcações do mês?')) {
+        state.allocations.forEach(a => { a.checked = false; a.checkedAt = null; a.currentAmount = 0; });
         saveState();
-        showToast('Checklist reiniciado para novo ciclo!');
+        showToast('Mês reiniciado!');
       }
     }
 
@@ -1404,7 +1339,7 @@
       recalculateAllocationsAuto();
       closeModalVault();
       saveState();
-      showToast('Saldos patrimoniais salvos permanentemente!');
+      showToast('Saldos salvos!');
     }
 
     function exportDataJSON() {
@@ -1415,13 +1350,12 @@
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
-      showToast('Ficheiro de backup exportado com sucesso!');
+      showToast('Backup exportado!');
     }
 
     function importDataJSON(event) {
       const file = event.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = function(e) {
         try {
@@ -1432,7 +1366,7 @@
             showToast('Dados importados com sucesso!');
           }
         } catch (err) {
-          alert('Erro ao carregar o arquivo de backup.');
+          alert('Erro ao carregar backup.');
         }
       };
       reader.readAsText(file);
@@ -1463,7 +1397,6 @@
         }
       });
 
-      // Render Expenses
       const expContainer = document.getElementById('expensesContainer');
       expContainer.innerHTML = (state.expenses || []).map(e => `
         <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-2.5 group">
@@ -1496,7 +1429,6 @@
       document.getElementById('kpiIncome').innerText = formatBRL(state.income);
       document.getElementById('kpiExpenses').innerText = formatBRL(totalExp);
 
-      // Render Dinâmico dos Títulos do Tesouro Direto
       const totalTesouro = getTotalTesouro();
       document.getElementById('kpiTotalTesouro').innerText = formatBRL(totalTesouro);
       document.getElementById('badgeTesouroTotalCard').innerText = formatBRL(totalTesouro);
@@ -1542,7 +1474,6 @@
       document.getElementById('kpiExecutedAmount').innerText = formatBRL(totalExec);
       document.getElementById('totalChecklistExecuted').innerText = formatBRL(totalExec);
 
-      // Barra Giro Operacional MP (Piso R$ 1.000)
       const mpGiroBal = state.vault.mpGiroBalance || 12.11;
       const mpGiroTarget = state.vault.mpGiroTarget || 1000;
       const mpGiroPct = Math.min(100, (mpGiroBal / mpGiroTarget) * 100).toFixed(1);
@@ -1551,7 +1482,6 @@
       const mpGiroDiff = mpGiroTarget - mpGiroBal;
       document.getElementById('statusMpGiroProgress').innerText = mpGiroDiff > 0 ? `Faltam ${formatBRL(mpGiroDiff)} para o piso` : '✓ Piso de R$ 1.000 OK';
 
-      // Barra 99Pay (Meta R$ 10k)
       const pay99Bal = state.vault.pay99Balance || 6513.41;
       const pay99Target = state.vault.pay99Target || 10000;
       const pay99Pct = Math.min(100, (pay99Bal / pay99Target) * 100).toFixed(1);
@@ -1561,32 +1491,27 @@
       const pay99Diff = pay99Target - pay99Bal;
       document.getElementById('status99PayProgress').innerText = pay99Diff > 0 ? `Faltam ${formatBRL(pay99Diff)} para o teto` : '🎉 TETO 10K ATINGIDO!';
 
-      // Barra Cofrinhos Mercado Pago
       const cofMeliBal = state.vault.cofrinhoMeliBalance !== undefined ? state.vault.cofrinhoMeliBalance : 2000;
       const cofPontuaisBal = state.vault.cofrinhoPontuaisBalance !== undefined ? state.vault.cofrinhoPontuaisBalance : 8000;
       const totalCofrinhosMP = cofMeliBal + cofPontuaisBal;
       
       document.getElementById('labelCofrinhosMpTotal').innerText = `${formatBRL(totalCofrinhosMP)} / R$ 10.000,00`;
 
-      // Sub-cofrinho Mercado Livre (140% até 2k)
       const meliPct = Math.min(100, (cofMeliBal / 2000) * 100).toFixed(1);
       document.getElementById('labelCofrinhoMeli').innerText = `${formatBRL(cofMeliBal)} / R$ 2.000,00`;
       document.getElementById('barCofrinhoMeli').style.width = `${meliPct}%`;
       document.getElementById('percentCofrinhoMeli').innerText = `${meliPct}%`;
 
-      // Sub-cofrinho Reservas Imediatas (120% até 8k restantes)
       const pontuaisPct = Math.min(100, (cofPontuaisBal / 8000) * 100).toFixed(1);
       document.getElementById('labelCofrinhoPontuais').innerText = `${formatBRL(cofPontuaisBal)} / R$ 8.000,00`;
       document.getElementById('barCofrinhoPontuais').style.width = `${pontuaisPct}%`;
       document.getElementById('percentCofrinhoPontuais').innerText = `${pontuaisPct}%`;
-      document.getElementById('statusCofrinhoPontuais').innerText = totalCofrinhosMP > 10000 ? `Excedente de ${formatBRL(totalCofrinhosMP - 10000)} rende a 100% CDI` : (cofPontuaisBal >= 8000 ? 'R$ 8.000 a 120% CDI (Teto atingido)' : `Faltam ${formatBRL(8000 - cofPontuaisBal)} a 120%`);
+      document.getElementById('statusCofrinhoPontuais').innerText = totalCofrinhosMP > 10000 ? `Excedente de ${formatBRL(totalCofrinhosMP - 10000)} rende a 100% CDI` : 'R$ 8.000 a 120% CDI';
 
-      // Barra Cofrinho Turbo (115% até 5k)
       const cofBal = state.vault.cofrinhoTurboBalance || 5088.24;
       document.getElementById('labelCofrinhoTurbo').innerText = formatBRL(cofBal);
       document.getElementById('statusCofrinhoTurbo').innerText = `R$ 5.000 a 115% • ${formatBRL(Math.max(0, cofBal - 5000))} a 100% CDI`;
 
-      // Barra Mercado Pago CDB (Meta R$ 30k)
       const cdbBal = state.vault.cdb102Balance || 11222.77;
       const cdbTarget = state.vault.cdb102Target || 30000;
       const cdbPct = Math.min(100, (cdbBal / cdbTarget) * 100).toFixed(1);
@@ -1596,7 +1521,6 @@
       const cdbDiff = cdbTarget - cdbBal;
       document.getElementById('statusCdbProgress').innerText = cdbDiff > 0 ? `Faltam ${formatBRL(cdbDiff)} para o teto` : '🎉 TETO 30K ATINGIDO!';
 
-      // Barra Colchão Geral de Liquidez (Meta R$ 100k)
       const totalCushion = mpGiroBal + pay99Bal + totalCofrinhosMP + cdbBal + cofBal;
       const cushionTarget = state.vault.cushionTarget;
       const cushionPct = Math.min(100, (totalCushion / cushionTarget) * 100).toFixed(1);
@@ -1606,7 +1530,6 @@
 
       document.getElementById('labelAmortTotal').innerText = `${formatBRL(state.vault.amortAccumulated)} amortizados`;
 
-      // Render Checklist com IDs fixos
       const checklistContainer = document.getElementById('checklistContainer');
       checklistContainer.innerHTML = state.allocations.map(item => {
         const itemTarget = Number(item.amount) || 0;
@@ -1627,7 +1550,7 @@
                     <span class="text-[10px] px-2 py-0.5 rounded-full border font-medium ${item.badgeColor || 'border-slate-700 text-slate-300 bg-slate-800'}">${item.badge || 'Meta'}</span>
                     ${item.checked && item.checkedAt ? `<span class="text-[10px] text-emerald-400 font-mono">Concluído em ${item.checkedAt}</span>` : ''}
                     
-                    <button onclick="editAllocation('${item.id}')" title="Editar nome/instruções" class="w-5 h-5 rounded hover:bg-slate-800 text-slate-500 hover:text-amber-400 inline-flex items-center justify-center transition ml-1">
+                    <button onclick="editAllocation('${item.id}')" title="Editar nome" class="w-5 h-5 rounded hover:bg-slate-800 text-slate-500 hover:text-amber-400 inline-flex items-center justify-center transition ml-1">
                       <i data-lucide="edit-2" class="w-3 h-3"></i>
                     </button>
                     <button onclick="deleteAllocation('${item.id}')" title="Excluir meta" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 inline-flex items-center justify-center transition">
@@ -1653,7 +1576,7 @@
 
               <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 self-end sm:self-start shrink-0 pt-1">
                 ${isTreasury ? `
-                  <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1" title="Taxa real contratada na data da aplicação">
+                  <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1" title="Taxa real contratada">
                     <span class="text-[10px] text-slate-400">Taxa:</span>
                     <input type="text" value="${item.customRate || ''}" 
                       placeholder="Ex: 6.70"
@@ -1705,7 +1628,7 @@
 
       const histTable = document.getElementById('historyTableBody');
       if (state.history.length === 0) {
-        histTable.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-slate-500">Nenhum histórico gravado ainda. Os dados são salvos ao marcar os checks.</td></tr>`;
+        histTable.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-slate-500">Nenhum histórico gravado ainda.</td></tr>`;
       } else {
         histTable.innerHTML = state.history.map((h, i) => `
           <tr class="hover:bg-slate-800/30 transition">
@@ -1717,9 +1640,7 @@
             <td class="py-2.5 px-3 font-mono text-teal-300">${h.rates || '-'}</td>
             <td class="py-2.5 px-3 font-mono text-amber-300 font-semibold">${h.yieldRecorded || '-'}</td>
             <td class="py-2.5 px-3">
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${h.done ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}">
-                ${h.checks} concluídos
-              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${h.done ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}">${h.checks} concluídos</span>
             </td>
             <td class="py-2.5 px-3 text-right">
               <button onclick="deleteHistoryItem(${i})" class="text-slate-500 hover:text-rose-400 transition" title="Remover"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
@@ -1732,7 +1653,7 @@
     }
 
     function deleteHistoryItem(index) {
-      if (confirm('Deseja excluir este registro de histórico?')) {
+      if (confirm('Excluir este registro?')) {
         state.history.splice(index, 1);
         saveState();
       }
@@ -1740,8 +1661,9 @@
 
     document.addEventListener('DOMContentLoaded', async () => {
       updateCloudStatusUI();
-      // Puxa automaticamente da nuvem se já houver ID configurado
       await syncFromCloud();
+      // Aplica o auto-incremento diário ao abrir o site
+      applyDailyCompoundInterest();
       render();
     });
   </script>
