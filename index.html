@@ -148,7 +148,7 @@
             <div id="kpiProgressBar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
           </div>
           <div class="text-[11px] text-slate-400 mt-1.5 flex justify-between">
-            <span id="kpiChecksCount">0 de 4 concluídos</span>
+            <span id="kpiChecksCount">0 concluídos</span>
             <span id="kpiExecutedAmount" class="font-medium text-slate-300">R$ 0,00</span>
           </div>
         </div>
@@ -376,19 +376,16 @@
         <div class="rounded-xl border border-blue-900/40 bg-blue-950/20 p-4 text-xs text-slate-300 flex items-start gap-3">
           <i data-lucide="info" class="w-5 h-5 text-blue-400 shrink-0 mt-0.5"></i>
           <div class="space-y-1">
-            <span class="font-semibold text-blue-300">Organização das Suas Caixas de Liquidez:</span>
+            <span class="font-semibold text-blue-300">Controle Total do Checklist:</span>
             <p class="text-slate-300 leading-relaxed">
-              • <b>99Pay:</b> Máxima prioridade para completar R$ 10k (120% isento de IR/IOF).<br>
-              • <b>Nubank Turbo:</b> Rende 115% do CDI para valores maiores do colchão.<br>
-              • <b>Mercado Pago CDB:</b> Rende 102% até a meta de R$ 30k.<br>
-              • <b>Mercado Pago Giro:</b> Piso de R$ 1.000 para débito e Pix rendendo 105% do CDI.
+              Você pode <b>editar os nomes e categorias</b> clicando no ícone de lápis de cada card ou <b>excluir</b> os que não for usar este mês. Se quiser criar um novo objetivo ou caixinha, clique no botão <b>"+ Adicionar Meta"</b>.
             </p>
           </div>
         </div>
       </section>
     </div>
 
-    <!-- Allocation Checklist Section -->
+    <!-- Allocation Checklist Section COM EDIÇÃO E EXCLUSÃO LIVRE -->
     <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
       <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
         <div>
@@ -396,11 +393,14 @@
             <i data-lucide="check-square" class="w-5 h-5 text-emerald-400"></i>
             Checklist Mensal de Aportes
           </h2>
-          <p class="text-xs text-slate-400">Aportes e recomposição do mês (ajuste os valores livremente conforme o realizado)</p>
+          <p class="text-xs text-slate-400">Edite, exclua ou adicione novas metas e aportes conforme sua necessidade do mês</p>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="recalculateAllocationsAuto()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm">
-            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Recalcular Proporções Sugeridas
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="addNewAllocationPrompt()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> + Adicionar Meta
+          </button>
+          <button onclick="recalculateAllocationsAuto()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Recalcular Proporções
           </button>
         </div>
       </div>
@@ -410,7 +410,7 @@
       <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex items-center gap-2 text-slate-400">
           <span>Total Planejado na Lista:</span>
-          <span class="font-bold font-mono text-sm text-slate-200" id="totalChecklistPlanned">R$ 12.450,00</span>
+          <span class="font-bold font-mono text-sm text-slate-200" id="totalChecklistPlanned">R$ 0,00</span>
         </div>
         <div id="reconciliationWarning" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
           <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 100% da sobra líquida alocada com precisão.
@@ -483,7 +483,7 @@
         <div>
           <label class="text-slate-300 font-medium block mb-1">Saldo Nubank Caixinha Turbo 115% CDI (Meta R$ 30.000)</label>
           <input type="number" id="inputVaultNubank" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Saldo guardado na Caixinha Turbo do Nubank</span>
+          <span class="text-[11px] text-slate-500">Saldo na Caixinha Turbo</span>
         </div>
 
         <div>
@@ -537,11 +537,11 @@
       vault: {
         mpGiroBalance: 12,
         mpGiroTarget: 1000,
-        pay99Balance: 6513.41, // Dados reais da tela
+        pay99Balance: 6513.41,
         pay99Target: 10000,
-        cdb102Balance: 11222.77, // Dados reais da tela
+        cdb102Balance: 11222.77,
         cdb102Target: 30000,
-        nubankBalance: 20000, // Caixinha Turbo 115% do Nubank
+        nubankBalance: 20000,
         nubankTarget: 30000,
         mpCofrinhosBalance: 0,
         cushionTarget: 100000,
@@ -576,7 +576,7 @@
         },
         {
           id: 'alloc_cdb',
-          name: 'Liquidez Diária / Reserva de Emergência (99Pay, Nubank ou MP)',
+          name: 'Liquidez Diária / Reserva (99Pay, Nubank ou MP)',
           category: 'Caixa Imediato / Colchão 100k',
           amount: 5562,
           checked: false,
@@ -623,12 +623,15 @@
         try {
           const parsed = JSON.parse(savedPermanent);
           const mergedVault = { ...defaultState.vault, ...(parsed.vault || {}) };
-          
-          // Se tinha saldo em otherCdbsBalance, migra para o Nubank automaticamente
           if (mergedVault.otherCdbsBalance && (!mergedVault.nubankBalance || mergedVault.nubankBalance === 0)) {
             mergedVault.nubankBalance = mergedVault.otherCdbsBalance;
           }
-          return { ...defaultState, ...parsed, vault: mergedVault };
+          return { 
+            ...defaultState, 
+            ...parsed, 
+            vault: mergedVault,
+            allocations: parsed.allocations && parsed.allocations.length > 0 ? parsed.allocations : defaultState.allocations
+          };
         } catch(e) {}
       }
 
@@ -660,6 +663,65 @@
 
     function getTotalExecutedAllocations() {
       return (state.allocations || []).filter(a => a.checked).reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+    }
+
+    // --- Gestão Dinâmica das Metas / Aportes do Checklist ---
+    function addNewAllocationPrompt() {
+      const nome = prompt("Nome da nova meta/aporte (Ex: Fundo Imobiliário, Cripto, Reserva Extra):");
+      if (!nome || !nome.trim()) return;
+
+      const valorStr = prompt(`Valor planejado mensal para "${nome.trim()}" (R$):`, "500");
+      if (valorStr === null) return;
+      const valor = parseFloat(valorStr.replace(',', '.')) || 0;
+
+      const categoria = prompt("Categoria / Descrição curta:", "Diversificação") || "Investimento Geral";
+
+      const newId = `alloc_${Date.now()}`;
+      state.allocations.push({
+        id: newId,
+        name: nome.trim(),
+        category: categoria.trim(),
+        amount: valor,
+        checked: false,
+        checkedAt: null,
+        badge: 'Personalizado',
+        badgeColor: 'border-slate-500/30 text-slate-300 bg-slate-800',
+        instruction: 'Definido livremente pelo usuário.',
+        icon: 'target',
+        customRate: null
+      });
+
+      saveState();
+      showToast(`Meta "${nome.trim()}" adicionada com sucesso!`);
+    }
+
+    function editAllocation(id) {
+      const item = state.allocations.find(a => a.id === id);
+      if (!item) return;
+
+      const novoNome = prompt("Editar nome da meta:", item.name);
+      if (novoNome === null) return;
+      if (novoNome.trim()) item.name = novoNome.trim();
+
+      const novaCat = prompt("Editar categoria:", item.category);
+      if (novaCat !== null && novaCat.trim()) item.category = novaCat.trim();
+
+      const novaInstrucao = prompt("Editar instrução:", item.instruction);
+      if (novaInstrucao !== null) item.instruction = novaInstrucao.trim();
+
+      saveState();
+      showToast("Meta atualizada com sucesso!");
+    }
+
+    function deleteAllocation(id) {
+      const item = state.allocations.find(a => a.id === id);
+      if (!item) return;
+
+      if (confirm(`Deseja realmente excluir a meta "${item.name}" do checklist?`)) {
+        state.allocations = state.allocations.filter(a => a.id !== id);
+        saveState();
+        showToast(`Meta "${item.name}" excluída!`);
+      }
     }
 
     // Aportes Rápidos nas Barras
@@ -761,26 +823,21 @@
 
       const cdiAnual = (state.cdiRateAnnual || 13.15) / 100;
       
-      // 99Pay: 120% CDI 100% Isento
       const taxa99Anual = cdiAnual * 1.20;
       const rend99Mensal = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 12) - 1);
       const rend99Diario = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 252) - 1);
 
-      // Nubank Turbo: 115% CDI (com IR médio de 17.5%)
       const taxaNuAnual = cdiAnual * 1.15;
       const rendNuMensal = (state.vault.nubankBalance || 0) * (Math.pow(1 + taxaNuAnual, 1 / 12) - 1) * 0.825;
       const rendNuDiario = (state.vault.nubankBalance || 0) * (Math.pow(1 + taxaNuAnual, 1 / 252) - 1) * 0.825;
 
-      // Mercado Pago CDB: 102% CDI (IR médio 17.5%)
       const taxaCdbAnual = cdiAnual * 1.02;
       const rendCdbMensal = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 12) - 1) * 0.825;
       const rendCdbDiario = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 252) - 1) * 0.825;
 
-      // Mercado Pago Giro: 105% CDI (IR médio 17.5%)
       const taxaGiroAnual = cdiAnual * 1.05;
       const rendGiroMensal = (state.vault.mpGiroBalance || 0) * (Math.pow(1 + taxaGiroAnual, 1 / 12) - 1) * 0.825;
 
-      // Cofrinhos Mercado Pago: Média 124%
       const taxaCofrinhoAnual = cdiAnual * 1.24;
       const rendCofrinhoMensal = (state.vault.mpCofrinhosBalance || 0) * (Math.pow(1 + taxaCofrinhoAnual, 1 / 12) - 1) * 0.825;
 
@@ -1076,7 +1133,7 @@
       document.getElementById('kpiYieldDaily').innerText = `+${formatBRL(smartYield.diarioTotal)}/dia útil`;
 
       const checksDone = state.allocations.filter(a => a.checked).length;
-      const checksPercent = Math.round((checksDone / state.allocations.length) * 100);
+      const checksPercent = state.allocations.length > 0 ? Math.round((checksDone / state.allocations.length) * 100) : 0;
       document.getElementById('kpiCheckPercent').innerText = `${checksPercent}%`;
       document.getElementById('kpiProgressBar').style.width = `${checksPercent}%`;
       document.getElementById('kpiChecksCount').innerText = `${checksDone} de ${state.allocations.length} concluídos`;
@@ -1131,14 +1188,14 @@
 
       document.getElementById('labelAmortTotal').innerText = `${formatBRL(state.vault.amortAccumulated)} amortizados`;
 
-      // Checklist Render
+      // Render Checklist com Edição e Exclusão
       const checklistContainer = document.getElementById('checklistContainer');
       checklistContainer.innerHTML = state.allocations.map(item => {
         const itemPercent = netSurplus > 0 ? ((item.amount / netSurplus) * 100).toFixed(1) : 0;
-        const isTreasury = item.id === 'alloc_ipca32' || item.id === 'alloc_renda55';
+        const isTreasury = item.id.includes('ipca') || item.id.includes('renda');
 
         return `
-          <div class="rounded-2xl border ${item.checked ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'} p-4 sm:p-4.5 transition-all duration-200">
+          <div class="rounded-2xl border ${item.checked ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'} p-4 sm:p-4.5 transition-all duration-200 group">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div class="flex items-start gap-3">
                 <button type="button" onclick="toggleCheck('${item.id}')" class="mt-0.5 w-6 h-6 rounded-lg border flex items-center justify-center transition shrink-0 ${item.checked ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900 hover:border-slate-500 text-transparent'}">
@@ -1147,8 +1204,16 @@
                 <div>
                   <div class="flex flex-wrap items-center gap-2">
                     <span class="text-sm font-bold ${item.checked ? 'line-through text-slate-400' : 'text-white'}">${item.name}</span>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full border font-medium ${item.badgeColor}">${item.badge}</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full border font-medium ${item.badgeColor || 'border-slate-700 text-slate-300 bg-slate-800'}">${item.badge || 'Meta'}</span>
                     ${item.checked && item.checkedAt ? `<span class="text-[10px] text-emerald-400 font-mono">Aportado em ${item.checkedAt}</span>` : ''}
+                    
+                    <!-- Botões de Ação: Editar e Excluir -->
+                    <button onclick="editAllocation('${item.id}')" title="Editar nome/instruções" class="w-5 h-5 rounded hover:bg-slate-800 text-slate-500 hover:text-amber-400 inline-flex items-center justify-center transition ml-1">
+                      <i data-lucide="edit-2" class="w-3 h-3"></i>
+                    </button>
+                    <button onclick="deleteAllocation('${item.id}')" title="Excluir meta" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 inline-flex items-center justify-center transition">
+                      <i data-lucide="trash-2" class="w-3 h-3"></i>
+                    </button>
                   </div>
                   <div class="text-xs text-slate-400 mt-1 flex items-center gap-2">
                     <span>${item.category}</span>
