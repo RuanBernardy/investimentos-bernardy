@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Investimentos Bernardy</title>
   
-  <!-- Favicon e Ícones para Navegador e Atalho Mobile -->
   <link rel="icon" type="image/png" href="./brasao.png" />
   <link rel="shortcut icon" href="./brasao.png" />
   <link rel="apple-touch-icon" href="./brasao.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="./brasao.png" />
 
-  <!-- Configurações Web App / PWA -->
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -20,7 +18,6 @@
   
   <link rel="manifest" href='data:application/manifest+json,{"name":"Investimentos Bernardy","short_name":"Investimentos","start_url":"./","display":"standalone","background_color":"%23020617","theme_color":"%23020617","icons":[{"src":"./brasao.png","sizes":"192x192 512x512","type":"image/png"}]}' />
 
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -134,7 +131,7 @@
         </div>
         <div class="text-xl sm:text-2xl font-black text-amber-400 tracking-tight" id="kpiPassiveYield">R$ 0,00/mês</div>
         <div class="text-[11px] text-slate-400 mt-1 flex items-center justify-between">
-          <span id="kpiYieldSubtitle" class="flex items-center gap-1">
+          <span id="kpiYieldSubtitle" class="flex items-center gap-1 text-[10px]">
             <i data-lucide="coins" class="w-3 h-3 text-amber-400"></i> Pós IOF & IR
           </span>
           <span id="kpiYieldDaily" class="font-mono text-emerald-400 text-[10px]">+R$ 0,00/dia</span>
@@ -151,7 +148,7 @@
             <div id="kpiProgressBar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
           </div>
           <div class="text-[11px] text-slate-400 mt-1.5 flex justify-between">
-            <span id="kpiChecksCount">0 de 4 concluídos</span>
+            <span id="kpiChecksCount">0 de 5 concluídos</span>
             <span id="kpiExecutedAmount" class="font-medium text-slate-300">R$ 0,00</span>
           </div>
         </div>
@@ -220,22 +217,40 @@
           </div>
         </div>
 
-        <!-- Metas & Controle Tributário (IOF/IR) -->
+        <!-- Metas & Detalhamento da Liquidez -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-slate-800">
             <div class="flex items-center gap-2">
               <i data-lucide="target" class="w-4 h-4 text-indigo-400"></i>
-              <h2 class="text-sm font-semibold text-white">Metas & Saldo Tributável</h2>
+              <h2 class="text-sm font-semibold text-white">Metas Estratégicas de Blindagem</h2>
             </div>
-            <button onclick="editVaultBalances()" class="text-xs text-indigo-400 hover:text-indigo-300 transition underline">Editar Saldos & Lotes</button>
+            <button onclick="editVaultBalances()" class="text-xs text-indigo-400 hover:text-indigo-300 transition underline">Editar Saldos</button>
           </div>
 
-          <!-- Meta 1: Teto Mercado Pago 30k -->
+          <!-- Meta 1: Teto 99Pay 10k (Conta + Cofrinho 120%) -->
           <div class="space-y-1.5">
             <div class="flex justify-between items-center text-xs">
               <span class="text-slate-300 font-medium flex items-center gap-1.5">
+                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+                Meta 1: 99Pay (Conta + Cofrinho 120%)
+              </span>
+              <span class="text-slate-400 font-mono" id="label99PayProgress">R$ 1.000 / R$ 10.000</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
+              <div id="bar99PayProgress" class="bg-gradient-to-r from-amber-500 to-yellow-400 h-2 rounded-full transition-all duration-300" style="width: 10%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span id="status99PayProgress">Faltam R$ 9.000,00</span>
+              <span class="font-bold text-amber-400">120% Isento IR/IOF</span>
+            </div>
+          </div>
+
+          <!-- Meta 2: Teto Mercado Pago CDB 30k (102% CDI) -->
+          <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-medium flex items-center gap-1.5">
                 <i data-lucide="landmark" class="w-3.5 h-3.5 text-emerald-400"></i>
-                Mercado Pago 102% CDI
+                Meta 2: Mercado Pago CDB 102%
               </span>
               <span class="text-slate-400 font-mono" id="labelCdbProgress">R$ 11.000 / R$ 30.000</span>
             </div>
@@ -244,33 +259,33 @@
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
               <span id="statusCdbProgress">Faltam R$ 19.000,00</span>
-              <span id="statusIofAlert" class="font-medium text-amber-400 text-[10px]">Sem IOF ativo</span>
+              <span id="percentCdbProgress" class="font-bold text-emerald-400">36.7%</span>
             </div>
           </div>
 
-          <!-- Meta 2: Colchão Geral R$ 100k -->
+          <!-- Meta 3: Colchão Geral R$ 100k -->
           <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
             <div class="flex justify-between items-center text-xs">
               <span class="text-slate-300 font-medium flex items-center gap-1.5">
                 <i data-lucide="shield" class="w-3.5 h-3.5 text-blue-400"></i>
-                Colchão Total de Liquidez
+                Meta 3: Colchão Total de Liquidez
               </span>
-              <span class="text-slate-400 font-mono" id="labelTotalCushion">R$ 31.000 / R$ 100.000</span>
+              <span class="text-slate-400 font-mono" id="labelTotalCushion">R$ 32.000 / R$ 100.000</span>
             </div>
             <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
-              <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 31%"></div>
+              <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 32%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusTotalCushion">Soma de toda a reserva líquida</span>
-              <span id="percentTotalCushion" class="font-bold text-blue-400">31.0%</span>
+              <span id="statusTotalCushion">99Pay + CDBs + Cofrinhos MP</span>
+              <span id="percentTotalCushion" class="font-bold text-blue-400">32.0%</span>
             </div>
           </div>
 
-          <!-- Meta 3: Amortização Acumulada Casa -->
+          <!-- Meta 4: Amortização Acumulada Casa -->
           <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
             <div class="flex justify-between items-center text-xs">
               <span class="text-slate-300 font-medium flex items-center gap-1.5">
-                <i data-lucide="home" class="w-3.5 h-3.5 text-amber-400"></i>
+                <i data-lucide="home" class="w-3.5 h-3.5 text-indigo-400"></i>
                 Amortização Extraordinária Acumulada
               </span>
               <span class="text-slate-400 font-mono" id="labelAmortTotal">R$ 0,00 amortizados</span>
@@ -308,9 +323,11 @@
         <div class="rounded-xl border border-blue-900/40 bg-blue-950/20 p-4 text-xs text-slate-300 flex items-start gap-3">
           <i data-lucide="info" class="w-5 h-5 text-blue-400 shrink-0 mt-0.5"></i>
           <div class="space-y-1">
-            <span class="font-semibold text-blue-300">Regra de IOF & IR no Mercado Pago:</span>
+            <span class="font-semibold text-blue-300">Hierarquia da sua Liquidez:</span>
             <p class="text-slate-300 leading-relaxed">
-              Cada aporte novo entra na tabela regressiva de IOF (de 96% no dia 1 até 0% no dia 30) e IR de 22,5% (caindo para 15% após 2 anos). O sistema calcula os juros líquidos automaticamente ou você pode clicar em <b>"Ajustar Real"</b> e digitar o saldo exato que o app mostrar.
+              1º O <b>99Pay</b> (Conta + Cofrinho) recebe aportes até bater <b>R$ 10.000</b> rendendo 120% isento.<br>
+              2º O <b>Mercado Pago CDB</b> recebe o restante até bater <b>R$ 30.000</b> a 102% do CDI.<br>
+              3º O saldo de giro diário que sobra parado na <b>Conta Transacional do Mercado Pago</b> rende automaticamente a 105% do CDI.
             </p>
           </div>
         </div>
@@ -323,9 +340,9 @@
         <div>
           <h2 class="text-base font-bold text-white flex items-center gap-2">
             <i data-lucide="check-square" class="w-5 h-5 text-emerald-400"></i>
-            Checklist Mensal com Data de Aporte & Taxa Contratada
+            Checklist Mensal com Aportes Independentes
           </h2>
-          <p class="text-xs text-slate-400">Ao marcar o check, o sistema registra a data do aporte para calcular o prazo de IOF e IR</p>
+          <p class="text-xs text-slate-400">Digite o valor real que aportou no mês (ex: R$ 1.000 no 99Pay) e marque o check</p>
         </div>
         <div class="flex items-center gap-2">
           <button onclick="recalculateAllocationsAuto()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm">
@@ -338,7 +355,7 @@
 
       <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex items-center gap-2 text-slate-400">
-          <span>Total Planeado na Lista:</span>
+          <span>Total Planejado na Lista:</span>
           <span class="font-bold font-mono text-sm text-slate-200" id="totalChecklistPlanned">R$ 12.450,00</span>
         </div>
         <div id="reconciliationWarning" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
@@ -385,34 +402,52 @@
       <div class="flex items-center justify-between pb-3 border-b border-slate-800">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <i data-lucide="sliders" class="w-4 h-4 text-emerald-400"></i>
-          Ajuste de Saldos & Motor Tributário
+          Ajuste de Saldos Patrimoniais
         </h3>
         <button onclick="closeModalVault()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="text-slate-300 font-medium block mb-1">Saldo Atual Mercado Pago 102% CDI (Teto R$ 30.000)</label>
+          <label class="text-slate-300 font-medium block mb-1">Saldo 99Pay (Conta + Cofrinho - Teto R$ 10.000)</label>
+          <input type="number" id="inputVault99Pay" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          <span class="text-[11px] text-slate-500">Saldo atual: R$ 1.000 (Rende 120% isento)</span>
+        </div>
+
+        <div>
+          <label class="text-slate-300 font-medium block mb-1">Saldo Mercado Pago CDB 102% (Teto R$ 30.000)</label>
           <input type="number" id="inputVaultCdb102" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Valor inicial de referência: R$ 11.000</span>
+          <span class="text-[11px] text-slate-500">Saldo atual alocado no CDB: R$ 11.000</span>
+        </div>
+
+        <div>
+          <label class="text-slate-300 font-medium block mb-1">Mercado Pago: Cofrinhos 140% + 120% (Teto R$ 10.000)</label>
+          <input type="number" id="inputVaultMpCofrinhos" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          <span class="text-[11px] text-slate-500">Saldo guardado nos cofrinhos do Mercado Pago</span>
+        </div>
+
+        <div>
+          <label class="text-slate-300 font-medium block mb-1">Mercado Pago: Saldo Médio na Conta Transacional (105%)</label>
+          <input type="number" id="inputVaultMpTransacional" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          <span class="text-[11px] text-slate-500">Sobra média que fica parada na conta corrente</span>
         </div>
 
         <div>
           <label class="text-slate-300 font-medium block mb-1">Taxa CDI Oficial (% ao ano)</label>
           <input type="number" step="0.05" id="inputVaultCDIRate" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Taxa base da economia (padrão: 13.15%)</span>
+          <span class="text-[11px] text-slate-500">Padrão da economia: 13.15%</span>
         </div>
 
         <div>
-          <label class="text-slate-300 font-medium block mb-1">Total de outros CDBs (110%, 115%, 120%, 140%)</label>
+          <label class="text-slate-300 font-medium block mb-1">Outros CDBs (Bancos/Corretoras)</label>
           <input type="number" id="inputVaultOtherCdbs" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Valor inicial somado: R$ 20.000</span>
+          <span class="text-[11px] text-slate-500">Valor somado de outros CDBs</span>
         </div>
 
         <div>
           <label class="text-slate-300 font-medium block mb-1">Amortização Acumulada da Casa (R$)</label>
           <input type="number" id="inputVaultAmortTotal" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Soma acumulada de amortizações no financiamento</span>
+          <span class="text-[11px] text-slate-500">Soma acumulada de amortizações</span>
         </div>
       </div>
 
@@ -430,29 +465,14 @@
   </div>
 
   <script>
-    const STORAGE_KEY = 'FINANCE_ALLOCATOR_DATA_V4';
-
-    // Tabela oficial regressiva de IOF para os primeiros 30 dias
-    const IOF_TABLE = [
-      0.96, 0.93, 0.90, 0.86, 0.83, 0.80, 0.76, 0.73, 0.70, 0.66,
-      0.63, 0.60, 0.56, 0.53, 0.50, 0.46, 0.43, 0.40, 0.36, 0.33,
-      0.30, 0.26, 0.23, 0.20, 0.16, 0.13, 0.10, 0.06, 0.03, 0.00
-    ];
+    const STORAGE_KEY = 'FINANCE_ALLOCATOR_DATA_V6';
 
     const defaultState = {
       selectedMonth: new Date().toISOString().slice(0, 7),
       activePhase: 1,
       income: 14550,
       cdiRateAnnual: 13.15,
-      manualYieldRecorded: null, // se preenchido, sobrepõe o cálculo automático
-      lots: [
-        {
-          id: 'lot_inicial',
-          asset: 'Mercado Pago 102%',
-          amount: 11000,
-          date: '2026-05-01' // saldo antigo já isento de IOF
-        }
-      ],
+      manualYieldRecorded: null,
       expenses: [
         { id: 'exp_agua', label: 'Água / Saneamento', amount: 80, icon: 'droplet' },
         { id: 'exp_net', label: 'Internet Fibra', amount: 99, icon: 'wifi' },
@@ -461,8 +481,12 @@
         { id: 'exp_cartao', label: 'Fatura do Cartão (Pessoal)', amount: 1500, icon: 'credit-card' }
       ],
       vault: {
+        pay99Balance: 1000,
+        pay99Target: 10000,
         cdb102Balance: 11000,
         cdb102Target: 30000,
+        mpCofrinhosBalance: 0,
+        mpTransacionalBalance: 0,
         otherCdbsBalance: 20000,
         cushionTarget: 100000,
         amortAccumulated: 0
@@ -477,20 +501,33 @@
           checkedAt: null,
           badge: 'Redução de Prazo',
           badgeColor: 'border-blue-500/30 text-blue-400 bg-blue-500/10',
-          instruction: 'Abra o app do banco do financiamento, vá em Amortizar e escolha a opção "Reduzir Prazo".',
+          instruction: 'Abra o app do financiamento e amortize reduzindo o prazo final.',
           icon: 'home',
           customRate: null
         },
         {
+          id: 'alloc_99pay',
+          name: '99Pay 120% do CDI (Conta + Cofrinho)',
+          category: 'Super Liquidez / Isento IR & IOF',
+          amount: 1000, // Você já colocou R$ 1.000 agora!
+          checked: true, // Já pode iniciar marcado
+          checkedAt: new Date().toLocaleDateString('pt-BR'),
+          badge: '120% Isento (Meta R$ 10k)',
+          badgeColor: 'border-amber-500/30 text-amber-400 bg-amber-500/10',
+          instruction: 'Aporte de até R$ 10.000 somados (R$ 5k na Conta + R$ 5k no Cofrinho).',
+          icon: 'zap',
+          customRate: '120% CDI'
+        },
+        {
           id: 'alloc_cdb',
-          name: 'Mercado Pago 102% do CDI (Meta R$ 30k)',
-          category: 'Liquidez Diária / Conta Remunerada',
-          amount: 6550,
+          name: 'Mercado Pago CDB 102% do CDI',
+          category: 'Liquidez Diária / Reserva Tática',
+          amount: 5550, // Restante da sobra de liquidez
           checked: false,
           checkedAt: null,
-          badge: 'Aceleração até o Teto',
+          badge: '102% CDI (Meta R$ 30k)',
           badgeColor: 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10',
-          instruction: 'Aplicar no Mercado Pago a 102% do CDI com liquidez imediata diária.',
+          instruction: 'Aplicar no CDB 102% no Mercado Pago (saldo atual R$ 11.000).',
           icon: 'landmark',
           customRate: '102% CDI'
         },
@@ -562,89 +599,53 @@
       return state.allocations.filter(a => a.checked).reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
     }
 
-    // Calcula a alíquota regressiva de IR com base na idade do aporte (em dias)
-    function getIrRateByDays(days) {
-      if (days <= 180) return 0.225;
-      if (days <= 360) return 0.200;
-      if (days <= 720) return 0.175;
-      return 0.150;
-    }
-
-    // Calcula a alíquota regressiva de IOF para os primeiros 30 dias
-    function getIofRateByDays(days) {
-      if (days <= 0) return 0.96;
-      if (days >= 30) return 0.00;
-      return IOF_TABLE[days - 1] || 0;
-    }
-
-    // Motor de cálculo de rendimento considerando cada lote e a tabela de IOF/IR
     function calculateSmartYield() {
-      // Se você editou manualmente, retorna direto o seu valor oficial digitado
       if (state.manualYieldRecorded !== null && state.manualYieldRecorded !== undefined) {
         return {
           mensalTotal: state.manualYieldRecorded,
-          diarioMP: state.manualYieldRecorded / 22,
-          isManual: true,
-          hasActiveIOF: false
+          diarioTotal: state.manualYieldRecorded / 22,
+          isManual: true
         };
       }
 
       const cdiAnual = (state.cdiRateAnnual || 13.15) / 100;
-      const taxaMPAnual = cdiAnual * 1.02;
-      const taxaDiariaBruta = Math.pow(1 + taxaMPAnual, 1 / 252) - 1;
-      const taxaMensalBruta = Math.pow(1 + taxaMPAnual, 1 / 12) - 1;
+      
+      // 99Pay 120% CDI 100% Isento
+      const taxa99Anual = cdiAnual * 1.20;
+      const rend99Mensal = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 12) - 1);
+      const rend99Diario = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 252) - 1);
 
-      const hoje = new Date();
-      let rendimentoMensalLiquidoMP = 0;
-      let rendimentoDiarioLiquidoMP = 0;
-      let hasActiveIOF = false;
+      // Mercado Pago CDB 102% (IR médio 17.5%)
+      const taxaCdbAnual = cdiAnual * 1.02;
+      const rendCdbMensal = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 12) - 1) * 0.825;
+      const rendCdbDiario = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 252) - 1) * 0.825;
 
-      // Se temos lotes registrados, calcula individualmente
-      if (state.lots && state.lots.length > 0) {
-        state.lots.forEach(lot => {
-          const dataLote = new Date(lot.date || hoje);
-          const diffTempo = Math.abs(hoje - dataLote);
-          const diasCorridos = Math.floor(diffTempo / (1000 * 60 * 60 * 24));
+      // Mercado Pago Conta Corrente 105% (IR médio 17.5%)
+      const taxaTransacAnual = cdiAnual * 1.05;
+      const rendTransacMensal = (state.vault.mpTransacionalBalance || 0) * (Math.pow(1 + taxaTransacAnual, 1 / 12) - 1) * 0.825;
 
-          const iofRate = getIofRateByDays(diasCorridos);
-          if (iofRate > 0) hasActiveIOF = true;
-          const irRate = getIrRateByDays(diasCorridos);
+      // Cofrinhos MP (Média 124% com IR)
+      const taxaCofrinhoAnual = cdiAnual * 1.24;
+      const rendCofrinhoMensal = (state.vault.mpCofrinhosBalance || 0) * (Math.pow(1 + taxaCofrinhoAnual, 1 / 12) - 1) * 0.825;
 
-          // Rendimento bruto sobre o lote
-          const rendBrutoMensal = lot.amount * taxaMensalBruta;
-          const rendAposIOFMensal = rendBrutoMensal * (1 - iofRate);
-          const rendLiquidoMensal = rendAposIOFMensal * (1 - irRate);
+      // Outros CDBs
+      const taxaOutrosMensal = Math.pow(1 + (cdiAnual * 1.15), 1 / 12) - 1;
+      const rendOutrosMensal = (state.vault.otherCdbsBalance || 0) * taxaOutrosMensal * 0.825;
 
-          const rendBrutoDiario = lot.amount * taxaDiariaBruta;
-          const rendAposIOFDiario = rendBrutoDiario * (1 - iofRate);
-          const rendLiquidoDiario = rendAposIOFDiario * (1 - irRate);
-
-          rendimentoMensalLiquidoMP += rendLiquidoMensal;
-          rendimentoDiarioLiquidoMP += rendLiquidoDiario;
-        });
-      } else {
-        // Fallback para o saldo total caso não haja lotes discriminados
-        rendimentoMensalLiquidoMP = state.vault.cdb102Balance * taxaMensalBruta * 0.85;
-        rendimentoDiarioLiquidoMP = state.vault.cdb102Balance * taxaDiariaBruta * 0.85;
-      }
-
-      // Outros CDBs (média de 115% do CDI, saldo consolidado após 6 meses)
-      const taxaOutrosMensalBruta = Math.pow(1 + (cdiAnual * 1.15), 1 / 12) - 1;
-      const rendimentoOutrosLiquido = state.vault.otherCdbsBalance * taxaOutrosMensalBruta * 0.825; // IR médio 17.5%
+      const totalMensal = rend99Mensal + rendCdbMensal + rendTransacMensal + rendCofrinhoMensal + rendOutrosMensal;
+      const totalDiario = rend99Diario + rendCdbDiario;
 
       return {
-        mensalTotal: rendimentoMensalLiquidoMP + rendimentoOutrosLiquido,
-        diarioMP: rendimentoDiarioLiquidoMP,
-        isManual: false,
-        hasActiveIOF
+        mensalTotal: totalMensal,
+        diarioTotal: totalDiario,
+        isManual: false
       };
     }
 
-    // Permite que você edite o rendimento real na mão para bater com o banco
     function editRealYieldManual() {
       const atual = state.manualYieldRecorded !== null ? state.manualYieldRecorded : calculateSmartYield().mensalTotal;
       const entrada = prompt(
-        "Digite o rendimento líquido real acumulado no mês (conforme aparece no extrato do seu app):\n(Deixe em branco ou digite 'auto' para voltar ao cálculo automático)",
+        "Digite o rendimento líquido real somado no mês (conforme extratos de 99Pay + Mercado Pago):\n(Deixe em branco ou digite 'auto' para voltar ao cálculo automático)",
         atual ? atual.toFixed(2) : ""
       );
 
@@ -652,7 +653,7 @@
 
       if (entrada.trim().toLowerCase() === 'auto' || entrada.trim() === '') {
         state.manualYieldRecorded = null;
-        showToast("Rendimento configurado para cálculo automático com IOF e IR!");
+        showToast("Rendimento configurado para cálculo automático!");
       } else {
         const val = parseFloat(entrada.replace(',', '.')) || 0;
         state.manualYieldRecorded = val;
@@ -706,26 +707,16 @@
       const item = state.allocations.find(a => a.id === id);
       if (item) {
         item.checked = !item.checked;
-        const dataHoje = new Date().toISOString().slice(0, 10);
         item.checkedAt = item.checked ? new Date().toLocaleDateString('pt-BR') : null;
         
-        if (id === 'alloc_cdb') {
-          if (item.checked) {
-            state.vault.cdb102Balance += item.amount;
-            // Cria um novo lote datado para calcular regressão de IOF e IR
-            state.lots.push({
-              id: `lot_${Date.now()}`,
-              asset: 'Mercado Pago 102%',
-              amount: item.amount,
-              date: dataHoje
-            });
-          } else {
-            state.vault.cdb102Balance = Math.max(11000, state.vault.cdb102Balance - item.amount);
-            // Remove o último lote
-            if (state.lots.length > 1) state.lots.pop();
-          }
+        if (id === 'alloc_99pay') {
+          if (item.checked) state.vault.pay99Balance += item.amount;
+          else state.vault.pay99Balance = Math.max(1000, state.vault.pay99Balance - item.amount);
         }
-
+        if (id === 'alloc_cdb') {
+          if (item.checked) state.vault.cdb102Balance += item.amount;
+          else state.vault.cdb102Balance = Math.max(11000, state.vault.cdb102Balance - item.amount);
+        }
         if (id === 'alloc_amort') {
           if (item.checked) state.vault.amortAccumulated += item.amount;
           else state.vault.amortAccumulated = Math.max(0, state.vault.amortAccumulated - item.amount);
@@ -740,6 +731,7 @@
     function recalculateAllocationsAuto() {
       const surplus = getNetSurplus();
       const amortItem = state.allocations.find(a => a.id === 'alloc_amort');
+      const pay99Item = state.allocations.find(a => a.id === 'alloc_99pay');
       const cdbItem = state.allocations.find(a => a.id === 'alloc_cdb');
       const ipca32Item = state.allocations.find(a => a.id === 'alloc_ipca32');
       const renda55Item = state.allocations.find(a => a.id === 'alloc_renda55');
@@ -748,20 +740,31 @@
         amortItem.amount = 2000;
         renda55Item.amount = 1400;
         ipca32Item.amount = 2500;
-        cdbItem.amount = Math.max(0, surplus - (amortItem.amount + renda55Item.amount + ipca32Item.amount));
+        const totalLiquidez = Math.max(0, surplus - (amortItem.amount + renda55Item.amount + ipca32Item.amount));
+        
+        const falta99Pay = Math.max(0, (state.vault.pay99Target || 10000) - (state.vault.pay99Balance || 1000));
+        pay99Item.amount = Math.min(totalLiquidez, Math.min(falta99Pay, 4000));
+        cdbItem.amount = Math.max(0, totalLiquidez - pay99Item.amount);
+
       } else if (state.activePhase === 2 || state.income >= 10000) {
         amortItem.amount = 2000;
         renda55Item.amount = 1000;
         ipca32Item.amount = 2500;
-        cdbItem.amount = Math.max(0, surplus - (amortItem.amount + renda55Item.amount + ipca32Item.amount));
+        const totalLiquidez = Math.max(0, surplus - (amortItem.amount + renda55Item.amount + ipca32Item.amount));
+        const falta99Pay = Math.max(0, (state.vault.pay99Target || 10000) - (state.vault.pay99Balance || 1000));
+        pay99Item.amount = Math.min(totalLiquidez, falta99Pay);
+        cdbItem.amount = Math.max(0, totalLiquidez - pay99Item.amount);
+
       } else if (state.activePhase === 3 || state.income >= 5000) {
         amortItem.amount = Math.min(2000, Math.floor(surplus * 0.65));
-        cdbItem.amount = Math.max(0, surplus - amortItem.amount);
+        pay99Item.amount = Math.max(0, surplus - amortItem.amount);
+        cdbItem.amount = 0;
         ipca32Item.amount = 0;
         renda55Item.amount = 0;
       } else {
         amortItem.amount = Math.min(1000, Math.floor(surplus * 0.5));
-        cdbItem.amount = Math.max(0, surplus - amortItem.amount);
+        pay99Item.amount = Math.max(0, surplus - amortItem.amount);
+        cdbItem.amount = 0;
         ipca32Item.amount = 0;
         renda55Item.amount = 0;
       }
@@ -805,14 +808,17 @@
           a.checked = false;
           a.checkedAt = null;
         });
-        state.manualYieldRecorded = null; // limpa o ajuste manual para o novo mês
+        state.manualYieldRecorded = null;
         saveState();
         showToast('Checklist reiniciado para novo ciclo!');
       }
     }
 
     function editVaultBalances() {
+      document.getElementById('inputVault99Pay').value = state.vault.pay99Balance || 1000;
       document.getElementById('inputVaultCdb102').value = state.vault.cdb102Balance;
+      document.getElementById('inputVaultMpCofrinhos').value = state.vault.mpCofrinhosBalance || 0;
+      document.getElementById('inputVaultMpTransacional').value = state.vault.mpTransacionalBalance || 0;
       document.getElementById('inputVaultCDIRate').value = state.cdiRateAnnual || 13.15;
       document.getElementById('inputVaultOtherCdbs').value = state.vault.otherCdbsBalance;
       document.getElementById('inputVaultAmortTotal').value = state.vault.amortAccumulated;
@@ -824,20 +830,17 @@
     }
 
     function saveModalVault() {
-      const novoSaldoMP = parseFloat(document.getElementById('inputVaultCdb102').value) || 0;
-      state.vault.cdb102Balance = novoSaldoMP;
+      state.vault.pay99Balance = parseFloat(document.getElementById('inputVault99Pay').value) || 0;
+      state.vault.cdb102Balance = parseFloat(document.getElementById('inputVaultCdb102').value) || 0;
+      state.vault.mpCofrinhosBalance = parseFloat(document.getElementById('inputVaultMpCofrinhos').value) || 0;
+      state.vault.mpTransacionalBalance = parseFloat(document.getElementById('inputVaultMpTransacional').value) || 0;
       state.cdiRateAnnual = parseFloat(document.getElementById('inputVaultCDIRate').value) || 13.15;
       state.vault.otherCdbsBalance = parseFloat(document.getElementById('inputVaultOtherCdbs').value) || 0;
       state.vault.amortAccumulated = parseFloat(document.getElementById('inputVaultAmortTotal').value) || 0;
-      
-      // Sincroniza o lote principal
-      if (state.lots.length > 0) {
-        state.lots[0].amount = novoSaldoMP;
-      }
 
       closeModalVault();
       saveState();
-      showToast('Saldos e parâmetros tributários atualizados!');
+      showToast('Saldos patrimoniais atualizados!');
     }
 
     function exportDataJSON() {
@@ -907,7 +910,6 @@
       const amortItem = state.allocations.find(a => a.id === 'alloc_amort');
       document.getElementById('kpiAmortization').innerText = formatBRL(amortItem?.amount || 0);
 
-      // Atualização dos Rendimentos Passivos Inteligentes
       const smartYield = calculateSmartYield();
       document.getElementById('kpiPassiveYield').innerText = `${formatBRL(smartYield.mensalTotal)}/mês`;
       
@@ -917,7 +919,7 @@
       } else {
         subEl.innerHTML = '<i data-lucide="coins" class="w-3 h-3 text-amber-400"></i> Pós IOF & IR (Calculado)';
       }
-      document.getElementById('kpiYieldDaily').innerText = `+${formatBRL(smartYield.diarioMP)}/dia útil`;
+      document.getElementById('kpiYieldDaily').innerText = `+${formatBRL(smartYield.diarioTotal)}/dia útil`;
 
       const checksDone = state.allocations.filter(a => a.checked).length;
       const checksPercent = Math.round((checksDone / state.allocations.length) * 100);
@@ -926,26 +928,27 @@
       document.getElementById('kpiChecksCount').innerText = `${checksDone} de ${state.allocations.length} concluídos`;
       document.getElementById('kpiExecutedAmount').innerText = formatBRL(getTotalExecutedAllocations());
 
-      // Barra Mercado Pago
+      // Barra 99Pay (Meta R$ 10k)
+      const pay99Bal = state.vault.pay99Balance || 1000;
+      const pay99Target = state.vault.pay99Target || 10000;
+      const pay99Pct = Math.min(100, (pay99Bal / pay99Target) * 100).toFixed(1);
+      document.getElementById('label99PayProgress').innerText = `${formatBRL(pay99Bal)} / ${formatBRL(pay99Target)}`;
+      document.getElementById('bar99PayProgress').style.width = `${pay99Pct}%`;
+      const pay99Diff = pay99Target - pay99Bal;
+      document.getElementById('status99PayProgress').innerText = pay99Diff > 0 ? `Faltam ${formatBRL(pay99Diff)}` : '🎉 TETO 10K ATINGIDO!';
+
+      // Barra Mercado Pago CDB (Meta R$ 30k)
       const cdbBal = state.vault.cdb102Balance;
       const cdbTarget = state.vault.cdb102Target;
       const cdbPct = Math.min(100, (cdbBal / cdbTarget) * 100).toFixed(1);
       document.getElementById('labelCdbProgress').innerText = `${formatBRL(cdbBal)} / ${formatBRL(cdbTarget)}`;
       document.getElementById('barCdbProgress').style.width = `${cdbPct}%`;
+      document.getElementById('percentCdbProgress').innerText = `${cdbPct}%`;
       const cdbDiff = cdbTarget - cdbBal;
-      document.getElementById('statusCdbProgress').innerText = cdbDiff > 0 ? `Faltam ${formatBRL(cdbDiff)} para o teto` : '🎉 TETO ATINGIDO! Pode migrar a sobra.';
-      
-      const statusIof = document.getElementById('statusIofAlert');
-      if (smartYield.hasActiveIOF) {
-        statusIof.innerText = '⚠️ Lote recente em carência de IOF (<30d)';
-        statusIof.className = 'font-medium text-amber-400 text-[10px]';
-      } else {
-        statusIof.innerText = '🛡️ 100% isento de IOF (>30d)';
-        statusIof.className = 'font-medium text-emerald-400 text-[10px]';
-      }
+      document.getElementById('statusCdbProgress').innerText = cdbDiff > 0 ? `Faltam ${formatBRL(cdbDiff)} para o teto` : '🎉 TETO 30K ATINGIDO!';
 
-      // Barra Colchão
-      const totalCushion = cdbBal + state.vault.otherCdbsBalance;
+      // Barra Colchão Geral (Meta R$ 100k)
+      const totalCushion = pay99Bal + cdbBal + (state.vault.mpCofrinhosBalance || 0) + (state.vault.mpTransacionalBalance || 0) + (state.vault.otherCdbsBalance || 0);
       const cushionTarget = state.vault.cushionTarget;
       const cushionPct = Math.min(100, (totalCushion / cushionTarget) * 100).toFixed(1);
       document.getElementById('labelTotalCushion').innerText = `${formatBRL(totalCushion)} / ${formatBRL(cushionTarget)}`;
@@ -954,7 +957,7 @@
 
       document.getElementById('labelAmortTotal').innerText = `${formatBRL(state.vault.amortAccumulated)} amortizados`;
 
-      // Checklist com Taxas e Datas
+      // Checklist Render
       const checklistContainer = document.getElementById('checklistContainer');
       checklistContainer.innerHTML = state.allocations.map(item => {
         const itemPercent = netSurplus > 0 ? ((item.amount / netSurplus) * 100).toFixed(1) : 0;
