@@ -217,7 +217,7 @@
           </div>
         </div>
 
-        <!-- Seção 1: Metas de Liquidez Imediata (Colchão R$ 100k) -->
+        <!-- Seção 1: Metas de Liquidez Imediata (Colchão R$ 100k) com TODOS OS COFRINHOS DETALHADOS -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-slate-800">
             <div class="flex items-center gap-2">
@@ -269,7 +269,49 @@
             </div>
           </div>
 
-          <!-- Cofrinho Turbo (115% CDI) -->
+          <!-- NOVO: Cofrinho Mercado Livre (140% CDI até R$ 2k) -->
+          <div class="space-y-1.5 p-3 rounded-xl bg-slate-950/70 border border-yellow-700/40">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-yellow-400 font-semibold flex items-center gap-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-yellow-400"></i>
+                Cofrinho MP Mercado Livre (140% CDI)
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="text-slate-300 font-mono font-bold" id="labelCofrinhoMeli">R$ 0,00 / R$ 2.000</span>
+                <button onclick="quickAddCofrinhoMeli()" class="text-[10px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/20">+ Aporte</button>
+              </div>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden p-0.5">
+              <div id="barCofrinhoMeli" class="bg-gradient-to-r from-yellow-500 to-amber-400 h-1 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span id="statusCofrinhoMeli">Teto: R$ 2.000,00 a 140% CDI</span>
+              <span id="percentCofrinhoMeli" class="font-bold text-yellow-400">0.0%</span>
+            </div>
+          </div>
+
+          <!-- NOVO: Cofrinho MP Reservas Pontuais (120% CDI até R$ 8k) -->
+          <div class="space-y-1.5 p-3 rounded-xl bg-slate-950/70 border border-emerald-900/40">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-emerald-300 font-semibold flex items-center gap-1.5">
+                <i data-lucide="piggy-bank" class="w-3.5 h-3.5 text-emerald-400"></i>
+                Cofrinho MP Reservas Pontuais (120% CDI)
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="text-slate-300 font-mono font-bold" id="labelCofrinhoPontuais">R$ 0,00 / R$ 8.000</span>
+                <button onclick="quickAddCofrinhoPontuais()" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20">+ Aporte</button>
+              </div>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden p-0.5">
+              <div id="barCofrinhoPontuais" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span id="statusCofrinhoPontuais">Teto: R$ 8.000,00 a 120% CDI</span>
+              <span id="percentCofrinhoPontuais" class="font-bold text-emerald-400">0.0%</span>
+            </div>
+          </div>
+
+          <!-- Cofrinho Turbo (115% CDI até R$ 5k) -->
           <div class="space-y-1.5 p-3 rounded-xl bg-slate-950/70 border border-purple-900/40">
             <div class="flex justify-between items-center text-xs">
               <span class="text-purple-300 font-semibold flex items-center gap-1.5">
@@ -324,7 +366,7 @@
               <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 22.8%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusTotalCushion">Giro + 99Pay + Cofrinho + MP CDB</span>
+              <span id="statusTotalCushion">Giro + 99Pay + Cofrinhos MP + Cofrinho Turbo + CDB MP</span>
               <span id="percentTotalCushion" class="font-bold text-blue-400">22.8%</span>
             </div>
           </div>
@@ -354,7 +396,7 @@
             </div>
           </div>
 
-          <!-- Título 2: IPCA+ Juros Semestrais 2055 (Bloqueado para novos aportes) -->
+          <!-- Título 2: IPCA+ Juros Semestrais 2055 (Bloqueado) -->
           <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3 opacity-90">
             <div>
               <div class="text-xs font-bold text-white flex items-center gap-1.5">
@@ -527,6 +569,18 @@
         </div>
 
         <div>
+          <label class="text-slate-300 font-medium block mb-1">Cofrinho Mercado Livre (140% CDI - Teto R$ 2.000)</label>
+          <input type="number" id="inputVaultCofrinhoMeli" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          <span class="text-[11px] text-slate-500">Saldo atual no Cofrinho Mercado Livre</span>
+        </div>
+
+        <div>
+          <label class="text-slate-300 font-medium block mb-1">Cofrinho MP Reservas Pontuais (120% CDI - Teto R$ 8.000)</label>
+          <input type="number" id="inputVaultCofrinhoPontuais" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          <span class="text-[11px] text-slate-500">Saldo atual no Cofrinho Reservas Pontuais</span>
+        </div>
+
+        <div>
           <label class="text-slate-300 font-medium block mb-1">Saldo Cofrinho Turbo (115% CDI até R$ 5k)</label>
           <input type="number" id="inputVaultCofrinhoTurbo" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
           <span class="text-[11px] text-slate-500">Saldo atual: R$ 5.088,24</span>
@@ -585,12 +639,15 @@
         mpGiroTarget: 1000,
         pay99Balance: 6513.41,
         pay99Target: 10000,
+        cofrinhoMeliBalance: 0, // 140% CDI até R$ 2.000
+        cofrinhoMeliTarget: 2000,
+        cofrinhoPontuaisBalance: 0, // 120% CDI até R$ 8.000
+        cofrinhoPontuaisTarget: 8000,
         cofrinhoTurboBalance: 5088.24,
         cdb102Balance: 11222.77,
         cdb102Target: 30000,
         cushionTarget: 100000,
         amortAccumulated: 0,
-        // Saldos Reais Extraídos dos Demonstrativos
         tesouro2045: 4364.88,
         tesouro2055: 6866.38,
         tesouroRenda: 6797.74
@@ -626,17 +683,17 @@
         },
         {
           id: 'alloc_cdb',
-          name: 'Liquidez Diária / Reserva (99Pay, Cofrinho ou MP)',
+          name: 'Liquidez Diária / Reserva (99Pay, Cofrinhos MP ou CDB)',
           category: 'Caixa Imediato / Colchão 100k',
           amount: 5562,
-          currentAmount: 1500, // Ex: você já colocou R$ 1.500 no 99Pay!
+          currentAmount: 0,
           checked: false,
           checkedAt: null,
-          badge: '120% 99 / 115% Cof / 102% MP',
+          badge: '140% / 120% / 102%',
           badgeColor: 'border-teal-500/30 text-teal-400 bg-teal-500/10',
-          instruction: 'Direcione livremente para completar os R$ 10k do 99Pay ou CDB do MP.',
+          instruction: 'Direcione para o Cofrinho Meli 140%, Pontuais 120%, 99Pay ou CDB 102%.',
           icon: 'landmark',
-          customRate: '120% / 115% / 102%'
+          customRate: '140% / 120% / 102%'
         },
         {
           id: 'alloc_ipca32',
@@ -842,6 +899,28 @@
       }
     }
 
+    function quickAddCofrinhoMeli() {
+      const entrada = prompt("Quanto deseja somar ao Cofrinho Mercado Livre (140% CDI)? (R$):", "500");
+      if (entrada === null) return;
+      const valor = parseFloat(entrada.replace(',', '.')) || 0;
+      if (valor > 0) {
+        state.vault.cofrinhoMeliBalance = Math.min(state.vault.cofrinhoMeliTarget || 2000, (state.vault.cofrinhoMeliBalance || 0) + valor);
+        saveState();
+        showToast(`Adicionado ${formatBRL(valor)} ao Cofrinho Mercado Livre!`);
+      }
+    }
+
+    function quickAddCofrinhoPontuais() {
+      const entrada = prompt("Quanto deseja somar ao Cofrinho Reservas Pontuais (120% CDI)? (R$):", "1000");
+      if (entrada === null) return;
+      const valor = parseFloat(entrada.replace(',', '.')) || 0;
+      if (valor > 0) {
+        state.vault.cofrinhoPontuaisBalance = Math.min(state.vault.cofrinhoPontuaisTarget || 8000, (state.vault.cofrinhoPontuaisBalance || 0) + valor);
+        saveState();
+        showToast(`Adicionado ${formatBRL(valor)} ao Cofrinho Reservas Pontuais!`);
+      }
+    }
+
     function quickAddMercadoPagoCdb() {
       const entrada = prompt("Quanto deseja somar ao saldo do CDB 102% do Mercado Pago? (R$):", "1000");
       if (entrada === null) return;
@@ -907,7 +986,7 @@
       }
     }
 
-    // Motor de Rendimento Líquido
+    // Motor de Rendimento Líquido com Todos os Cofrinhos
     function calculateSmartYield() {
       if (state.manualYieldRecorded !== null && state.manualYieldRecorded !== undefined) {
         return {
@@ -924,7 +1003,17 @@
       const rend99Mensal = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 12) - 1);
       const rend99Diario = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 252) - 1);
 
-      // 2. Cofrinho Turbo: R$ 5.000 a 115% CDI + Excedente a 100% CDI (c/ 17.5% IR)
+      // 2. Cofrinho Mercado Livre: 140% CDI (c/ 17.5% IR)
+      const taxaMeliAnual = cdiAnual * 1.40;
+      const rendMeliMensal = (state.vault.cofrinhoMeliBalance || 0) * (Math.pow(1 + taxaMeliAnual, 1 / 12) - 1) * 0.825;
+      const rendMeliDiario = (state.vault.cofrinhoMeliBalance || 0) * (Math.pow(1 + taxaMeliAnual, 1 / 252) - 1) * 0.825;
+
+      // 3. Cofrinho MP Reservas Pontuais: 120% CDI (c/ 17.5% IR)
+      const taxaPontuaisAnual = cdiAnual * 1.20;
+      const rendPontuaisMensal = (state.vault.cofrinhoPontuaisBalance || 0) * (Math.pow(1 + taxaPontuaisAnual, 1 / 12) - 1) * 0.825;
+      const rendPontuaisDiario = (state.vault.cofrinhoPontuaisBalance || 0) * (Math.pow(1 + taxaPontuaisAnual, 1 / 252) - 1) * 0.825;
+
+      // 4. Cofrinho Turbo: R$ 5.000 a 115% CDI + Excedente a 100% CDI (c/ 17.5% IR)
       const saldoCofTotal = state.vault.cofrinhoTurboBalance || 0;
       const saldoCof115 = Math.min(5000, saldoCofTotal);
       const saldoCof100 = Math.max(0, saldoCofTotal - 5000);
@@ -940,17 +1029,17 @@
       const rendCof100Diario = saldoCof100 * (Math.pow(1 + taxaCof100Anual, 1 / 252) - 1) * 0.825;
       const rendCofDiario = rendCof115Diario + rendCof100Diario;
 
-      // 3. Mercado Pago CDB: 102% CDI (IR 17.5%)
+      // 5. Mercado Pago CDB: 102% CDI (IR 17.5%)
       const taxaCdbAnual = cdiAnual * 1.02;
       const rendCdbMensal = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 12) - 1) * 0.825;
       const rendCdbDiario = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 252) - 1) * 0.825;
 
-      // 4. Mercado Pago Giro: 105% CDI (IR 17.5%)
+      // 6. Mercado Pago Giro: 105% CDI (IR 17.5%)
       const taxaGiroAnual = cdiAnual * 1.05;
       const rendGiroMensal = (state.vault.mpGiroBalance || 0) * (Math.pow(1 + taxaGiroAnual, 1 / 12) - 1) * 0.825;
 
-      const totalMensal = rend99Mensal + rendCofMensal + rendCdbMensal + rendGiroMensal;
-      const totalDiario = rend99Diario + rendCofDiario + rendCdbDiario;
+      const totalMensal = rend99Mensal + rendMeliMensal + rendPontuaisMensal + rendCofMensal + rendCdbMensal + rendGiroMensal;
+      const totalDiario = rend99Diario + rendMeliDiario + rendPontuaisDiario + rendCofDiario + rendCdbDiario;
 
       return {
         mensalTotal: totalMensal,
@@ -1007,7 +1096,6 @@
         item.checked = !item.checked;
         item.checkedAt = item.checked ? new Date().toLocaleDateString('pt-BR') : null;
         
-        // Se marcou o check e não tinha preenchido o valor realizado, assume o planejado
         if (item.checked && (!item.currentAmount || item.currentAmount === 0)) {
           item.currentAmount = item.amount;
         }
@@ -1113,6 +1201,8 @@
     function editVaultBalances() {
       document.getElementById('inputVaultMpGiro').value = state.vault.mpGiroBalance || 12;
       document.getElementById('inputVault99Pay').value = state.vault.pay99Balance || 6513.41;
+      document.getElementById('inputVaultCofrinhoMeli').value = state.vault.cofrinhoMeliBalance || 0;
+      document.getElementById('inputVaultCofrinhoPontuais').value = state.vault.cofrinhoPontuaisBalance || 0;
       document.getElementById('inputVaultCofrinhoTurbo').value = state.vault.cofrinhoTurboBalance || 5088.24;
       document.getElementById('inputVaultCdb102').value = state.vault.cdb102Balance || 11222.77;
       document.getElementById('inputVaultCDIRate').value = state.cdiRateAnnual || 13.15;
@@ -1127,6 +1217,8 @@
     function saveModalVault() {
       state.vault.mpGiroBalance = parseFloat(document.getElementById('inputVaultMpGiro').value) || 0;
       state.vault.pay99Balance = parseFloat(document.getElementById('inputVault99Pay').value) || 0;
+      state.vault.cofrinhoMeliBalance = parseFloat(document.getElementById('inputVaultCofrinhoMeli').value) || 0;
+      state.vault.cofrinhoPontuaisBalance = parseFloat(document.getElementById('inputVaultCofrinhoPontuais').value) || 0;
       state.vault.cofrinhoTurboBalance = parseFloat(document.getElementById('inputVaultCofrinhoTurbo').value) || 0;
       state.vault.cdb102Balance = parseFloat(document.getElementById('inputVaultCdb102').value) || 0;
       state.cdiRateAnnual = parseFloat(document.getElementById('inputVaultCDIRate').value) || 13.15;
@@ -1255,6 +1347,26 @@
       const pay99Diff = pay99Target - pay99Bal;
       document.getElementById('status99PayProgress').innerText = pay99Diff > 0 ? `Faltam ${formatBRL(pay99Diff)} para o teto` : '🎉 TETO 10K ATINGIDO!';
 
+      // Barra Cofrinho Mercado Livre (140% CDI até R$ 2k)
+      const cofMeliBal = state.vault.cofrinhoMeliBalance || 0;
+      const cofMeliTarget = state.vault.cofrinhoMeliTarget || 2000;
+      const cofMeliPct = Math.min(100, (cofMeliBal / cofMeliTarget) * 100).toFixed(1);
+      document.getElementById('labelCofrinhoMeli').innerText = `${formatBRL(cofMeliBal)} / ${formatBRL(cofMeliTarget)}`;
+      document.getElementById('barCofrinhoMeli').style.width = `${cofMeliPct}%`;
+      document.getElementById('percentCofrinhoMeli').innerText = `${cofMeliPct}%`;
+      const cofMeliDiff = cofMeliTarget - cofMeliBal;
+      document.getElementById('statusCofrinhoMeli').innerText = cofMeliDiff > 0 ? `Faltam ${formatBRL(cofMeliDiff)} para o teto de 140%` : '🎉 TETO 140% ATINGIDO!';
+
+      // Barra Cofrinho MP Reservas Pontuais (120% CDI até R$ 8k)
+      const cofPontuaisBal = state.vault.cofrinhoPontuaisBalance || 0;
+      const cofPontuaisTarget = state.vault.cofrinhoPontuaisTarget || 8000;
+      const cofPontuaisPct = Math.min(100, (cofPontuaisBal / cofPontuaisTarget) * 100).toFixed(1);
+      document.getElementById('labelCofrinhoPontuais').innerText = `${formatBRL(cofPontuaisBal)} / ${formatBRL(cofPontuaisTarget)}`;
+      document.getElementById('barCofrinhoPontuais').style.width = `${cofPontuaisPct}%`;
+      document.getElementById('percentCofrinhoPontuais').innerText = `${cofPontuaisPct}%`;
+      const cofPontuaisDiff = cofPontuaisTarget - cofPontuaisBal;
+      document.getElementById('statusCofrinhoPontuais').innerText = cofPontuaisDiff > 0 ? `Faltam ${formatBRL(cofPontuaisDiff)} para o teto de 120%` : '🎉 TETO 120% ATINGIDO!';
+
       // Barra Cofrinho Turbo (115% até 5k)
       const cofBal = state.vault.cofrinhoTurboBalance || 5088.24;
       document.getElementById('labelCofrinhoTurbo').innerText = formatBRL(cofBal);
@@ -1271,7 +1383,7 @@
       document.getElementById('statusCdbProgress').innerText = cdbDiff > 0 ? `Faltam ${formatBRL(cdbDiff)} para o teto` : '🎉 TETO 30K ATINGIDO!';
 
       // Barra Colchão Geral de Liquidez (Meta R$ 100k)
-      const totalCushion = mpGiroBal + pay99Bal + cdbBal + cofBal;
+      const totalCushion = mpGiroBal + pay99Bal + cofMeliBal + cofPontuaisBal + cdbBal + cofBal;
       const cushionTarget = state.vault.cushionTarget;
       const cushionPct = Math.min(100, (totalCushion / cushionTarget) * 100).toFixed(1);
       document.getElementById('labelTotalCushion').innerText = `${formatBRL(totalCushion)} / ${formatBRL(cushionTarget)}`;
@@ -1305,7 +1417,7 @@
                       <i data-lucide="edit-2" class="w-3 h-3"></i>
                     </button>
                     <button onclick="deleteAllocation('${item.id}')" title="Excluir meta" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 inline-flex items-center justify-center transition">
-                      <i data-lucide="trash-2" class="w-3 h-3"></i>
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                     </button>
                   </div>
                   <div class="text-xs text-slate-400 mt-1 flex items-center gap-2">
