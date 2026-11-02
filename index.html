@@ -148,7 +148,7 @@
             <div id="kpiProgressBar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
           </div>
           <div class="text-[11px] text-slate-400 mt-1.5 flex justify-between">
-            <span id="kpiChecksCount">0 de 5 concluídos</span>
+            <span id="kpiChecksCount">0 de 4 concluídos</span>
             <span id="kpiExecutedAmount" class="font-medium text-slate-300">R$ 0,00</span>
           </div>
         </div>
@@ -217,7 +217,7 @@
           </div>
         </div>
 
-        <!-- Metas & Detalhamento da Liquidez com Giro Operacional -->
+        <!-- Metas & Detalhamento da Liquidez com Nubank Separado -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-slate-800">
             <div class="flex items-center gap-2">
@@ -239,8 +239,8 @@
                 <button onclick="quickUpdateGiro()" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20" title="Ajustar saldo de giro">Atualizar</button>
               </div>
             </div>
-            <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5">
-              <div id="barMpGiroProgress" class="bg-emerald-400 h-1.5 rounded-full transition-all duration-300" style="width: 1.2%"></div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden p-0.5">
+              <div id="barMpGiroProgress" class="bg-emerald-400 h-1 rounded-full transition-all duration-300" style="width: 1.2%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
               <span id="statusMpGiroProgress">Faltam R$ 988,00 para o piso</span>
@@ -248,7 +248,7 @@
             </div>
           </div>
 
-          <!-- Meta 1: Barra Dinâmica 99Pay 10k (Conta + Cofrinho 120%) -->
+          <!-- Meta 1: Barra Dinâmica 99Pay 10k (120% CDI) -->
           <div class="space-y-1.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
             <div class="flex justify-between items-center text-xs">
               <span class="text-amber-300 font-semibold flex items-center gap-1.5">
@@ -256,56 +256,80 @@
                 Meta 1: 99Pay 120% CDI (Conta + Cofrinho)
               </span>
               <div class="flex items-center gap-2">
-                <span class="text-slate-300 font-mono font-bold" id="label99PayProgress">R$ 1.500 / R$ 10.000</span>
+                <span class="text-slate-300 font-mono font-bold" id="label99PayProgress">R$ 6.513,41 / R$ 10.000</span>
                 <button onclick="quickAdd99Pay()" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20" title="Adicionar aporte rápido">+ Aporte</button>
               </div>
             </div>
-            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
-              <div id="bar99PayProgress" class="bg-gradient-to-r from-amber-500 to-yellow-400 h-2 rounded-full transition-all duration-300" style="width: 15%"></div>
+            <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5">
+              <div id="bar99PayProgress" class="bg-gradient-to-r from-amber-500 to-yellow-400 h-1.5 rounded-full transition-all duration-300" style="width: 65.1%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="status99PayProgress">Faltam R$ 8.500,00 para o teto</span>
-              <span id="percent99PayProgress" class="font-bold text-amber-400">15.0%</span>
+              <span id="status99PayProgress">Faltam R$ 3.486,59 para o teto</span>
+              <span id="percent99PayProgress" class="font-bold text-amber-400">65.1%</span>
             </div>
           </div>
 
           <!-- Meta 2: Teto Mercado Pago CDB 30k (102% CDI) -->
-          <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
+          <div class="space-y-1.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
             <div class="flex justify-between items-center text-xs">
-              <span class="text-slate-300 font-medium flex items-center gap-1.5">
-                <i data-lucide="landmark" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span class="text-teal-300 font-semibold flex items-center gap-1.5">
+                <i data-lucide="landmark" class="w-3.5 h-3.5 text-teal-400"></i>
                 Meta 2: Mercado Pago CDB 102%
               </span>
-              <span class="text-slate-400 font-mono" id="labelCdbProgress">R$ 11.000 / R$ 30.000</span>
+              <div class="flex items-center gap-2">
+                <span class="text-slate-300 font-mono font-bold" id="labelCdbProgress">R$ 11.222,77 / R$ 30.000</span>
+                <button onclick="quickAddMercadoPagoCdb()" class="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500/20" title="Adicionar aporte">+ Aporte</button>
+              </div>
             </div>
-            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
-              <div id="barCdbProgress" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full transition-all duration-300" style="width: 36.6%"></div>
+            <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5">
+              <div id="barCdbProgress" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 rounded-full transition-all duration-300" style="width: 37.4%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusCdbProgress">Faltam R$ 19.000,00 para o teto</span>
-              <span id="percentCdbProgress" class="font-bold text-emerald-400">36.7%</span>
+              <span id="statusCdbProgress">Faltam R$ 18.777,23 para o teto</span>
+              <span id="percentCdbProgress" class="font-bold text-teal-400">37.4%</span>
             </div>
           </div>
 
-          <!-- Meta 3: Colchão Geral R$ 100k -->
+          <!-- Meta 3: Barra Dinâmica Nubank Turbo 115% CDI -->
+          <div class="space-y-1.5 p-3 rounded-xl bg-slate-950/70 border border-purple-900/40">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-purple-300 font-semibold flex items-center gap-1.5">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
+                Meta 3: Nubank Caixinha Turbo (115% CDI)
+              </span>
+              <div class="flex items-center gap-2">
+                <span class="text-slate-300 font-mono font-bold" id="labelNubankProgress">R$ 20.000 / R$ 30.000</span>
+                <button onclick="quickAddNubank()" class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30 hover:bg-purple-500/20" title="Adicionar aporte">+ Aporte</button>
+              </div>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5">
+              <div id="barNubankProgress" class="bg-gradient-to-r from-purple-600 to-fuchsia-400 h-1.5 rounded-full transition-all duration-300" style="width: 66.7%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span id="statusNubankProgress">Faltam R$ 10.000,00</span>
+              <span id="percentNubankProgress" class="font-bold text-purple-400">66.7%</span>
+            </div>
+          </div>
+
+          <!-- Meta Geral: Colchão Total R$ 100k -->
           <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
             <div class="flex justify-between items-center text-xs">
               <span class="text-slate-300 font-medium flex items-center gap-1.5">
                 <i data-lucide="shield" class="w-3.5 h-3.5 text-blue-400"></i>
-                Meta 3: Colchão Total de Liquidez
+                Meta Geral: Colchão Total de Liquidez
               </span>
-              <span class="text-slate-400 font-mono" id="labelTotalCushion">R$ 32.512 / R$ 100.000</span>
+              <span class="text-slate-400 font-mono" id="labelTotalCushion">R$ 37.736,18 / R$ 100.000</span>
             </div>
             <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
-              <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 32.5%"></div>
+              <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 37.7%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusTotalCushion">Giro + 99Pay + CDBs</span>
-              <span id="percentTotalCushion" class="font-bold text-blue-400">32.5%</span>
+              <span id="statusTotalCushion">99Pay + MP + Nubank + Cofrinhos</span>
+              <span id="percentTotalCushion" class="font-bold text-blue-400">37.7%</span>
             </div>
           </div>
 
-          <!-- Meta 4: Amortização Acumulada Casa -->
+          <!-- Meta Amortização -->
           <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
             <div class="flex justify-between items-center text-xs">
               <span class="text-slate-300 font-medium flex items-center gap-1.5">
@@ -352,9 +376,12 @@
         <div class="rounded-xl border border-blue-900/40 bg-blue-950/20 p-4 text-xs text-slate-300 flex items-start gap-3">
           <i data-lucide="info" class="w-5 h-5 text-blue-400 shrink-0 mt-0.5"></i>
           <div class="space-y-1">
-            <span class="font-semibold text-blue-300">Como funciona a sua conta e caixa de giro:</span>
+            <span class="font-semibold text-blue-300">Organização das Suas Caixas de Liquidez:</span>
             <p class="text-slate-300 leading-relaxed">
-              O <b>Caixa de Giro de R$ 1.000</b> fica parado na conta do Mercado Pago para seu débito e Pix rotineiro rendendo 105% do CDI. Apenas no 1º mês você transfere os R$ 988 restantes para formá-lo; nos meses seguintes, só recompõe eventuais gastos.
+              • <b>99Pay:</b> Máxima prioridade para completar R$ 10k (120% isento de IR/IOF).<br>
+              • <b>Nubank Turbo:</b> Rende 115% do CDI para valores maiores do colchão.<br>
+              • <b>Mercado Pago CDB:</b> Rende 102% até a meta de R$ 30k.<br>
+              • <b>Mercado Pago Giro:</b> Piso de R$ 1.000 para débito e Pix rendendo 105% do CDI.
             </p>
           </div>
         </div>
@@ -436,21 +463,27 @@
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="text-slate-300 font-medium block mb-1">Giro Atual na Conta Mercado Pago (Piso R$ 1.000)</label>
+          <label class="text-slate-300 font-medium block mb-1">Giro Conta Mercado Pago (Piso R$ 1.000)</label>
           <input type="number" id="inputVaultMpGiro" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
           <span class="text-[11px] text-slate-500">Saldo atual para Débito/Pix: R$ 12,00</span>
         </div>
 
         <div>
-          <label class="text-slate-300 font-medium block mb-1">Saldo 99Pay (Conta + Cofrinho - Teto R$ 10.000)</label>
+          <label class="text-slate-300 font-medium block mb-1">Saldo 99Pay (Conta + Cofrinho 120% - Teto R$ 10.000)</label>
           <input type="number" id="inputVault99Pay" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Saldo atual: R$ 1.500 (Rende 120% isento)</span>
+          <span class="text-[11px] text-slate-500">Saldo atual: R$ 6.513,41</span>
         </div>
 
         <div>
           <label class="text-slate-300 font-medium block mb-1">Saldo Mercado Pago CDB 102% (Teto R$ 30.000)</label>
           <input type="number" id="inputVaultCdb102" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Saldo alocado no CDB: R$ 11.000</span>
+          <span class="text-[11px] text-slate-500">Saldo atual no CDB: R$ 11.222,77</span>
+        </div>
+
+        <div>
+          <label class="text-slate-300 font-medium block mb-1">Saldo Nubank Caixinha Turbo 115% CDI (Meta R$ 30.000)</label>
+          <input type="number" id="inputVaultNubank" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          <span class="text-[11px] text-slate-500">Saldo guardado na Caixinha Turbo do Nubank</span>
         </div>
 
         <div>
@@ -463,12 +496,6 @@
           <label class="text-slate-300 font-medium block mb-1">Taxa CDI Oficial (% ao ano)</label>
           <input type="number" step="0.05" id="inputVaultCDIRate" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
           <span class="text-[11px] text-slate-500">Padrão da economia: 13.15%</span>
-        </div>
-
-        <div>
-          <label class="text-slate-300 font-medium block mb-1">Outros CDBs (Bancos/Corretoras)</label>
-          <input type="number" id="inputVaultOtherCdbs" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Valor somado de outros CDBs</span>
         </div>
 
         <div>
@@ -508,14 +535,15 @@
         { id: 'exp_cartao', label: 'Fatura do Cartão (Pessoal)', amount: 1500, icon: 'credit-card' }
       ],
       vault: {
-        mpGiroBalance: 12, // Saldo inicial atual para começar do zero!
-        mpGiroTarget: 1000, // Piso de giro que você quer manter
-        pay99Balance: 1500,
+        mpGiroBalance: 12,
+        mpGiroTarget: 1000,
+        pay99Balance: 6513.41, // Dados reais da tela
         pay99Target: 10000,
-        cdb102Balance: 11000,
+        cdb102Balance: 11222.77, // Dados reais da tela
         cdb102Target: 30000,
+        nubankBalance: 20000, // Caixinha Turbo 115% do Nubank
+        nubankTarget: 30000,
         mpCofrinhosBalance: 0,
-        otherCdbsBalance: 20000,
         cushionTarget: 100000,
         amortAccumulated: 0
       },
@@ -537,27 +565,27 @@
           id: 'alloc_giro',
           name: 'Recompor Caixa de Giro Mercado Pago (Piso R$ 1.000)',
           category: 'Caixa Operacional / Débito & Pix',
-          amount: 988, // 1000 - 12 no 1º mês
+          amount: 988,
           checked: false,
           checkedAt: null,
           badge: 'Giro R$ 1.000 (105% CDI)',
           badgeColor: 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10',
-          instruction: 'Deixe parado na conta corrente do Mercado Pago para seu giro e compras diárias.',
+          instruction: 'Deixe parado na conta corrente do Mercado Pago para seu giro diário.',
           icon: 'credit-card',
           customRate: '105% CDI'
         },
         {
           id: 'alloc_cdb',
-          name: 'Liquidez Diária / Reserva de Emergência (99Pay ou Mercado Pago)',
+          name: 'Liquidez Diária / Reserva de Emergência (99Pay, Nubank ou MP)',
           category: 'Caixa Imediato / Colchão 100k',
-          amount: 5562, // Sobra restante após o giro
+          amount: 5562,
           checked: false,
           checkedAt: null,
-          badge: '120% 99Pay / 102% MP',
+          badge: '120% 99 / 115% Nu / 102% MP',
           badgeColor: 'border-teal-500/30 text-teal-400 bg-teal-500/10',
-          instruction: 'Direcione para o 99Pay (até bater R$ 10k) ou para o CDB 102% do Mercado Pago.',
+          instruction: 'Direcione livremente para completar os R$ 10k do 99Pay, o Nubank Turbo ou CDB do MP.',
           icon: 'landmark',
-          customRate: '120% / 102%'
+          customRate: '120% / 115% / 102%'
         },
         {
           id: 'alloc_ipca32',
@@ -594,38 +622,14 @@
       if (savedPermanent) {
         try {
           const parsed = JSON.parse(savedPermanent);
-          return { ...defaultState, ...parsed, vault: { ...defaultState.vault, ...(parsed.vault || {}) } };
+          const mergedVault = { ...defaultState.vault, ...(parsed.vault || {}) };
+          
+          // Se tinha saldo em otherCdbsBalance, migra para o Nubank automaticamente
+          if (mergedVault.otherCdbsBalance && (!mergedVault.nubankBalance || mergedVault.nubankBalance === 0)) {
+            mergedVault.nubankBalance = mergedVault.otherCdbsBalance;
+          }
+          return { ...defaultState, ...parsed, vault: mergedVault };
         } catch(e) {}
-      }
-
-      const oldKeys = [
-        'FINANCE_ALLOCATOR_DATA_V8',
-        'FINANCE_ALLOCATOR_DATA_V7',
-        'FINANCE_ALLOCATOR_DATA_V6',
-        'FINANCE_ALLOCATOR_DATA_V5',
-        'FINANCE_ALLOCATOR_DATA_V4',
-        'FINANCE_ALLOCATOR_DATA_V3',
-        'FINANCE_ALLOCATOR_DATA_V2',
-        'FINANCE_ALLOCATOR_DATA_V1',
-        'bernardy_investments_state'
-      ];
-
-      for (let key of oldKeys) {
-        const oldData = localStorage.getItem(key);
-        if (oldData) {
-          try {
-            const parsedOld = JSON.parse(oldData);
-            if (parsedOld && typeof parsedOld === 'object') {
-              const migrated = {
-                ...defaultState,
-                ...parsedOld,
-                vault: { ...defaultState.vault, ...(parsedOld.vault || {}) }
-              };
-              localStorage.setItem(PERMANENT_STORAGE_KEY, JSON.stringify(migrated));
-              return migrated;
-            }
-          } catch(e) {}
-        }
       }
 
       return defaultState;
@@ -658,6 +662,7 @@
       return (state.allocations || []).filter(a => a.checked).reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
     }
 
+    // Aportes Rápidos nas Barras
     function quickUpdateGiro() {
       const entrada = prompt("Qual o saldo atual na sua conta corrente do Mercado Pago? (R$):", state.vault.mpGiroBalance || 12);
       if (entrada === null) return;
@@ -665,11 +670,11 @@
       state.vault.mpGiroBalance = valor;
       recalculateAllocationsAuto();
       saveState();
-      showToast(`Saldo de giro atualizado para ${formatBRL(valor)}!`);
+      showToast(`Giro Mercado Pago atualizado para ${formatBRL(valor)}!`);
     }
 
     function quickAdd99Pay() {
-      const entrada = prompt("Quanto você deseja somar ao saldo do 99Pay agora? (R$):", "500");
+      const entrada = prompt("Quanto deseja somar ao saldo do 99Pay agora? (R$):", "500");
       if (entrada === null) return;
       const valor = parseFloat(entrada.replace(',', '.')) || 0;
       if (valor > 0) {
@@ -679,6 +684,29 @@
       }
     }
 
+    function quickAddMercadoPagoCdb() {
+      const entrada = prompt("Quanto deseja somar ao saldo do CDB 102% do Mercado Pago? (R$):", "1000");
+      if (entrada === null) return;
+      const valor = parseFloat(entrada.replace(',', '.')) || 0;
+      if (valor > 0) {
+        state.vault.cdb102Balance = Math.min(state.vault.cdb102Target || 30000, (state.vault.cdb102Balance || 0) + valor);
+        saveState();
+        showToast(`Adicionado ${formatBRL(valor)} ao CDB Mercado Pago!`);
+      }
+    }
+
+    function quickAddNubank() {
+      const entrada = prompt("Quanto deseja somar ao saldo da Caixinha Turbo do Nubank (115% CDI)? (R$):", "1000");
+      if (entrada === null) return;
+      const valor = parseFloat(entrada.replace(',', '.')) || 0;
+      if (valor > 0) {
+        state.vault.nubankBalance = (state.vault.nubankBalance || 0) + valor;
+        saveState();
+        showToast(`Adicionado ${formatBRL(valor)} à Caixinha Turbo Nubank!`);
+      }
+    }
+
+    // Despesas Dinâmicas
     function addNewExpensePrompt() {
       const nome = prompt("Nome da nova despesa fixa (Ex: Condomínio, Academia, Streaming):");
       if (!nome || !nome.trim()) return;
@@ -721,6 +749,7 @@
       }
     }
 
+    // Motor de Rendimento Passivo Diário e Mensal
     function calculateSmartYield() {
       if (state.manualYieldRecorded !== null && state.manualYieldRecorded !== undefined) {
         return {
@@ -732,25 +761,31 @@
 
       const cdiAnual = (state.cdiRateAnnual || 13.15) / 100;
       
+      // 99Pay: 120% CDI 100% Isento
       const taxa99Anual = cdiAnual * 1.20;
       const rend99Mensal = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 12) - 1);
       const rend99Diario = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 252) - 1);
 
+      // Nubank Turbo: 115% CDI (com IR médio de 17.5%)
+      const taxaNuAnual = cdiAnual * 1.15;
+      const rendNuMensal = (state.vault.nubankBalance || 0) * (Math.pow(1 + taxaNuAnual, 1 / 12) - 1) * 0.825;
+      const rendNuDiario = (state.vault.nubankBalance || 0) * (Math.pow(1 + taxaNuAnual, 1 / 252) - 1) * 0.825;
+
+      // Mercado Pago CDB: 102% CDI (IR médio 17.5%)
       const taxaCdbAnual = cdiAnual * 1.02;
       const rendCdbMensal = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 12) - 1) * 0.825;
       const rendCdbDiario = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 252) - 1) * 0.825;
 
+      // Mercado Pago Giro: 105% CDI (IR médio 17.5%)
       const taxaGiroAnual = cdiAnual * 1.05;
       const rendGiroMensal = (state.vault.mpGiroBalance || 0) * (Math.pow(1 + taxaGiroAnual, 1 / 12) - 1) * 0.825;
 
+      // Cofrinhos Mercado Pago: Média 124%
       const taxaCofrinhoAnual = cdiAnual * 1.24;
       const rendCofrinhoMensal = (state.vault.mpCofrinhosBalance || 0) * (Math.pow(1 + taxaCofrinhoAnual, 1 / 12) - 1) * 0.825;
 
-      const taxaOutrosMensal = Math.pow(1 + (cdiAnual * 1.15), 1 / 12) - 1;
-      const rendOutrosMensal = (state.vault.otherCdbsBalance || 0) * taxaOutrosMensal * 0.825;
-
-      const totalMensal = rend99Mensal + rendCdbMensal + rendGiroMensal + rendCofrinhoMensal + rendOutrosMensal;
-      const totalDiario = rend99Diario + rendCdbDiario;
+      const totalMensal = rend99Mensal + rendNuMensal + rendCdbMensal + rendGiroMensal + rendCofrinhoMensal;
+      const totalDiario = rend99Diario + rendNuDiario + rendCdbDiario;
 
       return {
         mensalTotal: totalMensal,
@@ -762,7 +797,7 @@
     function editRealYieldManual() {
       const atual = state.manualYieldRecorded !== null ? state.manualYieldRecorded : calculateSmartYield().mensalTotal;
       const entrada = prompt(
-        "Digite o rendimento líquido real somado no mês (conforme extratos de 99Pay + Mercado Pago):\n(Deixe em branco ou digite 'auto' para voltar ao cálculo automático)",
+        "Digite o rendimento líquido real somado no mês:\n(Deixe em branco ou digite 'auto' para voltar ao cálculo automático)",
         atual ? atual.toFixed(2) : ""
       );
 
@@ -930,11 +965,11 @@
 
     function editVaultBalances() {
       document.getElementById('inputVaultMpGiro').value = state.vault.mpGiroBalance || 12;
-      document.getElementById('inputVault99Pay').value = state.vault.pay99Balance || 1500;
-      document.getElementById('inputVaultCdb102').value = state.vault.cdb102Balance;
+      document.getElementById('inputVault99Pay').value = state.vault.pay99Balance || 6513.41;
+      document.getElementById('inputVaultCdb102').value = state.vault.cdb102Balance || 11222.77;
+      document.getElementById('inputVaultNubank').value = state.vault.nubankBalance || 20000;
       document.getElementById('inputVaultMpCofrinhos').value = state.vault.mpCofrinhosBalance || 0;
       document.getElementById('inputVaultCDIRate').value = state.cdiRateAnnual || 13.15;
-      document.getElementById('inputVaultOtherCdbs').value = state.vault.otherCdbsBalance;
       document.getElementById('inputVaultAmortTotal').value = state.vault.amortAccumulated;
       document.getElementById('modalVault').classList.remove('hidden');
     }
@@ -947,9 +982,9 @@
       state.vault.mpGiroBalance = parseFloat(document.getElementById('inputVaultMpGiro').value) || 0;
       state.vault.pay99Balance = parseFloat(document.getElementById('inputVault99Pay').value) || 0;
       state.vault.cdb102Balance = parseFloat(document.getElementById('inputVaultCdb102').value) || 0;
+      state.vault.nubankBalance = parseFloat(document.getElementById('inputVaultNubank').value) || 0;
       state.vault.mpCofrinhosBalance = parseFloat(document.getElementById('inputVaultMpCofrinhos').value) || 0;
       state.cdiRateAnnual = parseFloat(document.getElementById('inputVaultCDIRate').value) || 13.15;
-      state.vault.otherCdbsBalance = parseFloat(document.getElementById('inputVaultOtherCdbs').value) || 0;
       state.vault.amortAccumulated = parseFloat(document.getElementById('inputVaultAmortTotal').value) || 0;
 
       recalculateAllocationsAuto();
@@ -1056,8 +1091,8 @@
       const mpGiroDiff = mpGiroTarget - mpGiroBal;
       document.getElementById('statusMpGiroProgress').innerText = mpGiroDiff > 0 ? `Faltam ${formatBRL(mpGiroDiff)} para o piso` : '✓ Piso de R$ 1.000 OK';
 
-      // Barra Dinâmica 99Pay (Meta R$ 10k)
-      const pay99Bal = state.vault.pay99Balance || 1500;
+      // Barra 99Pay (Meta R$ 10k)
+      const pay99Bal = state.vault.pay99Balance || 6513.41;
       const pay99Target = state.vault.pay99Target || 10000;
       const pay99Pct = Math.min(100, (pay99Bal / pay99Target) * 100).toFixed(1);
       document.getElementById('label99PayProgress').innerText = `${formatBRL(pay99Bal)} / ${formatBRL(pay99Target)}`;
@@ -1067,8 +1102,8 @@
       document.getElementById('status99PayProgress').innerText = pay99Diff > 0 ? `Faltam ${formatBRL(pay99Diff)} para o teto` : '🎉 TETO 10K ATINGIDO!';
 
       // Barra Mercado Pago CDB (Meta R$ 30k)
-      const cdbBal = state.vault.cdb102Balance;
-      const cdbTarget = state.vault.cdb102Target;
+      const cdbBal = state.vault.cdb102Balance || 11222.77;
+      const cdbTarget = state.vault.cdb102Target || 30000;
       const cdbPct = Math.min(100, (cdbBal / cdbTarget) * 100).toFixed(1);
       document.getElementById('labelCdbProgress').innerText = `${formatBRL(cdbBal)} / ${formatBRL(cdbTarget)}`;
       document.getElementById('barCdbProgress').style.width = `${cdbPct}%`;
@@ -1076,8 +1111,18 @@
       const cdbDiff = cdbTarget - cdbBal;
       document.getElementById('statusCdbProgress').innerText = cdbDiff > 0 ? `Faltam ${formatBRL(cdbDiff)} para o teto` : '🎉 TETO 30K ATINGIDO!';
 
+      // Barra Nubank Turbo (Meta R$ 30k)
+      const nuBal = state.vault.nubankBalance || 20000;
+      const nuTarget = state.vault.nubankTarget || 30000;
+      const nuPct = Math.min(100, (nuBal / nuTarget) * 100).toFixed(1);
+      document.getElementById('labelNubankProgress').innerText = `${formatBRL(nuBal)} / ${formatBRL(nuTarget)}`;
+      document.getElementById('barNubankProgress').style.width = `${nuPct}%`;
+      document.getElementById('percentNubankProgress').innerText = `${nuPct}%`;
+      const nuDiff = nuTarget - nuBal;
+      document.getElementById('statusNubankProgress').innerText = nuDiff > 0 ? `Faltam ${formatBRL(nuDiff)}` : '✓ Caixinha Turbo Cheia!';
+
       // Barra Colchão Geral (Meta R$ 100k)
-      const totalCushion = mpGiroBal + pay99Bal + cdbBal + (state.vault.mpCofrinhosBalance || 0) + (state.vault.otherCdbsBalance || 0);
+      const totalCushion = mpGiroBal + pay99Bal + cdbBal + nuBal + (state.vault.mpCofrinhosBalance || 0);
       const cushionTarget = state.vault.cushionTarget;
       const cushionPct = Math.min(100, (totalCushion / cushionTarget) * 100).toFixed(1);
       document.getElementById('labelTotalCushion').innerText = `${formatBRL(totalCushion)} / ${formatBRL(cushionTarget)}`;
@@ -1086,7 +1131,7 @@
 
       document.getElementById('labelAmortTotal').innerText = `${formatBRL(state.vault.amortAccumulated)} amortizados`;
 
-      // Checklist Render (Com o Giro Operacional separado da Liquidez)
+      // Checklist Render
       const checklistContainer = document.getElementById('checklistContainer');
       checklistContainer.innerHTML = state.allocations.map(item => {
         const itemPercent = netSurplus > 0 ? ((item.amount / netSurplus) * 100).toFixed(1) : 0;
