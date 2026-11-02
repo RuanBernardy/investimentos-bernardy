@@ -227,7 +227,7 @@
           </div>
         </div>
 
-        <!-- Seção 1: Metas de Liquidez Imediata (Colchão R$ 100k) com Auto-Incremento Diário -->
+        <!-- Seção 1: Metas de Liquidez Imediata (Colchão R$ 100k) -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-slate-800">
             <div class="flex items-center gap-2">
@@ -281,7 +281,7 @@
 
           <!-- BLOCO INTEGRADO COFRINHOS MERCADO PAGO -->
           <div class="p-3.5 rounded-2xl bg-slate-950 border border-emerald-900/40 space-y-3">
-            <div class="flex items-center justify-between pb-1.5 border-b border-slate-800/80">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-800/80 gap-1">
               <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
                 <i data-lucide="piggy-bank" class="w-4 h-4 text-emerald-400"></i>
                 Cofrinhos MP (Teto R$ 10.000 Bonificado)
@@ -289,10 +289,10 @@
               <span class="text-xs font-mono font-bold text-emerald-300" id="labelCofrinhosMpTotal">R$ 10.000,00 / R$ 10.000</span>
             </div>
 
-            <!-- Sub-cofrinho 1: Mercado Livre (140% até R$ 2k) -->
+            <!-- Cofrinho MP Mercado Livre (140% CDI) -->
             <div class="space-y-1 pl-2 border-l-2 border-yellow-500/60">
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-yellow-400 font-medium">Sub-cofrinho Mercado Livre (140% CDI)</span>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
+                <span class="text-yellow-400 font-medium">Cofrinho MP Mercado Livre (140% CDI)</span>
                 <div class="flex items-center gap-2">
                   <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cofrinhoMeli')" title="Clique para editar ou somar" id="labelCofrinhoMeli">R$ 2.000,00 / R$ 2.000</span>
                   <button onclick="quickEditOrAdd('cofrinhoMeli')" class="text-[9px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/20">Ajustar</button>
@@ -302,15 +302,15 @@
                 <div id="barCofrinhoMeli" class="bg-gradient-to-r from-yellow-500 to-amber-400 h-1.5 rounded-full" style="width: 100%"></div>
               </div>
               <div class="flex justify-between text-[10px] text-slate-400">
-                <span>R$ 2.000 a 140% (Auto)</span>
+                <span id="statusCofrinhoMeli">R$ 2.000 a 140% (Auto)</span>
                 <span class="font-bold text-yellow-400" id="percentCofrinhoMeli">100.0%</span>
               </div>
             </div>
 
-            <!-- Sub-cofrinho 2: Reservas Imediatas (120% até R$ 8k restantes) -->
+            <!-- Cofrinho MP Reservas Imediatas (120% CDI) -->
             <div class="space-y-1 pl-2 border-l-2 border-emerald-500/60">
-              <div class="flex justify-between items-center text-xs">
-                <span class="text-emerald-300 font-medium">Cofrinho Reservas Imediatas (120% CDI)</span>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
+                <span class="text-emerald-300 font-medium">Cofrinho MP Reservas Imediatas (120% CDI)</span>
                 <div class="flex items-center gap-2">
                   <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cofrinhoPontuais')" title="Clique para editar ou somar" id="labelCofrinhoPontuais">R$ 8.000,00 / R$ 8.000</span>
                   <button onclick="quickEditOrAdd('cofrinhoPontuais')" class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20">Ajustar</button>
@@ -320,13 +320,13 @@
                 <div id="barCofrinhoPontuais" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full" style="width: 100%"></div>
               </div>
               <div class="flex justify-between text-[10px] text-slate-400">
-                <span id="statusCofrinhoPontuais">R$ 8.000 a 120% CDI (Auto)</span>
+                <span id="statusCofrinhoPontuais">R$ 8.000 a 120% CDI</span>
                 <span class="font-bold text-emerald-400" id="percentCofrinhoPontuais">100.0%</span>
               </div>
             </div>
 
             <div class="text-[10px] text-slate-500 italic pt-1 border-t border-slate-800/60">
-              *Rendimento acumulado automaticamente dia após dia.
+              *Se a soma global for até R$ 10.000, o sistema compensa o saldo entre os dois cofrinhos proporcionalmente. Acima de R$ 10.000, rende 100% CDI.
             </div>
           </div>
 
@@ -346,8 +346,8 @@
               <div id="barCofrinhoTurbo" class="bg-gradient-to-r from-purple-600 to-fuchsia-400 h-1.5 rounded-full transition-all duration-300" style="width: 100%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusCofrinhoTurbo">R$ 5k a 115% • Resto a 100% (Auto)</span>
-              <span class="font-bold text-purple-400">Rendimento Ativo</span>
+              <span id="statusCofrinhoTurbo">R$ 5.000 a 115% • R$ 88,24 a 100% CDI</span>
+              <span class="font-bold text-purple-400">Teto 115% atingido</span>
             </div>
           </div>
 
@@ -385,7 +385,7 @@
               <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 32.8%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusTotalCushion">Atualização diária de juros compostos ativa</span>
+              <span id="statusTotalCushion">Giro + 99Pay + Cofrinhos MP (10k) + Cofrinho Turbo + CDB MP</span>
               <span id="percentTotalCushion" class="font-bold text-blue-400">32.8%</span>
             </div>
           </div>
@@ -552,13 +552,13 @@
         </div>
 
         <div>
-          <label class="text-slate-300 font-medium block mb-1">Sub-cofrinho Mercado Livre (140% CDI - Sub-teto R$ 2.000)</label>
+          <label class="text-slate-300 font-medium block mb-1">Cofrinho MP Mercado Livre (140% CDI - Sub-teto R$ 2.000)</label>
           <input type="number" id="inputVaultCofrinhoMeli" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
           <span class="text-[11px] text-slate-500">R$ 2.000 a 140% (desconta do teto global de 10k)</span>
         </div>
 
         <div>
-          <label class="text-slate-300 font-medium block mb-1">Cofrinho Reservas Imediatas (120% CDI)</label>
+          <label class="text-slate-300 font-medium block mb-1">Cofrinho MP Reservas Imediatas (120% CDI)</label>
           <input type="number" id="inputVaultCofrinhoPontuais" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
           <span class="text-[11px] text-slate-500">R$ 8.000 a 120%</span>
         </div>
@@ -744,7 +744,6 @@
     let state = loadStateWithMigration();
     let cloudTimer = null;
 
-    // --- MOTOR DE AUTO-INCREMENTO DIÁRIO POR JUROS COMPOSTOS ---
     function applyDailyCompoundInterest() {
       const todayStr = new Date().toISOString().slice(0, 10);
       const lastDateStr = localStorage.getItem(LAST_DATE_KEY);
@@ -754,7 +753,7 @@
         return;
       }
 
-      if (lastDateStr === todayStr) return; // Já rodou hoje
+      if (lastDateStr === todayStr) return;
 
       const lastDate = new Date(lastDateStr);
       const today = new Date(todayStr);
@@ -763,42 +762,29 @@
 
       if (diffDays <= 0) return;
 
-      // Calcula juros acumulados para os dias passados (considerando apenas dias úteis aproximados ou proporcional)
       const cdiAnual = (state.cdiRateAnnual || 13.15) / 100;
-      const dailyFactor = (days, rateMult) => {
-        const taxaAno = cdiAnual * rateMult;
-        const fatorDia = Math.pow(1 + taxaAno, 1 / 252) - 1;
-        return days * fatorDia;
-      };
-
-      // Fator líquido (17.5% IR) ou isento (99pay)
       const liq = 0.825;
 
-      // 99Pay (120% isento)
       if (state.vault.pay99Balance) {
         const f = days => days * (Math.pow(1 + cdiAnual * 1.20, 1 / 252) - 1);
         state.vault.pay99Balance += state.vault.pay99Balance * f(diffDays);
       }
 
-      // Giro MP (105% liq)
       if (state.vault.mpGiroBalance) {
         const f = days => days * (Math.pow(1 + cdiAnual * 1.05, 1 / 252) - 1) * liq;
         state.vault.mpGiroBalance += state.vault.mpGiroBalance * f(diffDays);
       }
 
-      // Cofrinho Meli (140% liq)
       if (state.vault.cofrinhoMeliBalance) {
         const f = days => days * (Math.pow(1 + cdiAnual * 1.40, 1 / 252) - 1) * liq;
         state.vault.cofrinhoMeliBalance += state.vault.cofrinhoMeliBalance * f(diffDays);
       }
 
-      // Cofrinho Pontuais (120% liq)
       if (state.vault.cofrinhoPontuaisBalance) {
         const f = days => days * (Math.pow(1 + cdiAnual * 1.20, 1 / 252) - 1) * liq;
         state.vault.cofrinhoPontuaisBalance += state.vault.cofrinhoPontuaisBalance * f(diffDays);
       }
 
-      // Cofrinho Turbo (5k a 115%, resto a 100% liq)
       if (state.vault.cofrinhoTurboBalance) {
         const total = state.vault.cofrinhoTurboBalance;
         const b115 = Math.min(5000, total);
@@ -808,7 +794,6 @@
         state.vault.cofrinhoTurboBalance += (b115 * f115(diffDays)) + (b100 * f100(diffDays));
       }
 
-      // CDB MP (102% liq)
       if (state.vault.cdb102Balance) {
         const f = days => days * (Math.pow(1 + cdiAnual * 1.02, 1 / 252) - 1) * liq;
         state.vault.cdb102Balance += state.vault.cdb102Balance * f(diffDays);
@@ -942,10 +927,10 @@
         label = "99Pay (Conta + Cofrinho)";
       } else if (targetKey === 'cofrinhoMeli') {
         currentVal = state.vault.cofrinhoMeliBalance || 0;
-        label = "Sub-cofrinho Mercado Livre (140%)";
+        label = "Cofrinho MP Mercado Livre (140%)";
       } else if (targetKey === 'cofrinhoPontuais') {
         currentVal = state.vault.cofrinhoPontuaisBalance || 0;
-        label = "Cofrinho Reservas Imediatas (120%)";
+        label = "Cofrinho MP Reservas Imediatas (120%)";
       } else if (targetKey === 'cofrinhoTurbo') {
         currentVal = state.vault.cofrinhoTurboBalance || 0;
         label = "Cofrinho Turbo";
@@ -970,7 +955,7 @@
         if (targetKey === 'cofrinhoPontuais') state.vault.cofrinhoPontuaisBalance += aporte;
         if (targetKey === 'cofrinhoTurbo') state.vault.cofrinhoTurboBalance += aporte;
         if (targetKey === 'cdb102') state.vault.cdb102Balance += aporte;
-        showToast(`Aporte de ${formatBRL(aporte)} somado!`);
+        showToast(`Aporte de ${formatBRL(aporte)} somado com sucesso!`);
       } else {
         const novoTotal = parseFloat(entradaLimpa.replace(',', '.')) || 0;
         if (targetKey === 'pay99') state.vault.pay99Balance = novoTotal;
@@ -1184,11 +1169,11 @@
       const rend99Mensal = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 12) - 1);
       const rend99Diario = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 252) - 1);
 
-      const meliBal = state.vault.cofrinhoMeliBalance || 0;
-      const pontuaisBal = state.vault.cofrinhoPontuaisBalance || 0;
-      const totalCofrinhosMP = meliBal + pontuaisBal;
+      const rawMeli = state.vault.cofrinhoMeliBalance || 0;
+      const rawPontuais = state.vault.cofrinhoPontuaisBalance || 0;
+      const totalCofrinhosMP = rawMeli + rawPontuais;
 
-      const b140 = Math.min(2000, meliBal);
+      const b140 = Math.min(2000, Math.max(rawMeli, totalCofrinhosMP > 2000 ? 2000 : totalCofrinhosMP));
       const b120 = Math.max(0, Math.min(totalCofrinhosMP, 10000) - b140);
       const b100 = Math.max(0, totalCofrinhosMP - 10000);
 
@@ -1491,19 +1476,23 @@
       const pay99Diff = pay99Target - pay99Bal;
       document.getElementById('status99PayProgress').innerText = pay99Diff > 0 ? `Faltam ${formatBRL(pay99Diff)} para o teto` : '🎉 TETO 10K ATINGIDO!';
 
-      const cofMeliBal = state.vault.cofrinhoMeliBalance !== undefined ? state.vault.cofrinhoMeliBalance : 2000;
-      const cofPontuaisBal = state.vault.cofrinhoPontuaisBalance !== undefined ? state.vault.cofrinhoPontuaisBalance : 8000;
-      const totalCofrinhosMP = cofMeliBal + cofPontuaisBal;
-      
+      // Cofrinhos MP com compensação inteligente de barras e teto compartilhado
+      const rawMeli = state.vault.cofrinhoMeliBalance !== undefined ? state.vault.cofrinhoMeliBalance : 2000;
+      const rawPontuais = state.vault.cofrinhoPontuaisBalance !== undefined ? state.vault.cofrinhoPontuaisBalance : 8000;
+      const totalCofrinhosMP = rawMeli + rawPontuais;
+
+      const displayMeli = Math.min(2000, Math.max(rawMeli, totalCofrinhosMP > 2000 ? 2000 : totalCofrinhosMP));
+      const displayPontuais = Math.max(0, Math.min(8000, totalCofrinhosMP - displayMeli));
+
       document.getElementById('labelCofrinhosMpTotal').innerText = `${formatBRL(totalCofrinhosMP)} / R$ 10.000,00`;
 
-      const meliPct = Math.min(100, (cofMeliBal / 2000) * 100).toFixed(1);
-      document.getElementById('labelCofrinhoMeli').innerText = `${formatBRL(cofMeliBal)} / R$ 2.000,00`;
+      const meliPct = Math.min(100, (displayMeli / 2000) * 100).toFixed(1);
+      document.getElementById('labelCofrinhoMeli').innerText = `${formatBRL(rawMeli)} / R$ 2.000`;
       document.getElementById('barCofrinhoMeli').style.width = `${meliPct}%`;
       document.getElementById('percentCofrinhoMeli').innerText = `${meliPct}%`;
 
-      const pontuaisPct = Math.min(100, (cofPontuaisBal / 8000) * 100).toFixed(1);
-      document.getElementById('labelCofrinhoPontuais').innerText = `${formatBRL(cofPontuaisBal)} / R$ 8.000,00`;
+      const pontuaisPct = Math.min(100, (displayPontuais / 8000) * 100).toFixed(1);
+      document.getElementById('labelCofrinhoPontuais').innerText = `${formatBRL(rawPontuais)} / R$ 8.000`;
       document.getElementById('barCofrinhoPontuais').style.width = `${pontuaisPct}%`;
       document.getElementById('percentCofrinhoPontuais').innerText = `${pontuaisPct}%`;
       document.getElementById('statusCofrinhoPontuais').innerText = totalCofrinhosMP > 10000 ? `Excedente de ${formatBRL(totalCofrinhosMP - 10000)} rende a 100% CDI` : 'R$ 8.000 a 120% CDI';
@@ -1662,7 +1651,6 @@
     document.addEventListener('DOMContentLoaded', async () => {
       updateCloudStatusUI();
       await syncFromCloud();
-      // Aplica o auto-incremento diário ao abrir o site
       applyDailyCompoundInterest();
       render();
     });
