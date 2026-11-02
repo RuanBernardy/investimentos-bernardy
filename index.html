@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestão Financeira & Aportes Mensais</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.4);
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-200">
+
+  <!-- Header & Global Actions -->
+  <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-900/30">
+          <i data-lucide="shield-check" class="w-5 h-5 text-slate-950 stroke-[2.5]"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            Plano de Aportes & Transição
+            <span id="activePhaseBadge" class="text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Fase 1</span>
+          </h1>
+          <p class="text-xs text-slate-400">Blindagem patrimonial, amortização e independência</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <!-- Month Selector / Stamp -->
+        <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-300">
+          <i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5 text-slate-400"></i>
+          <input type="month" id="selectedMonth" class="bg-transparent border-0 text-slate-200 focus:outline-none cursor-pointer text-xs" />
+        </div>
+
+        <button onclick="exportDataJSON()" title="Exportar Backup JSON" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i> Exportar
+        </button>
+
+        <button onclick="confirmResetMonth()" title="Limpar marcações do mês" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/50 transition flex items-center gap-1.5">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reiniciar
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- KPI Summary Row -->
+    <section class="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Renda do Mês</div>
+        <div class="text-xl sm:text-2xl font-black text-emerald-400 tracking-tight" id="kpiIncome">R$ 0,00</div>
+        <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+          <i data-lucide="trending-up" class="w-3 h-3 text-emerald-400"></i> Entrada líquida
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Contas Fixas</div>
+        <div class="text-xl sm:text-2xl font-black text-rose-400 tracking-tight" id="kpiExpenses">R$ 0,00</div>
+        <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+          <i data-lucide="receipt" class="w-3 h-3 text-rose-400"></i> Despesas pessoais
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Amortização Casa</div>
+        <div class="text-xl sm:text-2xl font-black text-blue-400 tracking-tight" id="kpiAmortization">R$ 0,00</div>
+        <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+          <i data-lucide="home" class="w-3 h-3 text-blue-400"></i> Redução de prazo
+        </div>
+      </div>
+
+      <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Total Aportes</div>
+        <div class="text-xl sm:text-2xl font-black text-indigo-400 tracking-tight" id="kpiInvestments">R$ 0,00</div>
+        <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+          <i data-lucide="piggy-bank" class="w-3 h-3 text-indigo-400"></i> CDB + Tesouro
+        </div>
+      </div>
+
+      <div class="col-span-2 md:col-span-1 bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-semibold uppercase tracking-wider text-slate-400">Execução do Mês</span>
+          <span id="kpiCheckPercent" class="text-xs font-bold text-emerald-400">0%</span>
+        </div>
+        <div class="mt-2">
+          <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
+            <div id="kpiProgressBar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+          <div class="text-[11px] text-slate-400 mt-1.5 flex justify-between">
+            <span id="kpiChecksCount">0 de 4 concluídos</span>
+            <span id="kpiExecutedAmount" class="font-medium text-slate-300">R$ 0,00</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Grid: Configuration & Expenses -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- Column 1: Income & Preset Phases (4 cols) -->
+      <section class="lg:col-span-5 space-y-5">
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+              <h2 class="text-sm font-semibold text-white">Renda Mensal & Seletor de Fase</h2>
+            </div>
+            <span class="text-[11px] text-slate-400">Transição de Carreira</span>
+          </div>
+
+          <!-- Presets Buttons -->
+          <div class="space-y-1.5">
+            <label class="text-xs font-medium text-slate-400">Selecionar Período Planejado:</label>
+            <div class="grid grid-cols-1 gap-2">
+              <button type="button" onclick="setPhase(1)" id="btnPhase1" class="phase-btn text-left p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 transition flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                    Fase 1: Atual (Bolsa + Projetos)
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-emerald-500/30 text-emerald-300 font-normal">Nov/26 - Mai/27</span>
+                  </div>
+                  <div class="text-[11px] text-slate-400 mt-0.5">Renda estimada: R$ 14.550,00 • Sobra máxima para caixa</div>
+                </div>
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+              </button>
+
+              <button type="button" onclick="setPhase(2)" id="btnPhase2" class="phase-btn text-left p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:bg-slate-800 transition flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                    Fase 2: Pós-Bolsa Capes
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-700 text-slate-300 font-normal">Jun/27 - Out/27</span>
+                  </div>
+                  <div class="text-[11px] text-slate-400 mt-0.5">Renda estimada: R$ 11.350,00 • Encerramento do doutorado</div>
+                </div>
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400 hidden"></i>
+              </button>
+
+              <button type="button" onclick="setPhase(3)" id="btnPhase3" class="phase-btn text-left p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:bg-slate-800 transition flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                    Fase 3: Último Projeto
+                    <span class="text-[10px] px-1.5 py-0.2 rounded bg-slate-700 text-slate-300 font-normal">Nov/27 - Jan/28</span>
+                  </div>
+                  <div class="text-[11px] text-slate-400 mt-0.5">Renda estimada: R$ 5.000,00 • Modo defensivo de caixa</div>
+                </div>
+                <i data-lucide="check" class="w-4 h-4 text-emerald-400 hidden"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Input Manual da Renda -->
+          <div class="pt-2">
+            <label class="text-xs font-medium text-slate-300 block mb-1">Renda Total Confirmada no Mês (R$)</label>
+            <div class="relative">
+              <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 font-semibold text-sm">R$</span>
+              <input type="number" step="10" id="inputIncome" oninput="handleIncomeChange()" class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-2.5 text-base font-bold text-emerald-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition" />
+            </div>
+            <p class="text-[11px] text-slate-500 mt-1">Você pode digitar qualquer valor livremente conforme seu faturamento real.</p>
+          </div>
+        </div>
+
+        <!-- Metas Patrimoniais Progress Bars -->
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <i data-lucide="target" class="w-4 h-4 text-indigo-400"></i>
+              <h2 class="text-sm font-semibold text-white">Metas Estratégicas de Blindagem</h2>
+            </div>
+            <button onclick="editVaultBalances()" class="text-xs text-indigo-400 hover:text-indigo-300 transition underline">Editar Saldos</button>
+          </div>
+
+          <!-- Meta 1: Teto CDB 30k -->
+          <div class="space-y-1.5">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-medium flex items-center gap-1.5">
+                <i data-lucide="landmark" class="w-3.5 h-3.5 text-emerald-400"></i>
+                Meta 1: Teto CDB 102%
+              </span>
+              <span class="text-slate-400 font-mono" id="labelCdbProgress">R$ 11.000 / R$ 30.000</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
+              <div id="barCdbProgress" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full transition-all duration-300" style="width: 36.6%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span id="statusCdbProgress">Faltam R$ 19.000,00</span>
+              <span id="percentCdbProgress" class="font-bold text-emerald-400">36.7%</span>
+            </div>
+          </div>
+
+          <!-- Meta 2: Colchão Geral R$ 100k -->
+          <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-medium flex items-center gap-1.5">
+                <i data-lucide="shield" class="w-3.5 h-3.5 text-blue-400"></i>
+                Meta 2: Colchão Total de Liquidez
+              </span>
+              <span class="text-slate-400 font-mono" id="labelTotalCushion">R$ 31.000 / R$ 100.000</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
+              <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 31%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400">
+              <span id="statusTotalCushion">Soma de todos os CDBs (Reserva Jan/28)</span>
+              <span id="percentTotalCushion" class="font-bold text-blue-400">31.0%</span>
+            </div>
+          </div>
+
+          <!-- Meta 3: Amortização Acumulada Casa -->
+          <div class="space-y-1.5 pt-2 border-t border-slate-800/80">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-300 font-medium flex items-center gap-1.5">
+                <i data-lucide="home" class="w-3.5 h-3.5 text-amber-400"></i>
+                Amortização Extraordinária Acumulada
+              </span>
+              <span class="text-slate-400 font-mono" id="labelAmortTotal">R$ 0,00 amortizados</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Cada R$ 2.000 amortizados no prazo eliminam juros da ponta final do contrato de R$ 890/mês.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Column 2: Personal Expenses & Deduction (7 cols) -->
+      <section class="lg:col-span-7 space-y-5">
+        <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <i data-lucide="receipt" class="w-4 h-4 text-rose-400"></i>
+              <h2 class="text-sm font-semibold text-white">Despesas Pessoais Fixas do Mês</h2>
+            </div>
+            <span class="text-xs text-rose-400 font-bold" id="badgeTotalExpenses">R$ 2.053,00</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="expensesContainer">
+            <!-- Dynamic Expense Inputs injected by JS -->
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+            <div>
+              <div class="text-xs text-slate-400">Sobra Líquida Disponível para Aportes & Casa:</div>
+              <div class="text-lg font-black text-white tracking-tight" id="labelNetSurplus">R$ 12.497,00</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[11px] text-slate-400">Margem de Poupança:</div>
+              <div class="text-sm font-extrabold text-emerald-400" id="labelSavingsRate">85.9%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Help Note / Rule -->
+        <div class="rounded-xl border border-blue-900/40 bg-blue-950/20 p-4 text-xs text-slate-300 flex items-start gap-3">
+          <i data-lucide="info" class="w-5 h-5 text-blue-400 shrink-0 mt-0.5"></i>
+          <div class="space-y-1">
+            <span class="font-semibold text-blue-300">Regra de Ouro da sua Transição:</span>
+            <p class="text-slate-300 leading-relaxed">
+              Enquanto a caixinha de 102% estiver abaixo de R$ 30.000, o aporte nela tem prioridade de velocidade. Quando bater o teto (previsto para jan/2027), a sobra migra para acelerar a casa ou reforçar o Tesouro IPCA+ 2032.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Allocation Checklist Section (Full Width) -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
+        <div>
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i data-lucide="check-square" class="w-5 h-5 text-emerald-400"></i>
+            Checklist Mensal de Execução de Aportes
+          </h2>
+          <p class="text-xs text-slate-400">Marque as caixas no aplicativo do banco/Tesouro à medida que realizar as transferências</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="recalculateAllocationsAuto()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Recalcular Proporções Sugeridas
+          </button>
+        </div>
+      </div>
+
+      <!-- Checklist Items Grid/List -->
+      <div class="space-y-3.5" id="checklistContainer">
+        <!-- Injected by JavaScript -->
+      </div>
+
+      <!-- Footer Reconciliation Bar -->
+      <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 text-slate-400">
+          <span>Total Planejado na Lista:</span>
+          <span class="font-bold font-mono text-sm text-slate-200" id="totalChecklistPlanned">R$ 12.450,00</span>
+        </div>
+        <div id="reconciliationWarning" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
+          <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 100% da sobra líquida alocada com precisão.
+        </div>
+      </div>
+    </section>
+
+    <!-- Historical Log Table -->
+    <section class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2">
+          <i data-lucide="history" class="w-4 h-4 text-slate-400"></i>
+          <h3 class="text-sm font-semibold text-white">Histórico dos Meses Salvos</h3>
+        </div>
+        <span class="text-[11px] text-slate-500">Salvo localmente no seu navegador</span>
+      </div>
+
+      <div class="overflow-x-auto custom-scrollbar">
+        <table class="w-full text-left text-xs">
+          <thead>
+            <tr class="border-b border-slate-800 text-slate-400 font-semibold">
+              <th class="py-2.5 px-3">Mês / Fase</th>
+              <th class="py-2.5 px-3">Renda</th>
+              <th class="py-2.5 px-3">Despesas</th>
+              <th class="py-2.5 px-3">Amortização</th>
+              <th class="py-2.5 px-3">Total Investido</th>
+              <th class="py-2.5 px-3">Status</th>
+              <th class="py-2.5 px-3 text-right">Ação</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody" class="divide-y divide-slate-800/60 text-slate-300">
+            <!-- Injected by JS -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal for Vault & Starting Balances -->
+  <div id="modalVault" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <i data-lucide="sliders" class="w-4 h-4 text-emerald-400"></i>
+          Ajuste de Saldos Acumulados
+        </h3>
+        <button onclick="closeModalVault()" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="text-slate-300 font-medium block mb-1">Saldo Atual do CDB 102% (Teto R$ 30.000)</label>
+          <input type="number" id="inputVaultCdb102" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          <span class="text-[11px] text-slate-500">Valor inicial de referência: R$ 11.000</span>
+        </div>
+
+        <div>
+          <label class="text-slate-300 font-medium block mb-1">Total de outros CDBs (110%, 115%, 120%, 140%)</label>
+          <input type="number" id="inputVaultOtherCdbs" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          <span class="text-[11px] text-slate-500">Valor inicial somado: R$ 20.000</span>
+        </div>
+
+        <div>
+          <label class="text-slate-300 font-medium block mb-1">Amortização Acumulada da Casa (R$)</label>
+          <input type="number" id="inputVaultAmortTotal" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          <span class="text-[11px] text-slate-500">Soma acumulada de adiantamentos no financiamento</span>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+        <button onclick="closeModalVault()" class="px-3 py-1.5 text-xs rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">Cancelar</button>
+        <button onclick="saveModalVault()" class="px-4 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white">Salvar Saldos</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 text-xs transition-opacity duration-300 opacity-0 pointer-events-none">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toastMsg">Operação salva com sucesso!</span>
+  </div>
+
+  <script>
+    // --- Application State Model ---
+    const STORAGE_KEY = 'FINANCE_ALLOCATOR_DATA_V1';
+
+    const defaultState = {
+      selectedMonth: new Date().toISOString().slice(0, 7), // YYYY-MM
+      activePhase: 1, // 1: 14550, 2: 11350, 3: 5000
+      income: 14550,
+      expenses: [
+        { id: 'exp_agua', label: 'Água / Saneamento', amount: 80, icon: 'droplet' },
+        { id: 'exp_net', label: 'Internet Fibra', amount: 99, icon: 'wifi' },
+        { id: 'exp_luz', label: 'Energia Elétrica', amount: 200, icon: 'zap' },
+        { id: 'exp_seg', label: 'Seguro do Carro', amount: 174, icon: 'car' },
+        { id: 'exp_cartao', label: 'Fatura do Cartão (Pessoal)', amount: 1500, icon: 'credit-card' }
+      ],
+      vault: {
+        cdb102Balance: 11000,
+        cdb102Target: 30000,
+        otherCdbsBalance: 20000,
+        cushionTarget: 100000,
+        amortAccumulated: 0
+      },
+      allocations: [
+        {
+          id: 'alloc_amort',
+          name: 'Amortização Extraordinária do Financiamento',
+          category: 'Moradia / Quitação',
+          amount: 2000,
+          checked: false,
+          checkedAt: null,
+          badge: 'Redução de Prazo',
+          badgeColor: 'border-blue-500/30 text-blue-400 bg-blue-500/10',
+          instruction: 'Abra o app do banco do financiamento, vá em Amortizar e escolha a opção "Reduzir Prazo".',
+          icon: 'home'
+        },
+        {
+          id: 'alloc_cdb',
+          name: 'CDB 102% do CDI (Meta R$ 30k)',
+          category: 'Liquidez Diária / Caixa Imediato',
+          amount: 6550,
+          checked: false,
+          checkedAt: null,
+          badge: 'Aceleração até o Teto',
+          badgeColor: 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10',
+          instruction: 'Aplicar na caixinha do CDB 102% no Nubank com liquidez diária imediata.',
+          icon: 'landmark'
+        },
+        {
+          id: 'alloc_ipca32',
+          name: 'Tesouro IPCA+ 2032 (Taxa ~7,89%)',
+          category: 'Médio Prazo Real (~6 anos)',
+          amount: 2500,
+          checked: false,
+          checkedAt: null,
+          badge: 'Resgate Único em 2032',
+          badgeColor: 'border-teal-500/30 text-teal-400 bg-teal-500/10',
+          instruction: 'Aplicar no Tesouro IPCA+ 2032 (vence em 15/08/2032 com valor integral na conta).',
+          icon: 'clock'
+        },
+        {
+          id: 'alloc_renda55',
+          name: 'Tesouro RendA+ 2055',
+          category: 'Previdência Estruturada',
+          amount: 1400,
+          checked: false,
+          checkedAt: null,
+          badge: '240 Parcelas Mensais',
+          badgeColor: 'border-purple-500/30 text-purple-400 bg-purple-500/10',
+          instruction: 'Aplicar no Tesouro RendA+ 2055 para construir o salário de aposentadoria (58 aos 78 anos).',
+          icon: 'award'
+        }
+      ],
+      history: []
+    };
+
+    let state = loadState();
+
+    // --- State Persistence ---
+    function loadState() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (!saved) return defaultState;
+      try {
+        const parsed = JSON.parse(saved);
+        return { ...defaultState, ...parsed };
+      } catch (e) {
+        console.error('Erro ao ler estado do storage, usando default', e);
+        return defaultState;
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+    }
+
+    // --- Currency Format Helpers ---
+    function formatBRL(val) {
+      return (Number(val) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    // --- Calculation Functions ---
+    function getTotalExpenses() {
+      return state.expenses.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+    }
+
+    function getNetSurplus() {
+      return Math.max(0, (Number(state.income) || 0) - getTotalExpenses());
+    }
+
+    function getTotalPlannedAllocations() {
+      return state.allocations.reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+    }
+
+    function getTotalExecutedAllocations() {
+      return state.allocations
+        .filter(a => a.checked)
+        .reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+    }
+
+    // --- Handlers & Core Logic ---
+    function setPhase(phaseNum) {
+      state.activePhase = phaseNum;
+      if (phaseNum === 1) state.income = 14550;
+      else if (phaseNum === 2) state.income = 11350;
+      else if (phaseNum === 3) state.income = 5000;
+      recalculateAllocationsAuto();
+      showToast(`Fase ${phaseNum} selecionada: Renda atualizada para ${formatBRL(state.income)}`);
+    }
+
+    function handleIncomeChange() {
+      const val = parseFloat(document.getElementById('inputIncome').value) || 0;
+      state.income = val;
+      state.activePhase = 0; // custom
+      recalculateAllocationsAuto();
+      saveState();
+    }
+
+    function handleExpenseChange(id, value) {
+      const exp = state.expenses.find(e => e.id === id);
+      if (exp) {
+        exp.amount = parseFloat(value) || 0;
+        recalculateAllocationsAuto();
+        saveState();
+      }
+    }
+
+    function handleAllocationAmountChange(id, value) {
+      const item = state.allocations.find(a => a.id === id);
+      if (item) {
+        item.amount = parseFloat(value) || 0;
+        saveState();
+      }
+    }
+
+    function toggleCheck(id) {
+      const item = state.allocations.find(a => a.id === id);
+      if (item) {
+        item.checked = !item.checked;
+        item.checkedAt = item.checked ? new Date().toLocaleDateString('pt-BR') : null;
+        
+        // Se concluiu aporte de CDB ou amortização, atualiza os saldos acumulados de progresso
+        if (id === 'alloc_cdb') {
+          if (item.checked) state.vault.cdb102Balance += item.amount;
+          else state.vault.cdb102Balance = Math.max(11000, state.vault.cdb102Balance - item.amount);
+        }
+        if (id === 'alloc_amort') {
+          if (item.checked) state.vault.amortAccumulated += item.amount;
+          else state.vault.amortAccumulated = Math.max(0, state.vault.amortAccumulated - item.amount);
+        }
+
+        recordMonthSnapshot();
+        saveState();
+        showToast(item.checked ? `Check marcado: ${item.name}` : `Check desmarcado: ${item.name}`);
+      }
+    }
+
+    // Proporções estratégicas automáticas segundo a nossa análise
+    function recalculateAllocationsAuto() {
+      const surplus = getNetSurplus();
+      const amortItem = state.allocations.find(a => a.id === 'alloc_amort');
+      const cdbItem = state.allocations.find(a => a.id === 'alloc_cdb');
+      const ipca32Item = state.allocations.find(a => a.id === 'alloc_ipca32');
+      const renda55Item = state.allocations.find(a => a.id === 'alloc_renda55');
+
+      if (state.activePhase === 1 || state.income >= 14000) {
+        // Fase 1: R$ 14.550 (Sobra ~R$ 12.497)
+        amortItem.amount = 2000;
+        renda55Item.amount = 1400;
+        ipca32Item.amount = 2500;
+        // CDB recebe toda a sobra para matar o teto de 30k
+        cdbItem.amount = Math.max(0, surplus - (amortItem.amount + renda55Item.amount + ipca32Item.amount));
+      } else if (state.activePhase === 2 || state.income >= 10000) {
+        // Fase 2: R$ 11.350 (Sobra ~R$ 9.300)
+        amortItem.amount = 2000;
+        renda55Item.amount = 1000;
+        ipca32Item.amount = 2500;
+        cdbItem.amount = Math.max(0, surplus - (amortItem.amount + renda55Item.amount + ipca32Item.amount));
+      } else if (state.activePhase === 3 || state.income >= 5000) {
+        // Fase 3: R$ 5.000 (Sobra ~R$ 2.950) -> Modo Defensivo
+        amortItem.amount = Math.min(2000, Math.floor(surplus * 0.65));
+        cdbItem.amount = Math.max(0, surplus - amortItem.amount);
+        ipca32Item.amount = 0; // Pausa Tesouro no aperto
+        renda55Item.amount = 0;
+      } else {
+        // Renda baixa ou personalizada: prioriza custos e liquidez
+        amortItem.amount = Math.min(1000, Math.floor(surplus * 0.5));
+        cdbItem.amount = Math.max(0, surplus - amortItem.amount);
+        ipca32Item.amount = 0;
+        renda55Item.amount = 0;
+      }
+      saveState();
+    }
+
+    function recordMonthSnapshot() {
+      const month = state.selectedMonth;
+      const existingIdx = state.history.findIndex(h => h.month === month);
+      const totalInvested = state.allocations.filter(a => a.id !== 'alloc_amort').reduce((acc, c) => acc + c.amount, 0);
+      const amortVal = state.allocations.find(a => a.id === 'alloc_amort')?.amount || 0;
+      const checkedCount = state.allocations.filter(a => a.checked).length;
+
+      const record = {
+        month,
+        phase: state.activePhase ? `Fase ${state.activePhase}` : 'Personalizada',
+        income: state.income,
+        expenses: getTotalExpenses(),
+        amort: amortVal,
+        invested: totalInvested,
+        checks: `${checkedCount}/${state.allocations.length}`,
+        done: checkedCount === state.allocations.length
+      };
+
+      if (existingIdx >= 0) {
+        state.history[existingIdx] = record;
+      } else {
+        state.history.unshift(record);
+      }
+    }
+
+    function confirmResetMonth() {
+      if (confirm('Deseja desmarcar todos os checks deste mês para começar um novo ciclo? Os valores configurados serão mantidos.')) {
+        state.allocations.forEach(a => {
+          a.checked = false;
+          a.checkedAt = null;
+        });
+        saveState();
+        showToast('Checklist reiniciado para novo ciclo!');
+      }
+    }
+
+    // --- Modal Vault Controls ---
+    function editVaultBalances() {
+      document.getElementById('inputVaultCdb102').value = state.vault.cdb102Balance;
+      document.getElementById('inputVaultOtherCdbs').value = state.vault.otherCdbsBalance;
+      document.getElementById('inputVaultAmortTotal').value = state.vault.amortAccumulated;
+      document.getElementById('modalVault').classList.remove('hidden');
+    }
+
+    function closeModalVault() {
+      document.getElementById('modalVault').classList.add('hidden');
+    }
+
+    function saveModalVault() {
+      state.vault.cdb102Balance = parseFloat(document.getElementById('inputVaultCdb102').value) || 0;
+      state.vault.otherCdbsBalance = parseFloat(document.getElementById('inputVaultOtherCdbs').value) || 0;
+      state.vault.amortAccumulated = parseFloat(document.getElementById('inputVaultAmortTotal').value) || 0;
+      closeModalVault();
+      saveState();
+      showToast('Saldos patrimoniais atualizados!');
+    }
+
+    // --- Export / Backup ---
+    function exportDataJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `Planejamento_Financeiro_${state.selectedMonth}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('Arquivo de backup exportado com sucesso!');
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById('toast');
+      document.getElementById('toastMsg').innerText = msg;
+      el.classList.remove('opacity-0', 'pointer-events-none');
+      setTimeout(() => el.classList.add('opacity-0', 'pointer-events-none'), 3000);
+    }
+
+    // --- UI Render Function ---
+    function render() {
+      // Month selector
+      document.getElementById('selectedMonth').value = state.selectedMonth;
+
+      // Income & Phase indicator
+      document.getElementById('inputIncome').value = state.income;
+      const phaseBadge = document.getElementById('activePhaseBadge');
+      phaseBadge.innerText = state.activePhase ? `Fase ${state.activePhase}` : 'Personalizada';
+
+      // Update Phase Buttons active styling
+      [1, 2, 3].forEach(num => {
+        const btn = document.getElementById(`btnPhase${num}`);
+        const icon = btn.querySelector('svg, i');
+        if (state.activePhase === num) {
+          btn.className = "phase-btn text-left p-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 transition flex items-center justify-between";
+          if (icon) icon.classList.remove('hidden');
+        } else {
+          btn.className = "phase-btn text-left p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:bg-slate-800 transition flex items-center justify-between";
+          if (icon) icon.classList.add('hidden');
+        }
+      });
+
+      // Render Expenses
+      const expContainer = document.getElementById('expensesContainer');
+      expContainer.innerHTML = state.expenses.map(e => `
+        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 overflow-hidden">
+            <div class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 text-slate-400">
+              <i data-lucide="${e.icon}" class="w-3.5 h-3.5"></i>
+            </div>
+            <span class="text-xs font-medium text-slate-300 truncate">${e.label}</span>
+          </div>
+          <div class="flex items-center gap-1 shrink-0">
+            <span class="text-xs text-slate-400">R$</span>
+            <input type="number" step="5" value="${e.amount}" 
+              onchange="handleExpenseChange('${e.id}', this.value)"
+              class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-semibold text-white text-right focus:outline-none focus:border-emerald-500" />
+          </div>
+        </div>
+      `).join('');
+
+      const totalExp = getTotalExpenses();
+      const netSurplus = getNetSurplus();
+      const savingsRate = state.income > 0 ? ((netSurplus / state.income) * 100).toFixed(1) : 0;
+
+      document.getElementById('badgeTotalExpenses').innerText = formatBRL(totalExp);
+      document.getElementById('labelNetSurplus').innerText = formatBRL(netSurplus);
+      document.getElementById('labelSavingsRate').innerText = `${savingsRate}%`;
+
+      // KPIs
+      document.getElementById('kpiIncome').innerText = formatBRL(state.income);
+      document.getElementById('kpiExpenses').innerText = formatBRL(totalExp);
+      const amortItem = state.allocations.find(a => a.id === 'alloc_amort');
+      document.getElementById('kpiAmortization').innerText = formatBRL(amortItem?.amount || 0);
+      const investTotal = state.allocations.filter(a => a.id !== 'alloc_amort').reduce((acc, c) => acc + c.amount, 0);
+      document.getElementById('kpiInvestments').innerText = formatBRL(investTotal);
+
+      // Check Progress KPI
+      const checksDone = state.allocations.filter(a => a.checked).length;
+      const checksPercent = Math.round((checksDone / state.allocations.length) * 100);
+      document.getElementById('kpiCheckPercent').innerText = `${checksPercent}%`;
+      document.getElementById('kpiProgressBar').style.width = `${checksPercent}%`;
+      document.getElementById('kpiChecksCount').innerText = `${checksDone} de ${state.allocations.length} concluídos`;
+      document.getElementById('kpiExecutedAmount').innerText = formatBRL(getTotalExecutedAllocations());
+
+      // Progress Bars
+      // CDB Progress (Meta 30k)
+      const cdbBal = state.vault.cdb102Balance;
+      const cdbTarget = state.vault.cdb102Target;
+      const cdbPct = Math.min(100, (cdbBal / cdbTarget) * 100).toFixed(1);
+      document.getElementById('labelCdbProgress').innerText = `${formatBRL(cdbBal)} / ${formatBRL(cdbTarget)}`;
+      document.getElementById('barCdbProgress').style.width = `${cdbPct}%`;
+      document.getElementById('percentCdbProgress').innerText = `${cdbPct}%`;
+      const cdbDiff = cdbTarget - cdbBal;
+      document.getElementById('statusCdbProgress').innerText = cdbDiff > 0 ? `Faltam ${formatBRL(cdbDiff)} para o teto` : '🎉 TETO ATINGIDO! Pare de aportar aqui.';
+
+      // Cushion Progress (Meta 100k)
+      const totalCushion = cdbBal + state.vault.otherCdbsBalance;
+      const cushionTarget = state.vault.cushionTarget;
+      const cushionPct = Math.min(100, (totalCushion / cushionTarget) * 100).toFixed(1);
+      document.getElementById('labelTotalCushion').innerText = `${formatBRL(totalCushion)} / ${formatBRL(cushionTarget)}`;
+      document.getElementById('barTotalCushion').style.width = `${cushionPct}%`;
+      document.getElementById('percentTotalCushion').innerText = `${cushionPct}%`;
+
+      // Amortization Total
+      document.getElementById('labelAmortTotal').innerText = `${formatBRL(state.vault.amortAccumulated)} amortizados`;
+
+      // Render Checklist
+      const checklistContainer = document.getElementById('checklistContainer');
+      checklistContainer.innerHTML = state.allocations.map(item => {
+        const itemPercent = netSurplus > 0 ? ((item.amount / netSurplus) * 100).toFixed(1) : 0;
+        return `
+          <div class="rounded-2xl border ${item.checked ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'} p-4 sm:p-4.5 transition-all duration-200">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-start gap-3">
+                <button type="button" onclick="toggleCheck('${item.id}')" class="mt-0.5 w-6 h-6 rounded-lg border flex items-center justify-center transition shrink-0 ${item.checked ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900 hover:border-slate-500 text-transparent'}">
+                  <i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>
+                </button>
+                <div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-sm font-bold ${item.checked ? 'line-through text-slate-400' : 'text-white'}">${item.name}</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full border font-medium ${item.badgeColor}">${item.badge}</span>
+                    ${item.checked && item.checkedAt ? `<span class="text-[10px] text-emerald-400 font-mono">Concluído em ${item.checkedAt}</span>` : ''}
+                  </div>
+                  <div class="text-xs text-slate-400 mt-1 flex items-center gap-2">
+                    <span>${item.category}</span>
+                    <span>•</span>
+                    <span class="text-emerald-400 font-semibold">${itemPercent}% da sobra líquida</span>
+                  </div>
+                  <p class="text-[11px] text-slate-400 mt-1 italic">${item.instruction}</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 self-end sm:self-center shrink-0">
+                <span class="text-xs text-slate-400 font-semibold">R$</span>
+                <input type="number" step="50" value="${item.amount}"
+                  onchange="handleAllocationAmountChange('${item.id}', this.value)"
+                  class="w-28 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm font-mono font-bold text-white text-right focus:outline-none focus:border-emerald-500" />
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Reconciliation footer
+      const plannedTotal = getTotalPlannedAllocations();
+      document.getElementById('totalChecklistPlanned').innerText = formatBRL(plannedTotal);
+      const diff = Math.abs(plannedTotal - netSurplus);
+      const reconBox = document.getElementById('reconciliationWarning');
+      if (diff <= 5) {
+        reconBox.className = "text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5";
+        reconBox.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 100% da sobra alocada com precisão.';
+      } else if (plannedTotal < netSurplus) {
+        reconBox.className = "text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5";
+        reconBox.innerHTML = `<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Há ${formatBRL(netSurplus - plannedTotal)} sobrando sem alocação.`;
+      } else {
+        reconBox.className = "text-xs px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center gap-1.5";
+        reconBox.innerHTML = `<i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Alocações superam a sobra em ${formatBRL(plannedTotal - netSurplus)}.`;
+      }
+
+      // History Table
+      const histTable = document.getElementById('historyTableBody');
+      if (state.history.length === 0) {
+        histTable.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-500">Nenhum histórico gravado ainda. Os dados são salvos ao marcar os checks.</td></tr>`;
+      } else {
+        histTable.innerHTML = state.history.map((h, i) => `
+          <tr class="hover:bg-slate-800/30 transition">
+            <td class="py-2.5 px-3 font-medium text-white">${h.month} <span class="text-[10px] text-slate-400">(${h.phase})</span></td>
+            <td class="py-2.5 px-3 font-mono text-emerald-400">${formatBRL(h.income)}</td>
+            <td class="py-2.5 px-3 font-mono text-rose-400">${formatBRL(h.expenses)}</td>
+            <td class="py-2.5 px-3 font-mono text-blue-400">${formatBRL(h.amort)}</td>
+            <td class="py-2.5 px-3 font-mono text-indigo-400">${formatBRL(h.invested)}</td>
+            <td class="py-2.5 px-3">
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${h.done ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}">
+                ${h.checks} concluídos
+              </span>
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <button onclick="deleteHistoryItem(${i})" class="text-slate-500 hover:text-rose-400 transition" title="Remover"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      lucide.createIcons();
+    }
+
+    function deleteHistoryItem(index) {
+      if (confirm('Deseja excluir este registro de histórico?')) {
+        state.history.splice(index, 1);
+        saveState();
+      }
+    }
+
+    // Init on load
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('selectedMonth').addEventListener('change', (e) => {
+        state.selectedMonth = e.target.value;
+        saveState();
+      });
+      render();
+    });
+  </script>
+</body>
+</html>
