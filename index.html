@@ -5,14 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Investimentos Bernardy</title>
   
-  <!-- Ícones para Navegador e Atalho no Celular (Home Screen) -->
-  <link rel="icon" type="image/png" href="brasao.png" />
-  <link rel="apple-touch-icon" href="brasao.png" />
+  <!-- Favicon e Ícones para Navegador e Atalho Mobile (Home Screen) -->
+  <link rel="icon" type="image/png" href="./brasao.png" />
+  <link rel="shortcut icon" href="./brasao.png" />
+  <link rel="apple-touch-icon" href="./brasao.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./brasao.png" />
+
+  <!-- Configurações Web App / PWA para remover o emblema do navegador e abrir em tela cheia -->
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Investimentos Bernardy" />
-  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#020617" />
+  
+  <!-- Manifesto embutido direto no HTML -->
+  <link rel="manifest" href='data:application/manifest+json,{"name":"Investimentos Bernardy","short_name":"Investimentos","start_url":"./","display":"standalone","background_color":"%23020617","theme_color":"%23020617","icons":[{"src":"./brasao.png","sizes":"192x192 512x512","type":"image/png"}]}' />
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -65,7 +72,7 @@
       <div class="flex items-center gap-3">
         <!-- Brasão Bernardy no Cabeçalho -->
         <div class="h-11 w-11 rounded-xl bg-slate-950 border border-slate-800 p-1 flex items-center justify-center overflow-hidden shadow-lg shadow-emerald-950/20 shrink-0">
-          <img src="brasao.png" alt="Brasão Bernardy" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" />
+          <img src="./brasao.png" alt="Brasão Bernardy" class="w-full h-full object-contain" onerror="this.style.display='none'; this.nextElementSibling.classList.remove('hidden');" />
           <i data-lucide="shield-check" class="w-5 h-5 text-emerald-400 stroke-[2.5] hidden"></i>
         </div>
         <div>
