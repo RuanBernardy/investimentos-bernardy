@@ -116,10 +116,10 @@
       </div>
 
       <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-sm relative overflow-hidden">
-        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Total em Tesouro</div>
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Tesouro Direto (Real)</div>
         <div class="text-xl sm:text-2xl font-black text-cyan-400 tracking-tight" id="kpiTotalTesouro">R$ 18.029,00</div>
         <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-          <i data-lucide="landmark" class="w-3 h-3 text-cyan-400"></i> 3 Títulos IPCA+/RendA+
+          <i data-lucide="landmark" class="w-3 h-3 text-cyan-400"></i> Extrato Oficial NuInvest
         </div>
       </div>
 
@@ -346,24 +346,25 @@
               <div class="text-xs font-bold text-white flex items-center gap-1.5">
                 Tesouro IPCA+ c/ Juros Semestrais 2045
               </div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Cupom semestral na conta • Vencimento 2045</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Última taxa contratada: IPCA + 6,77%</div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs font-mono font-bold text-cyan-300" id="valTesouro2045">R$ 6.000,00</span>
+              <span class="text-xs font-mono font-bold text-cyan-300" id="valTesouro2045">R$ 4.364,88</span>
               <button onclick="updateTesouroBalance('t2045', 'Tesouro IPCA+ Juros Semestrais 2045')" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Atualizar</button>
             </div>
           </div>
 
-          <!-- Título 2: IPCA+ Juros Semestrais 2055 -->
-          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3">
+          <!-- Título 2: IPCA+ Juros Semestrais 2055 (Bloqueado para novos aportes) -->
+          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3 opacity-90">
             <div>
               <div class="text-xs font-bold text-white flex items-center gap-1.5">
                 Tesouro IPCA+ c/ Juros Semestrais 2055
+                <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-amber-400 border border-amber-500/20">Bloqueado</span>
               </div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Ultra-longo prazo • Fluxo de renda semestral</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Sem novos aportes • Rendendo e pagando cupom</div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs font-mono font-bold text-cyan-300" id="valTesouro2055">R$ 6.000,00</span>
+              <span class="text-xs font-mono font-bold text-cyan-300" id="valTesouro2055">R$ 6.866,38</span>
               <button onclick="updateTesouroBalance('t2055', 'Tesouro IPCA+ Juros Semestrais 2055')" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Atualizar</button>
             </div>
           </div>
@@ -374,17 +375,17 @@
               <div class="text-xs font-bold text-white flex items-center gap-1.5">
                 Tesouro RendA+ 2055 (Aposentadoria)
               </div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Salário mensal de 2055 a 2075 (240 parcelas)</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Última taxa contratada: IPCA + 6,70%</div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs font-mono font-bold text-purple-300" id="valTesouroRenda">R$ 6.029,00</span>
+              <span class="text-xs font-mono font-bold text-purple-300" id="valTesouroRenda">R$ 6.797,74</span>
               <button onclick="updateTesouroBalance('tRenda', 'Tesouro RendA+ 2055')" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Atualizar</button>
             </div>
           </div>
 
           <div class="p-2.5 rounded-xl bg-cyan-950/20 border border-cyan-900/30 flex items-start gap-2 text-xs text-slate-300">
             <i data-lucide="info" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i>
-            <span>Para atualizar após a oscilação do mercado (marcação a mercado), clique em <b>"Atualizar"</b> e digite o saldo líquido que aparece no seu extrato do Tesouro Direto.</span>
+            <span>Para atualizar o saldo após as oscilações de marcação a mercado da B3, basta clicar em <b>"Atualizar"</b> e inserir o valor atual do app.</span>
           </div>
         </div>
 
@@ -431,25 +432,15 @@
           </div>
         </div>
 
-        <div class="rounded-xl border border-blue-900/40 bg-blue-950/20 p-4 text-xs text-slate-300 flex items-start gap-3">
-          <i data-lucide="info" class="w-5 h-5 text-blue-400 shrink-0 mt-0.5"></i>
-          <div class="space-y-1">
-            <span class="font-semibold text-blue-300">Como funciona seu patrimônio consolidado:</span>
-            <p class="text-slate-300 leading-relaxed">
-              Você tem <b>R$ 22.836,42 de liquidez imediata</b> no colchão (99Pay, Cofrinho, Mercado Pago) e <b>R$ 18.029,00 nos 3 títulos do Tesouro Direto</b>, totalizando mais de R$ 40 mil rastreados com rentabilidade diária calculada.
-            </p>
-          </div>
-        </div>
-
-        <!-- Allocation Checklist Section COM EDIÇÃO E EXCLUSÃO LIVRE -->
+        <!-- Allocation Checklist Section COM BARRAS DE PROGRESSO PARCIAIS -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
             <div>
               <h2 class="text-base font-bold text-white flex items-center gap-2">
                 <i data-lucide="check-square" class="w-5 h-5 text-emerald-400"></i>
-                Checklist Mensal de Aportes
+                Checklist Mensal com Progresso de Aportes
               </h2>
-              <p class="text-xs text-slate-400">Edite, exclua ou adicione novas metas e aportes conforme sua necessidade do mês</p>
+              <p class="text-xs text-slate-400">Acompanhe aportes parciais (ex: 99Pay) até atingir a meta. Marque o check mesmo que parcial.</p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
               <button onclick="addNewAllocationPrompt()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm">
@@ -465,8 +456,11 @@
 
           <div class="pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
             <div class="flex items-center gap-2 text-slate-400">
-              <span>Total Planejado na Lista:</span>
-              <span class="font-bold font-mono text-sm text-slate-200" id="totalChecklistPlanned">R$ 0,00</span>
+              <span>Total Realizado no Mês:</span>
+              <span class="font-bold font-mono text-sm text-emerald-400" id="totalChecklistExecuted">R$ 0,00</span>
+              <span class="text-slate-600">•</span>
+              <span>Meta Planejada:</span>
+              <span class="font-bold font-mono text-sm text-slate-300" id="totalChecklistPlanned">R$ 0,00</span>
             </div>
             <div id="reconciliationWarning" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
               <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 100% da sobra líquida alocada com precisão.
@@ -523,7 +517,7 @@
         <div>
           <label class="text-slate-300 font-medium block mb-1">Giro Conta Mercado Pago (Piso R$ 1.000)</label>
           <input type="number" id="inputVaultMpGiro" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Saldo atual para Débito/Pix: R$ 12,00</span>
+          <span class="text-[11px] text-slate-500">Saldo atual: R$ 12,00</span>
         </div>
 
         <div>
@@ -535,7 +529,7 @@
         <div>
           <label class="text-slate-300 font-medium block mb-1">Saldo Cofrinho Turbo (115% CDI até R$ 5k)</label>
           <input type="number" id="inputVaultCofrinhoTurbo" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Saldo atual no Cofrinho: R$ 5.088,24</span>
+          <span class="text-[11px] text-slate-500">Saldo atual: R$ 5.088,24</span>
         </div>
 
         <div>
@@ -591,15 +585,15 @@
         mpGiroTarget: 1000,
         pay99Balance: 6513.41,
         pay99Target: 10000,
-        cofrinhoTurboBalance: 5088.24, // Seu valor real do cofrinho
+        cofrinhoTurboBalance: 5088.24,
         cdb102Balance: 11222.77,
         cdb102Target: 30000,
         cushionTarget: 100000,
         amortAccumulated: 0,
-        // Títulos do Tesouro Direto Reais
-        tesouro2045: 6000.00,
-        tesouro2055: 6000.00,
-        tesouroRenda: 6029.00
+        // Saldos Reais Extraídos dos Demonstrativos
+        tesouro2045: 4364.88,
+        tesouro2055: 6866.38,
+        tesouroRenda: 6797.74
       },
       allocations: [
         {
@@ -607,6 +601,7 @@
           name: 'Amortização Extraordinária do Financiamento',
           category: 'Moradia / Quitação',
           amount: 2000,
+          currentAmount: 0,
           checked: false,
           checkedAt: null,
           badge: 'Redução de Prazo',
@@ -620,6 +615,7 @@
           name: 'Recompor Caixa de Giro Mercado Pago (Piso R$ 1.000)',
           category: 'Caixa Operacional / Débito & Pix',
           amount: 988,
+          currentAmount: 0,
           checked: false,
           checkedAt: null,
           badge: 'Giro R$ 1.000 (105% CDI)',
@@ -633,6 +629,7 @@
           name: 'Liquidez Diária / Reserva (99Pay, Cofrinho ou MP)',
           category: 'Caixa Imediato / Colchão 100k',
           amount: 5562,
+          currentAmount: 1500, // Ex: você já colocou R$ 1.500 no 99Pay!
           checked: false,
           checkedAt: null,
           badge: '120% 99 / 115% Cof / 102% MP',
@@ -646,13 +643,14 @@
           name: 'Aporte Mensal Tesouro IPCA+ / RendA+',
           category: 'Médio / Longo Prazo Real',
           amount: 3900,
+          currentAmount: 0,
           checked: false,
           checkedAt: null,
           badge: 'Aposentadoria / Juros',
           badgeColor: 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10',
-          instruction: 'Aplicar nos seus títulos IPCA+ 2045/2055 ou no RendA+ 2055.',
+          instruction: 'Aplicar no IPCA+ 2045 ou RendA+ 2055 (registre a taxa contratada do dia).',
           icon: 'clock',
-          customRate: 'IPCA+'
+          customRate: '6.70'
         }
       ],
       history: []
@@ -665,13 +663,10 @@
           const parsed = JSON.parse(savedPermanent);
           const mergedVault = { ...defaultState.vault, ...(parsed.vault || {}) };
           
-          // Ajusta os valores reais se estiverem no padrão antigo
-          if (!mergedVault.cofrinhoTurboBalance || mergedVault.cofrinhoTurboBalance === 20000) {
-            mergedVault.cofrinhoTurboBalance = 5088.24;
-          }
-          if (!mergedVault.tesouro2045) mergedVault.tesouro2045 = 6000.00;
-          if (!mergedVault.tesouro2055) mergedVault.tesouro2055 = 6000.00;
-          if (!mergedVault.tesouroRenda) mergedVault.tesouroRenda = 6029.00;
+          mergedVault.tesouro2045 = 4364.88;
+          mergedVault.tesouro2055 = 6866.38;
+          mergedVault.tesouroRenda = 6797.74;
+          mergedVault.cofrinhoTurboBalance = 5088.24;
 
           return { 
             ...defaultState, 
@@ -709,19 +704,21 @@
     }
 
     function getTotalExecutedAllocations() {
-      return (state.allocations || []).filter(a => a.checked).reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
+      return (state.allocations || []).reduce((acc, curr) => {
+        const val = curr.currentAmount !== undefined && curr.currentAmount !== null ? Number(curr.currentAmount) : (curr.checked ? Number(curr.amount) : 0);
+        return acc + val;
+      }, 0);
     }
 
     function getTotalTesouro() {
       return (state.vault.tesouro2045 || 0) + (state.vault.tesouro2055 || 0) + (state.vault.tesouroRenda || 0);
     }
 
-    // Atualização de Saldo dos Títulos do Tesouro Direto
     function updateTesouroBalance(key, titleName) {
       let currentVal = 0;
-      if (key === 't2045') currentVal = state.vault.tesouro2045 || 6000;
-      if (key === 't2055') currentVal = state.vault.tesouro2055 || 6000;
-      if (key === 'tRenda') currentVal = state.vault.tesouroRenda || 6029;
+      if (key === 't2045') currentVal = state.vault.tesouro2045 || 4364.88;
+      if (key === 't2055') currentVal = state.vault.tesouro2055 || 6866.38;
+      if (key === 'tRenda') currentVal = state.vault.tesouroRenda || 6797.74;
 
       const entrada = prompt(`Digite o saldo líquido atualizado do ${titleName} (conforme o app/portal do Tesouro):`, currentVal);
       if (entrada === null) return;
@@ -735,7 +732,7 @@
       showToast(`Saldo do ${titleName} atualizado para ${formatBRL(valor)}!`);
     }
 
-    // Gestão Dinâmica do Checklist
+    // Gestão Dinâmica do Checklist com Progresso Parcial
     function addNewAllocationPrompt() {
       const nome = prompt("Nome da nova meta/aporte (Ex: Fundo Imobiliário, Cripto, Reserva Extra):");
       if (!nome || !nome.trim()) return;
@@ -752,6 +749,7 @@
         name: nome.trim(),
         category: categoria.trim(),
         amount: valor,
+        currentAmount: 0,
         checked: false,
         checkedAt: null,
         badge: 'Personalizado',
@@ -791,6 +789,34 @@
         state.allocations = state.allocations.filter(a => a.id !== id);
         saveState();
         showToast(`Meta "${item.name}" excluída!`);
+      }
+    }
+
+    function handleAllocationCurrentAmountChange(id, value) {
+      const item = state.allocations.find(a => a.id === id);
+      if (item) {
+        item.currentAmount = parseFloat(value) || 0;
+        if (item.currentAmount >= item.amount && !item.checked) {
+          item.checked = true;
+          item.checkedAt = new Date().toLocaleDateString('pt-BR');
+        }
+        saveState();
+      }
+    }
+
+    function handleAllocationAmountChange(id, value) {
+      const item = state.allocations.find(a => a.id === id);
+      if (item) {
+        item.amount = parseFloat(value) || 0;
+        saveState();
+      }
+    }
+
+    function handleCustomRateChange(id, value) {
+      const item = state.allocations.find(a => a.id === id);
+      if (item) {
+        item.customRate = value;
+        saveState();
       }
     }
 
@@ -970,22 +996,6 @@
       saveState();
     }
 
-    function handleAllocationAmountChange(id, value) {
-      const item = state.allocations.find(a => a.id === id);
-      if (item) {
-        item.amount = parseFloat(value) || 0;
-        saveState();
-      }
-    }
-
-    function handleCustomRateChange(id, value) {
-      const item = state.allocations.find(a => a.id === id);
-      if (item) {
-        item.customRate = value;
-        saveState();
-      }
-    }
-
     function handleMonthChange(value) {
       state.selectedMonth = value;
       saveState();
@@ -997,17 +1007,22 @@
         item.checked = !item.checked;
         item.checkedAt = item.checked ? new Date().toLocaleDateString('pt-BR') : null;
         
+        // Se marcou o check e não tinha preenchido o valor realizado, assume o planejado
+        if (item.checked && (!item.currentAmount || item.currentAmount === 0)) {
+          item.currentAmount = item.amount;
+        }
+
         if (id === 'alloc_giro') {
-          if (item.checked) state.vault.mpGiroBalance += item.amount;
-          else state.vault.mpGiroBalance = Math.max(12, state.vault.mpGiroBalance - item.amount);
+          if (item.checked) state.vault.mpGiroBalance += (item.currentAmount || item.amount);
+          else state.vault.mpGiroBalance = Math.max(12, state.vault.mpGiroBalance - (item.currentAmount || item.amount));
         }
         if (id === 'alloc_cdb') {
-          if (item.checked) state.vault.cdb102Balance += item.amount;
-          else state.vault.cdb102Balance = Math.max(11000, state.vault.cdb102Balance - item.amount);
+          if (item.checked) state.vault.cdb102Balance += (item.currentAmount || item.amount);
+          else state.vault.cdb102Balance = Math.max(11000, state.vault.cdb102Balance - (item.currentAmount || item.amount));
         }
         if (id === 'alloc_amort') {
-          if (item.checked) state.vault.amortAccumulated += item.amount;
-          else state.vault.amortAccumulated = Math.max(0, state.vault.amortAccumulated - item.amount);
+          if (item.checked) state.vault.amortAccumulated += (item.currentAmount || item.amount);
+          else state.vault.amortAccumulated = Math.max(0, state.vault.amortAccumulated - (item.currentAmount || item.amount));
         }
 
         recordMonthSnapshot();
@@ -1057,8 +1072,8 @@
     function recordMonthSnapshot() {
       const month = state.selectedMonth;
       const existingIdx = state.history.findIndex(h => h.month === month);
-      const totalInvested = state.allocations.filter(a => a.id !== 'alloc_amort').reduce((acc, c) => acc + c.amount, 0);
-      const amortVal = state.allocations.find(a => a.id === 'alloc_amort')?.amount || 0;
+      const totalInvested = state.allocations.filter(a => a.id !== 'alloc_amort').reduce((acc, c) => acc + (c.currentAmount || c.amount), 0);
+      const amortVal = state.allocations.find(a => a.id === 'alloc_amort')?.currentAmount || 0;
       const checkedCount = state.allocations.filter(a => a.checked).length;
       const smartYield = calculateSmartYield();
 
@@ -1087,6 +1102,7 @@
         state.allocations.forEach(a => {
           a.checked = false;
           a.checkedAt = null;
+          a.currentAmount = 0;
         });
         state.manualYieldRecorded = null;
         saveState();
@@ -1190,16 +1206,14 @@
 
       document.getElementById('kpiIncome').innerText = formatBRL(state.income);
       document.getElementById('kpiExpenses').innerText = formatBRL(totalExp);
-      const amortItem = state.allocations.find(a => a.id === 'alloc_amort');
-      document.getElementById('kpiAmortization').innerText = formatBRL(amortItem?.amount || 0);
 
-      // Atualiza KPI e Card de Títulos do Tesouro
+      // Atualiza KPI e Card de Títulos do Tesouro Direto com Dados dos Arquivos
       const totalTesouro = getTotalTesouro();
       document.getElementById('kpiTotalTesouro').innerText = formatBRL(totalTesouro);
       document.getElementById('badgeTesouroTotalCard').innerText = formatBRL(totalTesouro);
-      document.getElementById('valTesouro2045').innerText = formatBRL(state.vault.tesouro2045 || 6000);
-      document.getElementById('valTesouro2055').innerText = formatBRL(state.vault.tesouro2055 || 6000);
-      document.getElementById('valTesouroRenda').innerText = formatBRL(state.vault.tesouroRenda || 6029);
+      document.getElementById('valTesouro2045').innerText = formatBRL(state.vault.tesouro2045 || 4364.88);
+      document.getElementById('valTesouro2055').innerText = formatBRL(state.vault.tesouro2055 || 6866.38);
+      document.getElementById('valTesouroRenda').innerText = formatBRL(state.vault.tesouroRenda || 6797.74);
 
       const smartYield = calculateSmartYield();
       document.getElementById('kpiPassiveYield').innerText = `${formatBRL(smartYield.mensalTotal)}/mês`;
@@ -1217,7 +1231,10 @@
       document.getElementById('kpiCheckPercent').innerText = `${checksPercent}%`;
       document.getElementById('kpiProgressBar').style.width = `${checksPercent}%`;
       document.getElementById('kpiChecksCount').innerText = `${checksDone} de ${state.allocations.length} concluídos`;
-      document.getElementById('kpiExecutedAmount').innerText = formatBRL(getTotalExecutedAllocations());
+      
+      const totalExec = getTotalExecutedAllocations();
+      document.getElementById('kpiExecutedAmount').innerText = formatBRL(totalExec);
+      document.getElementById('totalChecklistExecuted').innerText = formatBRL(totalExec);
 
       // Barra Giro Operacional MP (Piso R$ 1.000)
       const mpGiroBal = state.vault.mpGiroBalance || 12;
@@ -1263,58 +1280,83 @@
 
       document.getElementById('labelAmortTotal').innerText = `${formatBRL(state.vault.amortAccumulated)} amortizados`;
 
-      // Render Checklist com Edição e Exclusão
+      // Render Checklist com Barras de Progresso Parciais e Edição
       const checklistContainer = document.getElementById('checklistContainer');
       checklistContainer.innerHTML = state.allocations.map(item => {
-        const itemPercent = netSurplus > 0 ? ((item.amount / netSurplus) * 100).toFixed(1) : 0;
+        const itemTarget = Number(item.amount) || 0;
+        const itemCurrent = Number(item.currentAmount) || 0;
+        const progressPct = itemTarget > 0 ? Math.min(100, Math.round((itemCurrent / itemTarget) * 100)) : 0;
         const isTreasury = item.id.includes('ipca') || item.id.includes('renda');
 
         return `
           <div class="rounded-2xl border ${item.checked ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'} p-4 sm:p-4.5 transition-all duration-200 group">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div class="flex items-start gap-3">
-                <button type="button" onclick="toggleCheck('${item.id}')" class="mt-0.5 w-6 h-6 rounded-lg border flex items-center justify-center transition shrink-0 ${item.checked ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900 hover:border-slate-500 text-transparent'}">
+            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+              <div class="flex items-start gap-3 flex-grow">
+                <button type="button" onclick="toggleCheck('${item.id}')" class="mt-1 w-6 h-6 rounded-lg border flex items-center justify-center transition shrink-0 ${item.checked ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900 hover:border-slate-500 text-transparent'}">
                   <i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>
                 </button>
-                <div>
+                <div class="flex-grow">
                   <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-sm font-bold ${item.checked ? 'line-through text-slate-400' : 'text-white'}">${item.name}</span>
+                    <span class="text-sm font-bold ${item.checked ? 'text-emerald-400' : 'text-white'}">${item.name}</span>
                     <span class="text-[10px] px-2 py-0.5 rounded-full border font-medium ${item.badgeColor || 'border-slate-700 text-slate-300 bg-slate-800'}">${item.badge || 'Meta'}</span>
-                    ${item.checked && item.checkedAt ? `<span class="text-[10px] text-emerald-400 font-mono">Aportado em ${item.checkedAt}</span>` : ''}
+                    ${item.checked && item.checkedAt ? `<span class="text-[10px] text-emerald-400 font-mono">Concluído em ${item.checkedAt}</span>` : ''}
                     
                     <button onclick="editAllocation('${item.id}')" title="Editar nome/instruções" class="w-5 h-5 rounded hover:bg-slate-800 text-slate-500 hover:text-amber-400 inline-flex items-center justify-center transition ml-1">
                       <i data-lucide="edit-2" class="w-3 h-3"></i>
                     </button>
                     <button onclick="deleteAllocation('${item.id}')" title="Excluir meta" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 inline-flex items-center justify-center transition">
-                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                      <i data-lucide="trash-2" class="w-3 h-3"></i>
                     </button>
                   </div>
                   <div class="text-xs text-slate-400 mt-1 flex items-center gap-2">
                     <span>${item.category}</span>
-                    <span>•</span>
-                    <span class="text-emerald-400 font-semibold">${itemPercent}% da sobra líquida</span>
                   </div>
                   <p class="text-[11px] text-slate-400 mt-1 italic">${item.instruction}</p>
+
+                  <!-- Barra de Progresso Parcial do Item -->
+                  <div class="mt-2.5 max-w-md">
+                    <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                      <span>Progresso: <b>${formatBRL(itemCurrent)}</b> de ${formatBRL(itemTarget)}</span>
+                      <span class="font-bold text-emerald-400">${progressPct}%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                      <div class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 self-end sm:self-center shrink-0">
+              <!-- Inputs de Valores: Realizado e Meta Planejada -->
+              <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 self-end sm:self-start shrink-0 pt-1">
                 ${isTreasury ? `
-                  <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5" title="Taxa real contratada no dia da compra">
-                    <span class="text-[11px] text-slate-400">IPCA +</span>
+                  <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1" title="Taxa real contratada na data da aplicação">
+                    <span class="text-[10px] text-slate-400">Taxa:</span>
                     <input type="text" value="${item.customRate || ''}" 
-                      placeholder="Ex: 7.89"
+                      placeholder="Ex: 6.70"
                       oninput="handleCustomRateChange('${item.id}', this.value)"
-                      class="w-14 bg-transparent border-0 text-xs font-mono font-bold text-teal-300 text-center focus:outline-none" />
-                    <span class="text-[11px] text-slate-400">%</span>
+                      class="w-12 bg-transparent border-0 text-xs font-mono font-bold text-teal-300 text-center focus:outline-none" />
+                    <span class="text-[10px] text-slate-400">%</span>
                   </div>
                 ` : ''}
 
-                <div class="flex items-center gap-1">
-                  <span class="text-xs text-slate-400 font-semibold">R$</span>
+                <div class="flex flex-col items-end">
+                  <div class="flex items-center gap-1 text-[10px] text-slate-400 mb-0.5">
+                    <span>Já Aportado (R$)</span>
+                  </div>
+                  <input type="number" step="50" value="${item.currentAmount || 0}"
+                    oninput="handleAllocationCurrentAmountChange('${item.id}', this.value)"
+                    placeholder="Realizado"
+                    class="w-24 bg-slate-900 border border-emerald-500/40 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-400 text-right focus:outline-none focus:border-emerald-500" />
+                </div>
+
+                <div class="flex flex-col items-end">
+                  <div class="flex items-center gap-1 text-[10px] text-slate-400 mb-0.5">
+                    <span>Meta Mês (R$)</span>
+                  </div>
                   <input type="number" step="50" value="${item.amount}"
                     oninput="handleAllocationAmountChange('${item.id}', this.value)"
-                    class="w-28 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm font-mono font-bold text-white text-right focus:outline-none focus:border-emerald-500" />
+                    placeholder="Meta"
+                    class="w-24 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-white text-right focus:outline-none focus:border-emerald-500" />
                 </div>
               </div>
             </div>
