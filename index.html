@@ -431,11 +431,9 @@
 
   <script>
     // --- Application State Model ---
-    const STORAGE_KEY = 'FINANCE_ALLOCATOR_DATA_V1';
-    const CURRENT_VERSION = 2; // Incremented to migrate labels to Mercado Pago
+    const STORAGE_KEY = 'FINANCE_ALLOCATOR_DATA_V2';
 
     const defaultState = {
-      version: CURRENT_VERSION,
       selectedMonth: new Date().toISOString().slice(0, 7), // YYYY-MM
       activePhase: 1, // 1: 14550, 2: 11350, 3: 5000
       income: 14550,
@@ -508,26 +506,13 @@
 
     let state = loadState();
 
-    // --- State Persistence & Migration ---
+    // --- State Persistence ---
     function loadState() {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (!saved) return defaultState;
       try {
         const parsed = JSON.parse(saved);
-        const merged = { ...defaultState, ...parsed };
-
-        // Migração suave para garantir que o texto do Mercado Pago substitua o Nubank
-        if (!merged.version || merged.version < CURRENT_VERSION) {
-          const cdbItem = merged.allocations?.find(a => a.id === 'alloc_cdb');
-          if (cdbItem) {
-            cdbItem.name = 'Mercado Pago 102% do CDI (Meta R$ 30k)';
-            cdbItem.category = 'Liquidez Diária / Conta Remunerada';
-            cdbItem.instruction = 'Aplicar no Mercado Pago a 102% do CDI com liquidez imediata diária.';
-          }
-          merged.version = CURRENT_VERSION;
-        }
-
-        return merged;
+        return { ...defaultState, ...parsed };
       } catch (e) {
         console.error('Erro ao ler estado do storage, usando default', e);
         return defaultState;
