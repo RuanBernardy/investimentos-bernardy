@@ -372,62 +372,27 @@
           </div>
         </div>
 
-        <!-- Seção 2: Seus Títulos Atuais do Tesouro Direto -->
+        <!-- Seção 2: Seus Títulos no Tesouro Direto (Dinâmico para Adicionar Novos Títulos) -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-2 border-b border-slate-800">
             <div class="flex items-center gap-2">
               <i data-lucide="landmark" class="w-4 h-4 text-cyan-400"></i>
-              <h2 class="text-sm font-semibold text-white">2. Seus 3 Títulos no Tesouro Direto</h2>
+              <h2 class="text-sm font-semibold text-white">2. Seus Títulos no Tesouro Direto</h2>
             </div>
-            <span class="text-xs text-cyan-400 font-bold font-mono" id="badgeTesouroTotalCard">R$ 18.029,00</span>
-          </div>
-
-          <!-- Título 1: IPCA+ Juros Semestrais 2045 -->
-          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3">
-            <div>
-              <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                Tesouro IPCA+ c/ Juros Semestrais 2045
-              </div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Última taxa contratada: IPCA + 6,77%</div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs font-mono font-bold text-cyan-300" id="valTesouro2045">R$ 4.364,88</span>
-              <button onclick="updateTesouroBalance('t2045', 'Tesouro IPCA+ Juros Semestrais 2045')" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Atualizar</button>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-cyan-400 font-bold font-mono" id="badgeTesouroTotalCard">R$ 18.029,00</span>
+              <button onclick="addNewTesouroTitlePrompt()" class="px-2 py-0.5 text-[10px] font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition flex items-center gap-1">
+                <i data-lucide="plus" class="w-3 h-3"></i> Título
+              </button>
             </div>
           </div>
 
-          <!-- Título 2: IPCA+ Juros Semestrais 2055 (Bloqueado) -->
-          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3 opacity-90">
-            <div>
-              <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                Tesouro IPCA+ c/ Juros Semestrais 2055
-                <span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-amber-400 border border-amber-500/20">Bloqueado</span>
-              </div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Sem novos aportes • Rendendo e pagando cupom</div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs font-mono font-bold text-cyan-300" id="valTesouro2055">R$ 6.866,38</span>
-              <button onclick="updateTesouroBalance('t2055', 'Tesouro IPCA+ Juros Semestrais 2055')" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Atualizar</button>
-            </div>
-          </div>
-
-          <!-- Título 3: RendA+ 2055 -->
-          <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3">
-            <div>
-              <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                Tesouro RendA+ 2055 (Aposentadoria)
-              </div>
-              <div class="text-[11px] text-slate-400 mt-0.5">Última taxa contratada: IPCA + 6,70%</div>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-              <span class="text-xs font-mono font-bold text-purple-300" id="valTesouroRenda">R$ 6.797,74</span>
-              <button onclick="updateTesouroBalance('tRenda', 'Tesouro RendA+ 2055')" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Atualizar</button>
-            </div>
-          </div>
+          <!-- Container Dinâmico de Títulos do Tesouro -->
+          <div class="space-y-2.5" id="tesouroTitlesContainer"></div>
 
           <div class="p-2.5 rounded-xl bg-cyan-950/20 border border-cyan-900/30 flex items-start gap-2 text-xs text-slate-300">
             <i data-lucide="info" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i>
-            <span>Para atualizar o saldo após as oscilações de marcação a mercado da B3, basta clicar em <b>"Atualizar"</b> e inserir o valor atual do app.</span>
+            <span>Para atualizar o saldo após as oscilações de marcação a mercado da B3, basta clicar em <b>"Atualizar"</b> e inserir o valor atual do app. Para cadastrar um novo título comprado, clique em <b>"+ Título"</b>.</span>
           </div>
         </div>
 
@@ -647,11 +612,35 @@
         cdb102Balance: 11222.77,
         cdb102Target: 30000,
         cushionTarget: 100000,
-        amortAccumulated: 0,
-        tesouro2045: 4364.88,
-        tesouro2055: 6866.38,
-        tesouroRenda: 6797.74
+        amortAccumulated: 0
       },
+      // LISTA DINÂMICA DE TÍTULOS DO TESOURO DIRETO
+      tesouroTitles: [
+        {
+          id: 'tesouro_2045',
+          name: 'Tesouro IPCA+ c/ Juros Semestrais 2045',
+          amount: 4364.88,
+          rate: 'IPCA + 6,77%',
+          blocked: false,
+          note: 'Última taxa contratada: IPCA + 6,77%'
+        },
+        {
+          id: 'tesouro_2055',
+          name: 'Tesouro IPCA+ c/ Juros Semestrais 2055',
+          amount: 6866.38,
+          rate: 'IPCA + 6,34%',
+          blocked: true,
+          note: 'Sem novos aportes • Rendendo e pagando cupom'
+        },
+        {
+          id: 'tesouro_renda2055',
+          name: 'Tesouro RendA+ 2055 (Aposentadoria)',
+          amount: 6797.74,
+          rate: 'IPCA + 6,70%',
+          blocked: false,
+          note: 'Última taxa contratada: IPCA + 6,70%'
+        }
+      ],
       allocations: [
         {
           id: 'alloc_amort',
@@ -720,15 +709,13 @@
           const parsed = JSON.parse(savedPermanent);
           const mergedVault = { ...defaultState.vault, ...(parsed.vault || {}) };
           
-          mergedVault.tesouro2045 = 4364.88;
-          mergedVault.tesouro2055 = 6866.38;
-          mergedVault.tesouroRenda = 6797.74;
-          mergedVault.cofrinhoTurboBalance = 5088.24;
+          let titles = parsed.tesouroTitles && parsed.tesouroTitles.length > 0 ? parsed.tesouroTitles : defaultState.tesouroTitles;
 
           return { 
             ...defaultState, 
             ...parsed, 
             vault: mergedVault,
+            tesouroTitles: titles,
             allocations: parsed.allocations && parsed.allocations.length > 0 ? parsed.allocations : defaultState.allocations
           };
         } catch(e) {}
@@ -768,25 +755,56 @@
     }
 
     function getTotalTesouro() {
-      return (state.vault.tesouro2045 || 0) + (state.vault.tesouro2055 || 0) + (state.vault.tesouroRenda || 0);
+      return (state.tesouroTitles || []).reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
     }
 
-    function updateTesouroBalance(key, titleName) {
-      let currentVal = 0;
-      if (key === 't2045') currentVal = state.vault.tesouro2045 || 4364.88;
-      if (key === 't2055') currentVal = state.vault.tesouro2055 || 6866.38;
-      if (key === 'tRenda') currentVal = state.vault.tesouroRenda || 6797.74;
+    // --- Gestão Dinâmica dos Títulos do Tesouro Direto ---
+    function addNewTesouroTitlePrompt() {
+      const nome = prompt("Nome do novo título do Tesouro (Ex: Tesouro IPCA+ 2032, Tesouro Selic 2029):");
+      if (!nome || !nome.trim()) return;
 
-      const entrada = prompt(`Digite o saldo líquido atualizado do ${titleName} (conforme o app/portal do Tesouro):`, currentVal);
+      const valorStr = prompt(`Saldo inicial atual para "${nome.trim()}" (R$):`, "1000");
+      if (valorStr === null) return;
+      const valor = parseFloat(valorStr.replace(',', '.')) || 0;
+
+      const taxa = prompt("Taxa contratada (Ex: IPCA + 6.85% ou 100% Selic):", "IPCA + 6.80%") || "IPCA+";
+
+      const newId = `tesouro_${Date.now()}`;
+      state.tesouroTitles.push({
+        id: newId,
+        name: nome.trim(),
+        amount: valor,
+        rate: taxa.trim(),
+        blocked: false,
+        note: `Taxa contratada: ${taxa.trim()}`
+      });
+
+      saveState();
+      showToast(`Título "${nome.trim()}" adicionado!`);
+    }
+
+    function updateTesouroDynamicBalance(id) {
+      const item = state.tesouroTitles.find(t => t.id === id);
+      if (!item) return;
+
+      const entrada = prompt(`Digite o saldo líquido atualizado de "${item.name}":`, item.amount);
       if (entrada === null) return;
       const valor = parseFloat(entrada.replace(',', '.')) || 0;
 
-      if (key === 't2045') state.vault.tesouro2045 = valor;
-      if (key === 't2055') state.vault.tesouro2055 = valor;
-      if (key === 'tRenda') state.vault.tesouroRenda = valor;
-
+      item.amount = valor;
       saveState();
-      showToast(`Saldo do ${titleName} atualizado para ${formatBRL(valor)}!`);
+      showToast(`Saldo de "${item.name}" atualizado para ${formatBRL(valor)}!`);
+    }
+
+    function deleteTesouroDynamicTitle(id) {
+      const item = state.tesouroTitles.find(t => t.id === id);
+      if (!item) return;
+
+      if (confirm(`Deseja realmente remover o título "${item.name}" da sua carteira?`)) {
+        state.tesouroTitles = state.tesouroTitles.filter(t => t.id !== id);
+        saveState();
+        showToast(`Título "${item.name}" removido!`);
+      }
     }
 
     // Gestão Dinâmica do Checklist
@@ -855,7 +873,6 @@
       if (item) {
         item.currentAmount = parseFloat(value) || 0;
         
-        // Atualiza a mini barra de progresso no DOM diretamente
         const itemTarget = Number(item.amount) || 0;
         const progressPct = itemTarget > 0 ? Math.min(100, Math.round((item.currentAmount / itemTarget) * 100)) : 0;
         
@@ -867,12 +884,10 @@
         if (progBar) progBar.style.width = `${progressPct}%`;
         if (progPctEl) progPctEl.innerText = `${progressPct}%`;
 
-        // Atualiza totais de execução no topo e rodapé
         const totalExec = getTotalExecutedAllocations();
         document.getElementById('kpiExecutedAmount').innerText = formatBRL(totalExec);
         document.getElementById('totalChecklistExecuted').innerText = formatBRL(totalExec);
 
-        // Salva silenciosamente sem rodar o render() que destruiria a célula
         saveState(true);
       }
     }
@@ -1025,7 +1040,7 @@
       }
     }
 
-    // Motor de Rendimento Líquido com Todos os Cofrinhos
+    // Motor de Rendimento Líquido
     function calculateSmartYield() {
       if (state.manualYieldRecorded !== null && state.manualYieldRecorded !== undefined) {
         return {
@@ -1344,13 +1359,30 @@
       document.getElementById('kpiIncome').innerText = formatBRL(state.income);
       document.getElementById('kpiExpenses').innerText = formatBRL(totalExp);
 
-      // Atualiza KPI e Card de Títulos do Tesouro Direto
+      // Render Dinâmico dos Títulos do Tesouro Direto
       const totalTesouro = getTotalTesouro();
       document.getElementById('kpiTotalTesouro').innerText = formatBRL(totalTesouro);
       document.getElementById('badgeTesouroTotalCard').innerText = formatBRL(totalTesouro);
-      document.getElementById('valTesouro2045').innerText = formatBRL(state.vault.tesouro2045 || 4364.88);
-      document.getElementById('valTesouro2055').innerText = formatBRL(state.vault.tesouro2055 || 6866.38);
-      document.getElementById('valTesouroRenda').innerText = formatBRL(state.vault.tesouroRenda || 6797.74);
+
+      const tesouroContainer = document.getElementById('tesouroTitlesContainer');
+      tesouroContainer.innerHTML = (state.tesouroTitles || []).map(t => `
+        <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3 group">
+          <div class="overflow-hidden">
+            <div class="text-xs font-bold text-white flex items-center gap-1.5 truncate">
+              ${t.name}
+              ${t.blocked ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-amber-400 border border-amber-500/20">Bloqueado</span>' : ''}
+            </div>
+            <div class="text-[11px] text-slate-400 mt-0.5 truncate">${t.note || t.rate}</div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-xs font-mono font-bold text-cyan-300">${formatBRL(t.amount)}</span>
+            <button onclick="updateTesouroDynamicBalance('${t.id}')" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Atualizar</button>
+            <button onclick="deleteTesouroDynamicTitle('${t.id}')" title="Excluir título" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-600 hover:text-rose-400 inline-flex items-center justify-center transition">
+              <i data-lucide="trash-2" class="w-3 h-3"></i>
+            </button>
+          </div>
+        </div>
+      `).join('');
 
       const smartYield = calculateSmartYield();
       document.getElementById('kpiPassiveYield').innerText = `${formatBRL(smartYield.mensalTotal)}/mês`;
@@ -1437,7 +1469,7 @@
 
       document.getElementById('labelAmortTotal').innerText = `${formatBRL(state.vault.amortAccumulated)} amortizados`;
 
-      // Render Checklist com IDs fixos para não perder o foco ao digitar
+      // Render Checklist com IDs fixos
       const checklistContainer = document.getElementById('checklistContainer');
       checklistContainer.innerHTML = state.allocations.map(item => {
         const itemTarget = Number(item.amount) || 0;
