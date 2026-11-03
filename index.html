@@ -168,7 +168,7 @@
     <!-- Top Grid -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-      <!-- Column 1: Income & Preset Phases (5 cols) -->
+      <!-- Column 1: Income & Preset Phases -->
       <section class="lg:col-span-5 space-y-5">
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -275,7 +275,7 @@
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
               <span id="status99PayProgress">Faltam R$ 3.486,59 para o teto</span>
-              <span class="font-bold text-amber-400">Rende 120% (Auto)</span>
+              <span id="percent99PayProgress" class="font-bold text-amber-400">65.1%</span>
             </div>
           </div>
 
@@ -289,10 +289,15 @@
               <span class="text-xs font-mono font-bold text-emerald-300" id="labelCofrinhosMpTotal">R$ 10.000,00 / R$ 10.000</span>
             </div>
 
-            <!-- Cofrinho MP Mercado Livre (140% CDI) -->
-            <div class="space-y-1 pl-2 border-l-2 border-yellow-500/60">
+            <!-- Cofrinho 1: Livre e Editável (140%) -->
+            <div class="space-y-1 pl-2 border-l-2 border-yellow-500/60 group">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
-                <span class="text-yellow-400 font-medium">Cofrinho MP Mercado Livre (140% CDI)</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-yellow-400 font-medium" id="labelNameMeli">Cofrinho MP Mercado Livre (140% CDI)</span>
+                  <button onclick="editCofrinhoName('meli')" class="w-4 h-4 rounded text-slate-500 hover:text-yellow-400 flex items-center justify-center transition">
+                    <i data-lucide="edit-2" class="w-3 h-3"></i>
+                  </button>
+                </div>
                 <div class="flex items-center gap-2">
                   <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cofrinhoMeli')" title="Clique para editar ou somar" id="labelCofrinhoMeli">R$ 2.000,00 / R$ 2.000</span>
                   <button onclick="quickEditOrAdd('cofrinhoMeli')" class="text-[9px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/20">Ajustar</button>
@@ -307,10 +312,15 @@
               </div>
             </div>
 
-            <!-- Cofrinho MP Reservas Imediatas (120% CDI) -->
-            <div class="space-y-1 pl-2 border-l-2 border-emerald-500/60">
+            <!-- Cofrinho 2: Livre e Editável (120%) -->
+            <div class="space-y-1 pl-2 border-l-2 border-emerald-500/60 group">
               <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
-                <span class="text-emerald-300 font-medium">Cofrinho MP Reservas Imediatas (120% CDI)</span>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-emerald-300 font-medium" id="labelNamePontuais">Cofrinho MP Reservas Imediatas (120% CDI)</span>
+                  <button onclick="editCofrinhoName('pontuais')" class="w-4 h-4 rounded text-slate-500 hover:text-emerald-400 flex items-center justify-center transition">
+                    <i data-lucide="edit-2" class="w-3 h-3"></i>
+                  </button>
+                </div>
                 <div class="flex items-center gap-2">
                   <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cofrinhoPontuais')" title="Clique para editar ou somar" id="labelCofrinhoPontuais">R$ 8.000,00 / R$ 8.000</span>
                   <button onclick="quickEditOrAdd('cofrinhoPontuais')" class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20">Ajustar</button>
@@ -326,7 +336,7 @@
             </div>
 
             <div class="text-[10px] text-slate-500 italic pt-1 border-t border-slate-800/60">
-              *Se a soma global for até R$ 10.000, o sistema compensa o saldo entre os dois cofrinhos proporcionalmente. Acima de R$ 10.000, rende 100% CDI.
+              *Qualquer valor inserido livremente que ultrapassar o teto geral de R$ 10.000 passa a render a 100% do CDI.
             </div>
           </div>
 
@@ -368,7 +378,7 @@
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
               <span id="statusCdbProgress">Faltam R$ 18.777,23 para o teto</span>
-              <span class="font-bold text-teal-400">Rende 102% (Auto)</span>
+              <span id="percentCdbProgress" class="font-bold text-teal-400">37.4%</span>
             </div>
           </div>
 
@@ -552,15 +562,15 @@
         </div>
 
         <div>
-          <label class="text-slate-300 font-medium block mb-1">Cofrinho MP Mercado Livre (140% CDI - Sub-teto R$ 2.000)</label>
+          <label class="text-slate-300 font-medium block mb-1">Cofrinho Mercado Livre (140% CDI - Sub-teto R$ 2.000)</label>
           <input type="number" id="inputVaultCofrinhoMeli" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">R$ 2.000 a 140% (desconta do teto global de 10k)</span>
+          <span class="text-[11px] text-slate-500">Digite seu saldo total neste cofrinho (sem trava)</span>
         </div>
 
         <div>
-          <label class="text-slate-300 font-medium block mb-1">Cofrinho MP Reservas Imediatas (120% CDI)</label>
+          <label class="text-slate-300 font-medium block mb-1">Cofrinho Reservas Imediatas (120% CDI)</label>
           <input type="number" id="inputVaultCofrinhoPontuais" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">R$ 8.000 a 120%</span>
+          <span class="text-[11px] text-slate-500">Digite seu saldo total neste cofrinho (sem trava)</span>
         </div>
 
         <div>
@@ -624,6 +634,9 @@
         mpGiroTarget: 1000,
         pay99Balance: 6513.41,
         pay99Target: 10000,
+        // Nomes Livres
+        cofrinhoMeliName: 'Cofrinho MP Mercado Livre',
+        cofrinhoPontuaisName: 'Cofrinho MP Reservas Imediatas',
         cofrinhoMeliBalance: 2000.00,
         cofrinhoPontuaisBalance: 8000.00,
         cofrinhoGlobalTarget: 10000,
@@ -726,6 +739,7 @@
         try {
           const parsed = JSON.parse(savedPermanent);
           const mergedVault = { ...defaultState.vault, ...(parsed.vault || {}) };
+          
           let titles = parsed.tesouroTitles && parsed.tesouroTitles.length > 0 ? parsed.tesouroTitles : defaultState.tesouroTitles;
 
           return { 
@@ -918,6 +932,23 @@
       return (state.tesouroTitles || []).reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
     }
 
+    // EDIÇÃO DE NOME DOS COFRINHOS
+    function editCofrinhoName(tipo) {
+      if (tipo === 'meli') {
+        const novo = prompt("Editar nome do Cofrinho (140% CDI):", state.vault.cofrinhoMeliName || "Cofrinho MP Mercado Livre");
+        if (novo && novo.trim()) {
+          state.vault.cofrinhoMeliName = novo.trim();
+          saveState();
+        }
+      } else if (tipo === 'pontuais') {
+        const novo = prompt("Editar nome do Cofrinho (120% CDI):", state.vault.cofrinhoPontuaisName || "Cofrinho MP Reservas Imediatas");
+        if (novo && novo.trim()) {
+          state.vault.cofrinhoPontuaisName = novo.trim();
+          saveState();
+        }
+      }
+    }
+
     function quickEditOrAdd(targetKey) {
       let currentVal = 0;
       let label = "";
@@ -927,10 +958,10 @@
         label = "99Pay (Conta + Cofrinho)";
       } else if (targetKey === 'cofrinhoMeli') {
         currentVal = state.vault.cofrinhoMeliBalance || 0;
-        label = "Cofrinho MP Mercado Livre (140%)";
+        label = state.vault.cofrinhoMeliName || "Cofrinho MP Mercado Livre (140%)";
       } else if (targetKey === 'cofrinhoPontuais') {
         currentVal = state.vault.cofrinhoPontuaisBalance || 0;
-        label = "Cofrinho MP Reservas Imediatas (120%)";
+        label = state.vault.cofrinhoPontuaisName || "Cofrinho MP Reservas Imediatas (120%)";
       } else if (targetKey === 'cofrinhoTurbo') {
         currentVal = state.vault.cofrinhoTurboBalance || 0;
         label = "Cofrinho Turbo";
@@ -959,8 +990,8 @@
       } else {
         const novoTotal = parseFloat(entradaLimpa.replace(',', '.')) || 0;
         if (targetKey === 'pay99') state.vault.pay99Balance = novoTotal;
-        if (targetKey === 'cofrinhoMeli') state.vault.cofrinhoMeliBalance = novoTotal;
-        if (targetKey === 'cofrinhoPontuais') state.vault.cofrinhoPontuaisBalance = novoTotal;
+        if (targetKey === 'cofrinhoMeli') state.vault.cofrinhoMeliBalance = novoTotal; // Sem trava Math.min
+        if (targetKey === 'cofrinhoPontuais') state.vault.cofrinhoPontuaisBalance = novoTotal; // Sem trava Math.min
         if (targetKey === 'cofrinhoTurbo') state.vault.cofrinhoTurboBalance = novoTotal;
         if (targetKey === 'cdb102') state.vault.cdb102Balance = novoTotal;
         showToast(`Saldo de "${label}" atualizado para ${formatBRL(novoTotal)}!`);
@@ -1069,6 +1100,7 @@
       }
     }
 
+    // DIGITAÇÃO SEM PERDER O FOCO
     function handleAllocationCurrentAmountChange(id, value) {
       const item = state.allocations.find(a => a.id === id);
       if (item) {
@@ -1158,6 +1190,7 @@
       }
     }
 
+    // Motor de Rendimento Líquido
     function calculateSmartYield() {
       if (state.manualYieldRecorded !== null && state.manualYieldRecorded !== undefined) {
         return { mensalTotal: state.manualYieldRecorded, diarioTotal: state.manualYieldRecorded / 22, isManual: true };
@@ -1432,7 +1465,7 @@
             <span class="text-xs font-mono font-bold text-cyan-300">${formatBRL(t.amount)}</span>
             <button onclick="updateTesouroDynamicBalance('${t.id}')" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Atualizar</button>
             <button onclick="deleteTesouroDynamicTitle('${t.id}')" title="Excluir título" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-600 hover:text-rose-400 inline-flex items-center justify-center transition">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <i data-lucide="trash-2" class="w-3 h-3"></i>
             </button>
           </div>
         </div>
@@ -1480,22 +1513,33 @@
       const rawMeli = state.vault.cofrinhoMeliBalance !== undefined ? state.vault.cofrinhoMeliBalance : 2000;
       const rawPontuais = state.vault.cofrinhoPontuaisBalance !== undefined ? state.vault.cofrinhoPontuaisBalance : 8000;
       const totalCofrinhosMP = rawMeli + rawPontuais;
+      
+      const meliName = state.vault.cofrinhoMeliName || 'Cofrinho MP Mercado Livre';
+      const pontuaisName = state.vault.cofrinhoPontuaisName || 'Cofrinho MP Reservas Imediatas';
 
+      document.getElementById('labelNameMeli').innerText = `${meliName} (140% CDI)`;
+      document.getElementById('labelNamePontuais').innerText = `${pontuaisName} (120% CDI)`;
+
+      // Compensação visual das barras com base no teto de 10k
       const displayMeli = Math.min(2000, Math.max(rawMeli, totalCofrinhosMP > 2000 ? 2000 : totalCofrinhosMP));
       const displayPontuais = Math.max(0, Math.min(8000, totalCofrinhosMP - displayMeli));
 
       document.getElementById('labelCofrinhosMpTotal').innerText = `${formatBRL(totalCofrinhosMP)} / R$ 10.000,00`;
 
+      // A barra agora calcula a % baseado no que está efetivamente compensado no limite para evitar quebrar, mas mostra o valor real no texto
       const meliPct = Math.min(100, (displayMeli / 2000) * 100).toFixed(1);
+      const excedenteMeliDisplay = rawMeli > 2000 ? ` (${formatBRL(rawMeli - 2000)} excede o teto de 140%)` : '';
+      
       document.getElementById('labelCofrinhoMeli').innerText = `${formatBRL(rawMeli)} / R$ 2.000`;
       document.getElementById('barCofrinhoMeli').style.width = `${meliPct}%`;
       document.getElementById('percentCofrinhoMeli').innerText = `${meliPct}%`;
+      document.getElementById('statusCofrinhoMeli').innerText = `R$ ${formatBRL(Math.min(2000, rawMeli))} a 140%` + excedenteMeliDisplay;
 
       const pontuaisPct = Math.min(100, (displayPontuais / 8000) * 100).toFixed(1);
       document.getElementById('labelCofrinhoPontuais').innerText = `${formatBRL(rawPontuais)} / R$ 8.000`;
       document.getElementById('barCofrinhoPontuais').style.width = `${pontuaisPct}%`;
       document.getElementById('percentCofrinhoPontuais').innerText = `${pontuaisPct}%`;
-      document.getElementById('statusCofrinhoPontuais').innerText = totalCofrinhosMP > 10000 ? `Excedente de ${formatBRL(totalCofrinhosMP - 10000)} rende a 100% CDI` : 'R$ 8.000 a 120% CDI';
+      document.getElementById('statusCofrinhoPontuais').innerText = totalCofrinhosMP > 10000 ? `Soma excede R$ 10k: ${formatBRL(totalCofrinhosMP - 10000)} a 100% CDI` : 'Rende até 120% CDI';
 
       const cofBal = state.vault.cofrinhoTurboBalance || 5088.24;
       document.getElementById('labelCofrinhoTurbo').innerText = formatBRL(cofBal);
@@ -1539,7 +1583,7 @@
                     <span class="text-[10px] px-2 py-0.5 rounded-full border font-medium ${item.badgeColor || 'border-slate-700 text-slate-300 bg-slate-800'}">${item.badge || 'Meta'}</span>
                     ${item.checked && item.checkedAt ? `<span class="text-[10px] text-emerald-400 font-mono">Concluído em ${item.checkedAt}</span>` : ''}
                     
-                    <button onclick="editAllocation('${item.id}')" title="Editar nome" class="w-5 h-5 rounded hover:bg-slate-800 text-slate-500 hover:text-amber-400 inline-flex items-center justify-center transition ml-1">
+                    <button onclick="editAllocation('${item.id}')" title="Editar nome/instruções" class="w-5 h-5 rounded hover:bg-slate-800 text-slate-500 hover:text-amber-400 inline-flex items-center justify-center transition ml-1">
                       <i data-lucide="edit-2" class="w-3 h-3"></i>
                     </button>
                     <button onclick="deleteAllocation('${item.id}')" title="Excluir meta" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 inline-flex items-center justify-center transition">
@@ -1565,7 +1609,7 @@
 
               <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 self-end sm:self-start shrink-0 pt-1">
                 ${isTreasury ? `
-                  <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1" title="Taxa real contratada">
+                  <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1" title="Taxa real contratada na data da aplicação">
                     <span class="text-[10px] text-slate-400">Taxa:</span>
                     <input type="text" value="${item.customRate || ''}" 
                       placeholder="Ex: 6.70"
