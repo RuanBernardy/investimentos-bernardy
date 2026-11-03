@@ -129,7 +129,7 @@
         <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-1">Tesouro Direto (Real)</div>
         <div class="text-xl sm:text-2xl font-black text-cyan-400 tracking-tight" id="kpiTotalTesouro">R$ 18.029,00</div>
         <div class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-          <i data-lucide="landmark" class="w-3 h-3 text-cyan-400"></i> Extrato Oficial NuInvest
+          <i data-lucide="landmark" class="w-3.5 h-3.5 text-cyan-400"></i> Extrato Oficial NuInvest
         </div>
       </div>
 
@@ -245,15 +245,15 @@
                 Giro Mercado Pago (Débito/Pix)
               </span>
               <div class="flex items-center gap-2">
-                <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickUpdateGiro()" title="Clique para editar" id="labelMpGiroProgress">R$ 12,11 / R$ 1.000</span>
+                <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickUpdateGiro()" title="Clique para editar" id="labelMpGiroProgress">R$ 0,00 / R$ 1.000</span>
                 <button onclick="quickUpdateGiro()" class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20">Editar</button>
               </div>
             </div>
             <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden p-0.5">
-              <div id="barMpGiroProgress" class="bg-emerald-400 h-1 rounded-full transition-all duration-300" style="width: 1.2%"></div>
+              <div id="barMpGiroProgress" class="bg-emerald-400 h-1 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusMpGiroProgress">Faltam R$ 987,89 para o piso</span>
+              <span id="statusMpGiroProgress">Calculando...</span>
               <span class="font-bold text-emerald-400">Rende 105% CDI (Auto)</span>
             </div>
           </div>
@@ -266,16 +266,16 @@
                 99Pay 120% CDI (Conta + Cofrinho)
               </span>
               <div class="flex items-center gap-2">
-                <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('pay99')" title="Clique para editar ou somar" id="label99PayProgress">R$ 6.513,41 / R$ 10.000</span>
+                <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('pay99')" title="Clique para editar ou somar" id="label99PayProgress">R$ 0,00 / R$ 10.000</span>
                 <button onclick="quickEditOrAdd('pay99')" class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20">Ajustar</button>
               </div>
             </div>
             <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5">
-              <div id="bar99PayProgress" class="bg-gradient-to-r from-amber-500 to-yellow-400 h-1.5 rounded-full transition-all duration-300" style="width: 65.1%"></div>
+              <div id="bar99PayProgress" class="bg-gradient-to-r from-amber-500 to-yellow-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="status99PayProgress">Faltam R$ 3.486,59 para o teto</span>
-              <span id="percent99PayProgress" class="font-bold text-amber-400">65.1%</span>
+              <span id="status99PayProgress">Calculando...</span>
+              <span id="percent99PayProgress" class="font-bold text-amber-400">0.0%</span>
             </div>
           </div>
 
@@ -286,7 +286,7 @@
                 <i data-lucide="piggy-bank" class="w-4 h-4 text-emerald-400"></i>
                 Cofrinhos MP (Teto R$ 10.000 Bonificado)
               </span>
-              <span class="text-xs font-mono font-bold text-emerald-300" id="labelCofrinhosMpTotal">R$ 10.000,00 / R$ 10.000</span>
+              <span class="text-xs font-mono font-bold text-emerald-300" id="labelCofrinhosMpTotal">R$ 0,00 / R$ 10.000</span>
             </div>
 
             <!-- Cofrinho 1: Livre e Editável (140%) -->
@@ -294,21 +294,21 @@
               <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
                 <div class="flex items-center gap-1.5">
                   <span class="text-yellow-400 font-medium" id="labelNameMeli">Cofrinho MP Mercado Livre (140% CDI)</span>
-                  <button onclick="editCofrinhoName('meli')" class="w-4 h-4 rounded text-slate-500 hover:text-yellow-400 flex items-center justify-center transition">
+                  <button onclick="editCofrinhoName('meli')" title="Editar Nome" class="w-4 h-4 rounded text-slate-500 hover:text-yellow-400 flex items-center justify-center transition">
                     <i data-lucide="edit-2" class="w-3 h-3"></i>
                   </button>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cofrinhoMeli')" title="Clique para editar ou somar" id="labelCofrinhoMeli">R$ 2.000,00 / R$ 2.000</span>
+                  <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cofrinhoMeli')" title="Clique para editar ou somar" id="labelCofrinhoMeli">R$ 0,00 / R$ 2.000</span>
                   <button onclick="quickEditOrAdd('cofrinhoMeli')" class="text-[9px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/20">Ajustar</button>
                 </div>
               </div>
               <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                <div id="barCofrinhoMeli" class="bg-gradient-to-r from-yellow-500 to-amber-400 h-1.5 rounded-full" style="width: 100%"></div>
+                <div id="barCofrinhoMeli" class="bg-gradient-to-r from-yellow-500 to-amber-400 h-1.5 rounded-full" style="width: 0%"></div>
               </div>
               <div class="flex justify-between text-[10px] text-slate-400">
-                <span id="statusCofrinhoMeli">R$ 2.000 a 140% (Auto)</span>
-                <span class="font-bold text-yellow-400" id="percentCofrinhoMeli">100.0%</span>
+                <span id="statusCofrinhoMeli">R$ 0 a 140% (Auto)</span>
+                <span class="font-bold text-yellow-400" id="percentCofrinhoMeli">0.0%</span>
               </div>
             </div>
 
@@ -317,24 +317,23 @@
               <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
                 <div class="flex items-center gap-1.5">
                   <span class="text-emerald-300 font-medium" id="labelNamePontuais">Cofrinho MP Reservas Imediatas (120% CDI)</span>
-                  <button onclick="editCofrinhoName('pontuais')" class="w-4 h-4 rounded text-slate-500 hover:text-emerald-400 flex items-center justify-center transition">
+                  <button onclick="editCofrinhoName('pontuais')" title="Editar Nome" class="w-4 h-4 rounded text-slate-500 hover:text-emerald-400 flex items-center justify-center transition">
                     <i data-lucide="edit-2" class="w-3 h-3"></i>
                   </button>
                 </div>
                 <div class="flex items-center gap-2">
-                  <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cofrinhoPontuais')" title="Clique para editar ou somar" id="labelCofrinhoPontuais">R$ 8.000,00 / R$ 8.000</span>
+                  <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cofrinhoPontuais')" title="Clique para editar ou somar" id="labelCofrinhoPontuais">R$ 0,00 / R$ 8.000</span>
                   <button onclick="quickEditOrAdd('cofrinhoPontuais')" class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20">Ajustar</button>
                 </div>
               </div>
               <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                <div id="barCofrinhoPontuais" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full" style="width: 100%"></div>
+                <div id="barCofrinhoPontuais" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full" style="width: 0%"></div>
               </div>
               <div class="flex justify-between text-[10px] text-slate-400">
-                <span id="statusCofrinhoPontuais">R$ 8.000 a 120% CDI</span>
-                <span class="font-bold text-emerald-400" id="percentCofrinhoPontuais">100.0%</span>
+                <span id="statusCofrinhoPontuais">R$ 0 a 120% CDI</span>
+                <span class="font-bold text-emerald-400" id="percentCofrinhoPontuais">0.0%</span>
               </div>
             </div>
-
             <div class="text-[10px] text-slate-500 italic pt-1 border-t border-slate-800/60">
               *Qualquer valor inserido livremente que ultrapassar o teto geral de R$ 10.000 passa a render a 100% do CDI.
             </div>
@@ -348,16 +347,16 @@
                 Cofrinho Turbo (115% CDI até R$ 5k)
               </span>
               <div class="flex items-center gap-2">
-                <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cofrinhoTurbo')" title="Clique para editar ou somar" id="labelCofrinhoTurbo">R$ 5.088,24</span>
+                <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cofrinhoTurbo')" title="Clique para editar ou somar" id="labelCofrinhoTurbo">R$ 0,00</span>
                 <button onclick="quickEditOrAdd('cofrinhoTurbo')" class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/10 text-purple-400 border border-purple-500/30 hover:bg-purple-500/20">Ajustar</button>
               </div>
             </div>
             <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5">
-              <div id="barCofrinhoTurbo" class="bg-gradient-to-r from-purple-600 to-fuchsia-400 h-1.5 rounded-full transition-all duration-300" style="width: 100%"></div>
+              <div id="barCofrinhoTurbo" class="bg-gradient-to-r from-purple-600 to-fuchsia-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusCofrinhoTurbo">R$ 5.000 a 115% • R$ 88,24 a 100% CDI</span>
-              <span class="font-bold text-purple-400">Teto 115% atingido</span>
+              <span id="statusCofrinhoTurbo">Calculando...</span>
+              <span class="font-bold text-purple-400">Rendimento Ativo</span>
             </div>
           </div>
 
@@ -369,16 +368,16 @@
                 Mercado Pago CDB 102% CDI
               </span>
               <div class="flex items-center gap-2">
-                <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cdb102')" title="Clique para editar ou somar" id="labelCdbProgress">R$ 11.222,77 / R$ 30.000</span>
+                <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('cdb102')" title="Clique para editar ou somar" id="labelCdbProgress">R$ 0,00 / R$ 30.000</span>
                 <button onclick="quickEditOrAdd('cdb102')" class="text-[10px] px-1.5 py-0.5 rounded bg-teal-500/10 text-teal-400 border border-teal-500/30 hover:bg-teal-500/20">Ajustar</button>
               </div>
             </div>
             <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5">
-              <div id="barCdbProgress" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 rounded-full transition-all duration-300" style="width: 37.4%"></div>
+              <div id="barCdbProgress" class="bg-gradient-to-r from-teal-500 to-emerald-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusCdbProgress">Faltam R$ 18.777,23 para o teto</span>
-              <span id="percentCdbProgress" class="font-bold text-teal-400">37.4%</span>
+              <span id="statusCdbProgress">Calculando...</span>
+              <span id="percentCdbProgress" class="font-bold text-teal-400">0%</span>
             </div>
           </div>
 
@@ -389,14 +388,14 @@
                 <i data-lucide="shield" class="w-3.5 h-3.5 text-blue-400"></i>
                 Colchão Total de Liquidez Atual
               </span>
-              <span class="text-slate-400 font-mono" id="labelTotalCushion">R$ 32.836,42 / R$ 100.000</span>
+              <span class="text-slate-400 font-mono" id="labelTotalCushion">R$ 0,00 / R$ 100.000</span>
             </div>
             <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden p-0.5">
-              <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 32.8%"></div>
+              <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
               <span id="statusTotalCushion">Giro + 99Pay + Cofrinhos MP (10k) + Cofrinho Turbo + CDB MP</span>
-              <span id="percentTotalCushion" class="font-bold text-blue-400">32.8%</span>
+              <span id="percentTotalCushion" class="font-bold text-blue-400">0%</span>
             </div>
           </div>
         </div>
@@ -409,7 +408,7 @@
               <h2 class="text-sm font-semibold text-white">2. Seus Títulos no Tesouro Direto</h2>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-xs text-cyan-400 font-bold font-mono" id="badgeTesouroTotalCard">R$ 18.029,00</span>
+              <span class="text-xs text-cyan-400 font-bold font-mono" id="badgeTesouroTotalCard">R$ 0,00</span>
               <button onclick="addNewTesouroTitlePrompt()" class="px-2 py-0.5 text-[10px] font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-slate-700 transition flex items-center gap-1">
                 <i data-lucide="plus" class="w-3 h-3"></i> Título
               </button>
@@ -420,7 +419,7 @@
 
           <div class="p-2.5 rounded-xl bg-cyan-950/20 border border-cyan-900/30 flex items-start gap-2 text-xs text-slate-300">
             <i data-lucide="info" class="w-4 h-4 text-cyan-400 shrink-0 mt-0.5"></i>
-            <span>Para atualizar o saldo após as oscilações de marcação a mercado da B3, basta clicar em <b>"Atualizar"</b> e inserir o valor atual do app. Para cadastrar um novo título comprado, clique em <b>"+ Título"</b>.</span>
+            <span>Para atualizar o saldo após as oscilações de marcação a mercado, clique em <b>"Atualizar"</b> e insira o valor do app.</span>
           </div>
         </div>
 
@@ -433,11 +432,11 @@
             </span>
             <span class="text-slate-400 font-mono" id="labelAmortTotal">R$ 0,00 amortizados</span>
           </div>
-          <p class="text-[11px] text-slate-400">Cada R$ 2.000 amortizados no prazo abatem parcelas do fim do financiamento de R$ 890/mês.</p>
+          <p class="text-[11px] text-slate-400">Cada R$ 2.000 amortizados no prazo abatem parcelas do fim do financiamento.</p>
         </div>
       </section>
 
-      <!-- Column 2: Personal Expenses com Adição e Exclusão Livre -->
+      <!-- Column 2: Personal Expenses e Checklist -->
       <section class="lg:col-span-7 space-y-5">
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 shadow-sm space-y-4">
           <div class="flex items-center justify-between pb-3 border-b border-slate-800">
@@ -467,7 +466,7 @@
           </div>
         </div>
 
-        <!-- Allocation Checklist Section -->
+        <!-- Allocation Checklist Section SEGURO CONTRA CRASHES -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
             <div>
@@ -478,8 +477,11 @@
               <p class="text-xs text-slate-400">Digite o valor aportado de forma contínua sem que a tela saia do campo</p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
+              <button onclick="restoreDefaultAllocations()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5 shadow-sm">
+                <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Restaurar Padrão
+              </button>
               <button onclick="addNewAllocationPrompt()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center gap-1.5 shadow-sm">
-                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> + Adicionar Meta
+                <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i> + Meta
               </button>
               <button onclick="recalculateAllocationsAuto()" class="px-3 py-1.5 text-xs font-medium rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition flex items-center gap-1.5">
                 <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Recalcular Proporções
@@ -497,8 +499,8 @@
               <span>Meta Planejada:</span>
               <span class="font-bold font-mono text-sm text-slate-300" id="totalChecklistPlanned">R$ 0,00</span>
             </div>
-            <div id="reconciliationWarning" class="text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5">
-              <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 100% da sobra líquida alocada com precisão.
+            <div id="reconciliationWarning" class="text-xs px-2.5 py-1 rounded-lg flex items-center gap-1.5">
+              Calculando...
             </div>
           </div>
         </div>
@@ -550,57 +552,18 @@
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="text-slate-300 font-medium block mb-1">Giro Conta Mercado Pago (Piso R$ 1.000)</label>
-          <input type="number" id="inputVaultMpGiro" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Saldo atual: R$ 12,11</span>
-        </div>
-
-        <div>
-          <label class="text-slate-300 font-medium block mb-1">Saldo 99Pay (Conta + Cofrinho 120% - Teto R$ 10.000)</label>
-          <input type="number" id="inputVault99Pay" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Saldo atual: R$ 6.513,41</span>
-        </div>
-
-        <div>
-          <label class="text-slate-300 font-medium block mb-1">Cofrinho Mercado Livre (140% CDI - Sub-teto R$ 2.000)</label>
-          <input type="number" id="inputVaultCofrinhoMeli" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Digite seu saldo total neste cofrinho (sem trava)</span>
-        </div>
-
-        <div>
-          <label class="text-slate-300 font-medium block mb-1">Cofrinho Reservas Imediatas (120% CDI)</label>
-          <input type="number" id="inputVaultCofrinhoPontuais" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Digite seu saldo total neste cofrinho (sem trava)</span>
-        </div>
-
-        <div>
-          <label class="text-slate-300 font-medium block mb-1">Saldo Cofrinho Turbo (115% CDI até R$ 5k)</label>
-          <input type="number" id="inputVaultCofrinhoTurbo" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Saldo atual: R$ 5.088,24</span>
-        </div>
-
-        <div>
-          <label class="text-slate-300 font-medium block mb-1">Saldo Mercado Pago CDB 102% (Teto R$ 30.000)</label>
-          <input type="number" id="inputVaultCdb102" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Saldo atual no CDB: R$ 11.222,77</span>
-        </div>
-
-        <div>
           <label class="text-slate-300 font-medium block mb-1">Taxa CDI Oficial (% ao ano)</label>
           <input type="number" step="0.05" id="inputVaultCDIRate" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Padrão da economia: 13.15%</span>
         </div>
-
         <div>
           <label class="text-slate-300 font-medium block mb-1">Amortização Acumulada da Casa (R$)</label>
           <input type="number" id="inputVaultAmortTotal" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
-          <span class="text-[11px] text-slate-500">Soma acumulada de amortizações</span>
         </div>
       </div>
 
       <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
         <button onclick="closeModalVault()" class="px-3 py-1.5 text-xs rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700">Cancelar</button>
-        <button onclick="saveModalVault()" class="px-4 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white">Salvar Saldos</button>
+        <button onclick="saveModalVault()" class="px-4 py-1.5 text-xs font-medium rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white">Salvar Config</button>
       </div>
     </div>
   </div>
@@ -615,6 +578,65 @@
     const PERMANENT_STORAGE_KEY = 'FINANCE_ALLOCATOR_DATA_PERMANENT';
     const CLOUD_SYNC_KEY = 'FINANCE_CLOUD_SYNC_BIN_ID';
     const LAST_DATE_KEY = 'FINANCE_LAST_COMPOUND_DATE';
+
+    const safeDefaultAllocations = [
+        {
+          id: 'alloc_amort',
+          name: 'Amortização Extraordinária do Financiamento',
+          category: 'Moradia / Quitação',
+          amount: 2000,
+          currentAmount: 0,
+          checked: false,
+          checkedAt: null,
+          badge: 'Redução de Prazo',
+          badgeColor: 'border-blue-500/30 text-blue-400 bg-blue-500/10',
+          instruction: 'Abra o app do financiamento e amortize reduzindo o prazo final.',
+          icon: 'home',
+          customRate: null
+        },
+        {
+          id: 'alloc_giro',
+          name: 'Recompor Caixa de Giro Mercado Pago (Piso R$ 1.000)',
+          category: 'Caixa Operacional / Débito & Pix',
+          amount: 988,
+          currentAmount: 0,
+          checked: false,
+          checkedAt: null,
+          badge: 'Giro R$ 1.000 (105% CDI)',
+          badgeColor: 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10',
+          instruction: 'Deixe parado na conta corrente do Mercado Pago para seu giro diário.',
+          icon: 'credit-card',
+          customRate: '105% CDI'
+        },
+        {
+          id: 'alloc_cdb',
+          name: 'Liquidez Diária / Reserva Tática',
+          category: 'Caixa Imediato / Colchão 100k',
+          amount: 5562,
+          currentAmount: 0,
+          checked: false,
+          checkedAt: null,
+          badge: '140% / 120% / 102%',
+          badgeColor: 'border-teal-500/30 text-teal-400 bg-teal-500/10',
+          instruction: 'Direcione para os Cofrinhos MP, 99Pay ou CDB 102%.',
+          icon: 'landmark',
+          customRate: '140% / 120% / 102%'
+        },
+        {
+          id: 'alloc_ipca32',
+          name: 'Aporte Mensal Tesouro IPCA+ / RendA+',
+          category: 'Médio / Longo Prazo Real',
+          amount: 3900,
+          currentAmount: 0,
+          checked: false,
+          checkedAt: null,
+          badge: 'Aposentadoria / Juros',
+          badgeColor: 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10',
+          instruction: 'Aplicar no Tesouro (registre a taxa contratada do dia).',
+          icon: 'clock',
+          customRate: '6.70'
+        }
+      ];
 
     const defaultState = {
       selectedMonth: new Date().toISOString().slice(0, 7),
@@ -634,7 +656,6 @@
         mpGiroTarget: 1000,
         pay99Balance: 6513.41,
         pay99Target: 10000,
-        // Nomes Livres
         cofrinhoMeliName: 'Cofrinho MP Mercado Livre',
         cofrinhoPontuaisName: 'Cofrinho MP Reservas Imediatas',
         cofrinhoMeliBalance: 2000.00,
@@ -672,64 +693,7 @@
           note: 'Última taxa contratada: IPCA + 6,70%'
         }
       ],
-      allocations: [
-        {
-          id: 'alloc_amort',
-          name: 'Amortização Extraordinária do Financiamento',
-          category: 'Moradia / Quitação',
-          amount: 2000,
-          currentAmount: 0,
-          checked: false,
-          checkedAt: null,
-          badge: 'Redução de Prazo',
-          badgeColor: 'border-blue-500/30 text-blue-400 bg-blue-500/10',
-          instruction: 'Abra o app do financiamento e amortize reduzindo o prazo final.',
-          icon: 'home',
-          customRate: null
-        },
-        {
-          id: 'alloc_giro',
-          name: 'Recompor Caixa de Giro Mercado Pago (Piso R$ 1.000)',
-          category: 'Caixa Operacional / Débito & Pix',
-          amount: 988,
-          currentAmount: 0,
-          checked: false,
-          checkedAt: null,
-          badge: 'Giro R$ 1.000 (105% CDI)',
-          badgeColor: 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10',
-          instruction: 'Deixe parado na conta corrente do Mercado Pago para seu giro diário.',
-          icon: 'credit-card',
-          customRate: '105% CDI'
-        },
-        {
-          id: 'alloc_cdb',
-          name: 'Liquidez Diária / Reserva (99Pay, Cofrinhos MP ou CDB)',
-          category: 'Caixa Imediato / Colchão 100k',
-          amount: 5562,
-          currentAmount: 0,
-          checked: false,
-          checkedAt: null,
-          badge: '140% / 120% / 102%',
-          badgeColor: 'border-teal-500/30 text-teal-400 bg-teal-500/10',
-          instruction: 'Direcione para o Cofrinho Meli 140%, Pontuais 120%, 99Pay ou CDB 102%.',
-          icon: 'landmark',
-          customRate: '140% / 120% / 102%'
-        },
-        {
-          id: 'alloc_ipca32',
-          name: 'Aporte Mensal Tesouro IPCA+ / RendA+',
-          category: 'Médio / Longo Prazo Real',
-          amount: 3900,
-          currentAmount: 0,
-          checked: false,
-          checkedAt: null,
-          badge: 'Aposentadoria / Juros',
-          badgeColor: 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10',
-          instruction: 'Aplicar no IPCA+ 2045 ou RendA+ 2055 (registre a taxa contratada do dia).',
-          icon: 'clock',
-          customRate: '6.70'
-        }
-      ],
+      allocations: JSON.parse(JSON.stringify(safeDefaultAllocations)),
       history: []
     };
 
@@ -741,22 +705,45 @@
           const mergedVault = { ...defaultState.vault, ...(parsed.vault || {}) };
           
           let titles = parsed.tesouroTitles && parsed.tesouroTitles.length > 0 ? parsed.tesouroTitles : defaultState.tesouroTitles;
+          
+          // Se a lista de allocations sumiu (vazia ou não salva), restaura o padrão.
+          let allocs = parsed.allocations;
+          if (!allocs || allocs.length === 0) {
+            allocs = JSON.parse(JSON.stringify(safeDefaultAllocations));
+          }
 
           return { 
             ...defaultState, 
             ...parsed, 
             vault: mergedVault,
             tesouroTitles: titles,
-            allocations: parsed.allocations && parsed.allocations.length > 0 ? parsed.allocations : defaultState.allocations
+            allocations: allocs
           };
         } catch(e) {}
       }
-
       return defaultState;
     }
 
     let state = loadStateWithMigration();
     let cloudTimer = null;
+
+    // --- FUNÇÕES DE ACESSO SEGURO AO DOM (PREVINE CRASH) ---
+    function safeUpdateText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.innerText = text;
+    }
+    function safeUpdateHTML(id, html) {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    }
+    function safeUpdateWidth(id, width) {
+      const el = document.getElementById(id);
+      if (el) el.style.width = width;
+    }
+    function safeUpdateValue(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.value = value;
+    }
 
     function applyDailyCompoundInterest() {
       const todayStr = new Date().toISOString().slice(0, 10);
@@ -865,13 +852,15 @@
       if (!syncKey) return;
 
       try {
-        const res = await fetch(`https://api.jsonstorage.net/v1/json/${syncKey}`, {
-          method: 'GET'
-        });
+        const res = await fetch(`https://api.jsonstorage.net/v1/json/${syncKey}`, { method: 'GET' });
         if (res.ok) {
           const remoteData = await res.json();
           if (remoteData && typeof remoteData === 'object' && remoteData.vault) {
             state = { ...defaultState, ...remoteData };
+            // Auto-recovery caso a nuvem traga o checklist vazio
+            if (!state.allocations || state.allocations.length === 0) {
+                state.allocations = JSON.parse(JSON.stringify(safeDefaultAllocations));
+            }
             localStorage.setItem(PERMANENT_STORAGE_KEY, JSON.stringify(state));
             render();
             showToast("Dados sincronizados com a nuvem!");
@@ -932,7 +921,6 @@
       return (state.tesouroTitles || []).reduce((acc, curr) => acc + (Number(curr.amount) || 0), 0);
     }
 
-    // EDIÇÃO DE NOME DOS COFRINHOS
     function editCofrinhoName(tipo) {
       if (tipo === 'meli') {
         const novo = prompt("Editar nome do Cofrinho (140% CDI):", state.vault.cofrinhoMeliName || "Cofrinho MP Mercado Livre");
@@ -990,8 +978,8 @@
       } else {
         const novoTotal = parseFloat(entradaLimpa.replace(',', '.')) || 0;
         if (targetKey === 'pay99') state.vault.pay99Balance = novoTotal;
-        if (targetKey === 'cofrinhoMeli') state.vault.cofrinhoMeliBalance = novoTotal; // Sem trava Math.min
-        if (targetKey === 'cofrinhoPontuais') state.vault.cofrinhoPontuaisBalance = novoTotal; // Sem trava Math.min
+        if (targetKey === 'cofrinhoMeli') state.vault.cofrinhoMeliBalance = novoTotal;
+        if (targetKey === 'cofrinhoPontuais') state.vault.cofrinhoPontuaisBalance = novoTotal;
         if (targetKey === 'cofrinhoTurbo') state.vault.cofrinhoTurboBalance = novoTotal;
         if (targetKey === 'cdb102') state.vault.cdb102Balance = novoTotal;
         showToast(`Saldo de "${label}" atualizado para ${formatBRL(novoTotal)}!`);
@@ -1086,6 +1074,10 @@
       if (!item) return;
       const novoNome = prompt("Editar nome:", item.name);
       if (novoNome !== null && novoNome.trim()) item.name = novoNome.trim();
+      
+      const novaInstrucao = prompt("Editar instrução:", item.instruction);
+      if (novaInstrucao !== null && novaInstrucao.trim()) item.instruction = novaInstrucao.trim();
+
       saveState();
       showToast("Meta atualizada!");
     }
@@ -1100,7 +1092,16 @@
       }
     }
 
-    // DIGITAÇÃO SEM PERDER O FOCO
+    function restoreDefaultAllocations() {
+      if (confirm("Isto recarregará as metas originais (Amortização, Giro, Reserva e Tesouro). Confirma?")) {
+        state.allocations = JSON.parse(JSON.stringify(safeDefaultAllocations));
+        recalculateAllocationsAuto();
+        saveState();
+        showToast("Metas originais restauradas!");
+      }
+    }
+
+    // DIGITAÇÃO SEGURA NO CHECKLIST
     function handleAllocationCurrentAmountChange(id, value) {
       const item = state.allocations.find(a => a.id === id);
       if (item) {
@@ -1108,17 +1109,13 @@
         const itemTarget = Number(item.amount) || 0;
         const progressPct = itemTarget > 0 ? Math.min(100, Math.round((item.currentAmount / itemTarget) * 100)) : 0;
         
-        const progLabel = document.getElementById(`prog_label_${id}`);
-        const progBar = document.getElementById(`prog_bar_${id}`);
-        const progPctEl = document.getElementById(`prog_pct_${id}`);
-        
-        if (progLabel) progLabel.innerText = formatBRL(item.currentAmount);
-        if (progBar) progBar.style.width = `${progressPct}%`;
-        if (progPctEl) progPctEl.innerText = `${progressPct}%`;
+        safeUpdateText(`prog_label_${id}`, formatBRL(item.currentAmount));
+        safeUpdateWidth(`prog_bar_${id}`, `${progressPct}%`);
+        safeUpdateText(`prog_pct_${id}`, `${progressPct}%`);
 
         const totalExec = getTotalExecutedAllocations();
-        document.getElementById('kpiExecutedAmount').innerText = formatBRL(totalExec);
-        document.getElementById('totalChecklistExecuted').innerText = formatBRL(totalExec);
+        safeUpdateText('kpiExecutedAmount', formatBRL(totalExec));
+        safeUpdateText('totalChecklistExecuted', formatBRL(totalExec));
 
         saveState(true);
       }
@@ -1131,16 +1128,12 @@
         const itemCurrent = Number(item.currentAmount) || 0;
         const progressPct = item.amount > 0 ? Math.min(100, Math.round((itemCurrent / item.amount) * 100)) : 0;
         
-        const targetLabel = document.getElementById(`target_label_${id}`);
-        const progBar = document.getElementById(`prog_bar_${id}`);
-        const progPctEl = document.getElementById(`prog_pct_${id}`);
-
-        if (targetLabel) targetLabel.innerText = formatBRL(item.amount);
-        if (progBar) progBar.style.width = `${progressPct}%`;
-        if (progPctEl) progPctEl.innerText = `${progressPct}%`;
+        safeUpdateText(`target_label_${id}`, formatBRL(item.amount));
+        safeUpdateWidth(`prog_bar_${id}`, `${progressPct}%`);
+        safeUpdateText(`prog_pct_${id}`, `${progressPct}%`);
 
         const plannedTotal = getTotalPlannedAllocations();
-        document.getElementById('totalChecklistPlanned').innerText = formatBRL(plannedTotal);
+        safeUpdateText('totalChecklistPlanned', formatBRL(plannedTotal));
         saveState(true);
       }
     }
@@ -1183,20 +1176,20 @@
         const totalExp = getTotalExpenses();
         const netSurplus = getNetSurplus();
         const savingsRate = state.income > 0 ? ((netSurplus / state.income) * 100).toFixed(1) : 0;
-        document.getElementById('badgeTotalExpenses').innerText = formatBRL(totalExp);
-        document.getElementById('kpiExpenses').innerText = formatBRL(totalExp);
-        document.getElementById('labelNetSurplus').innerText = formatBRL(netSurplus);
-        document.getElementById('labelSavingsRate').innerText = `${savingsRate}%`;
+        safeUpdateText('badgeTotalExpenses', formatBRL(totalExp));
+        safeUpdateText('kpiExpenses', formatBRL(totalExp));
+        safeUpdateText('labelNetSurplus', formatBRL(netSurplus));
+        safeUpdateText('labelSavingsRate', `${savingsRate}%`);
       }
     }
 
-    // Motor de Rendimento Líquido
     function calculateSmartYield() {
       if (state.manualYieldRecorded !== null && state.manualYieldRecorded !== undefined) {
         return { mensalTotal: state.manualYieldRecorded, diarioTotal: state.manualYieldRecorded / 22, isManual: true };
       }
 
       const cdiAnual = (state.cdiRateAnnual || 13.15) / 100;
+      const liq = 0.825;
       
       const taxa99Anual = cdiAnual * 1.20;
       const rend99Mensal = (state.vault.pay99Balance || 0) * (Math.pow(1 + taxa99Anual, 1 / 12) - 1);
@@ -1218,13 +1211,13 @@
         b140 * (Math.pow(1 + taxa140Anual, 1 / 12) - 1) +
         b120 * (Math.pow(1 + taxa120Anual, 1 / 12) - 1) +
         b100 * (Math.pow(1 + taxa100Anual, 1 / 12) - 1)
-      ) * 0.825;
+      ) * liq;
 
       const rendMpCofrinhosDiario = (
         b140 * (Math.pow(1 + taxa140Anual, 1 / 252) - 1) +
         b120 * (Math.pow(1 + taxa120Anual, 1 / 252) - 1) +
         b100 * (Math.pow(1 + taxa100Anual, 1 / 252) - 1)
-      ) * 0.825;
+      ) * liq;
 
       const saldoCofTotal = state.vault.cofrinhoTurboBalance || 0;
       const saldoCof115 = Math.min(5000, saldoCofTotal);
@@ -1233,15 +1226,15 @@
       const taxaCof115Anual = cdiAnual * 1.15;
       const taxaCof100Anual = cdiAnual * 1.00;
 
-      const rendCofMensal = (saldoCof115 * (Math.pow(1 + taxaCof115Anual, 1 / 12) - 1) + saldoCof100 * (Math.pow(1 + taxaCof100Anual, 1 / 12) - 1)) * 0.825;
-      const rendCofDiario = (saldoCof115 * (Math.pow(1 + taxaCof115Anual, 1 / 252) - 1) + saldoCof100 * (Math.pow(1 + taxaCof100Anual, 1 / 252) - 1)) * 0.825;
+      const rendCofMensal = (saldoCof115 * (Math.pow(1 + taxaCof115Anual, 1 / 12) - 1) + saldoCof100 * (Math.pow(1 + taxaCof100Anual, 1 / 12) - 1)) * liq;
+      const rendCofDiario = (saldoCof115 * (Math.pow(1 + taxaCof115Anual, 1 / 252) - 1) + saldoCof100 * (Math.pow(1 + taxaCof100Anual, 1 / 252) - 1)) * liq;
 
       const taxaCdbAnual = cdiAnual * 1.02;
-      const rendCdbMensal = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 12) - 1) * 0.825;
-      const rendCdbDiario = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 252) - 1) * 0.825;
+      const rendCdbMensal = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 12) - 1) * liq;
+      const rendCdbDiario = (state.vault.cdb102Balance || 0) * (Math.pow(1 + taxaCdbAnual, 1 / 252) - 1) * liq;
 
       const taxaGiroAnual = cdiAnual * 1.05;
-      const rendGiroMensal = (state.vault.mpGiroBalance || 0) * (Math.pow(1 + taxaGiroAnual, 1 / 12) - 1) * 0.825;
+      const rendGiroMensal = (state.vault.mpGiroBalance || 0) * (Math.pow(1 + taxaGiroAnual, 1 / 12) - 1) * liq;
 
       const totalMensal = rend99Mensal + rendMpCofrinhosMensal + rendCofMensal + rendCdbMensal + rendGiroMensal;
       const totalDiario = rend99Diario + rendMpCofrinhosDiario + rendCofDiario + rendCdbDiario;
@@ -1281,9 +1274,9 @@
 
       const netSurplus = getNetSurplus();
       const savingsRate = state.income > 0 ? ((netSurplus / state.income) * 100).toFixed(1) : 0;
-      document.getElementById('kpiIncome').innerText = formatBRL(state.income);
-      document.getElementById('labelNetSurplus').innerText = formatBRL(netSurplus);
-      document.getElementById('labelSavingsRate').innerText = `${savingsRate}%`;
+      safeUpdateText('kpiIncome', formatBRL(state.income));
+      safeUpdateText('labelNetSurplus', formatBRL(netSurplus));
+      safeUpdateText('labelSavingsRate', `${savingsRate}%`);
     }
 
     function handleMonthChange(value) {
@@ -1296,9 +1289,27 @@
       if (item) {
         item.checked = !item.checked;
         item.checkedAt = item.checked ? new Date().toLocaleDateString('pt-BR') : null;
-        if (item.checked && (!item.currentAmount || item.currentAmount === 0)) item.currentAmount = item.amount;
+        
+        if (item.checked && (!item.currentAmount || item.currentAmount === 0)) {
+          item.currentAmount = item.amount;
+        }
+
+        if (id === 'alloc_giro') {
+          if (item.checked) state.vault.mpGiroBalance += (item.currentAmount || item.amount);
+          else state.vault.mpGiroBalance = Math.max(12.11, state.vault.mpGiroBalance - (item.currentAmount || item.amount));
+        }
+        if (id === 'alloc_cdb') {
+          if (item.checked) state.vault.cdb102Balance += (item.currentAmount || item.amount);
+          else state.vault.cdb102Balance = Math.max(11000, state.vault.cdb102Balance - (item.currentAmount || item.amount));
+        }
+        if (id === 'alloc_amort') {
+          if (item.checked) state.vault.amortAccumulated += (item.currentAmount || item.amount);
+          else state.vault.amortAccumulated = Math.max(0, state.vault.amortAccumulated - (item.currentAmount || item.amount));
+        }
+
+        recordMonthSnapshot();
         saveState();
-        showToast(item.checked ? `Concluído: ${item.name}` : `Desmarcado: ${item.name}`);
+        showToast(item.checked ? `Check marcado: ${item.name}` : `Check desmarcado: ${item.name}`);
       }
     }
 
@@ -1329,14 +1340,7 @@
     }
 
     function editVaultBalances() {
-      document.getElementById('inputVaultMpGiro').value = state.vault.mpGiroBalance || 12.11;
-      document.getElementById('inputVault99Pay').value = state.vault.pay99Balance || 6513.41;
-      document.getElementById('inputVaultCofrinhoMeli').value = state.vault.cofrinhoMeliBalance || 2000;
-      document.getElementById('inputVaultCofrinhoPontuais').value = state.vault.cofrinhoPontuaisBalance || 8000;
-      document.getElementById('inputVaultCofrinhoTurbo').value = state.vault.cofrinhoTurboBalance || 5088.24;
-      document.getElementById('inputVaultCdb102').value = state.vault.cdb102Balance || 11222.77;
-      document.getElementById('inputVaultCDIRate').value = state.cdiRateAnnual || 13.15;
-      document.getElementById('inputVaultAmortTotal').value = state.vault.amortAccumulated;
+      // Abre Modal
       document.getElementById('modalVault').classList.remove('hidden');
     }
 
@@ -1345,19 +1349,12 @@
     }
 
     function saveModalVault() {
-      state.vault.mpGiroBalance = parseFloat(document.getElementById('inputVaultMpGiro').value) || 0;
-      state.vault.pay99Balance = parseFloat(document.getElementById('inputVault99Pay').value) || 0;
-      state.vault.cofrinhoMeliBalance = parseFloat(document.getElementById('inputVaultCofrinhoMeli').value) || 0;
-      state.vault.cofrinhoPontuaisBalance = parseFloat(document.getElementById('inputVaultCofrinhoPontuais').value) || 0;
-      state.vault.cofrinhoTurboBalance = parseFloat(document.getElementById('inputVaultCofrinhoTurbo').value) || 0;
-      state.vault.cdb102Balance = parseFloat(document.getElementById('inputVaultCdb102').value) || 0;
       state.cdiRateAnnual = parseFloat(document.getElementById('inputVaultCDIRate').value) || 13.15;
       state.vault.amortAccumulated = parseFloat(document.getElementById('inputVaultAmortTotal').value) || 0;
-
       recalculateAllocationsAuto();
       closeModalVault();
       saveState();
-      showToast('Saldos salvos!');
+      showToast('Configurações salvas!');
     }
 
     function exportDataJSON() {
@@ -1380,6 +1377,10 @@
           const importedData = JSON.parse(e.target.result);
           if (importedData && typeof importedData === 'object') {
             state = { ...defaultState, ...importedData };
+            // Proteção se o array vier vazio no import
+            if (!state.allocations || state.allocations.length === 0) {
+                state.allocations = JSON.parse(JSON.stringify(safeDefaultAllocations));
+            }
             saveState();
             showToast('Dados importados com sucesso!');
           }
@@ -1392,297 +1393,340 @@
 
     function showToast(msg) {
       const el = document.getElementById('toast');
-      document.getElementById('toastMsg').innerText = msg;
-      el.classList.remove('opacity-0', 'pointer-events-none');
-      setTimeout(() => el.classList.add('opacity-0', 'pointer-events-none'), 3000);
+      if(el) {
+        document.getElementById('toastMsg').innerText = msg;
+        el.classList.remove('opacity-0', 'pointer-events-none');
+        setTimeout(() => el.classList.add('opacity-0', 'pointer-events-none'), 3000);
+      }
     }
 
+    // --- RENDER SEGURO BLINDADO CONTRA ERROS ---
     function render() {
-      document.getElementById('selectedMonth').value = state.selectedMonth;
-      document.getElementById('inputIncome').value = state.income;
-      const phaseBadge = document.getElementById('activePhaseBadge');
-      phaseBadge.innerText = state.activePhase ? `Fase ${state.activePhase}` : 'Personalizada';
+      try {
+        safeUpdateValue('selectedMonth', state.selectedMonth);
+        safeUpdateValue('inputIncome', state.income);
+        
+        const phaseBadge = document.getElementById('activePhaseBadge');
+        if (phaseBadge) phaseBadge.innerText = state.activePhase ? `Fase ${state.activePhase}` : 'Personalizada';
 
-      [1, 2, 3].forEach(num => {
-        const btn = document.getElementById(`btnPhase${num}`);
-        const icon = btn.querySelector('svg, i');
-        if (state.activePhase === num) {
-          btn.className = "phase-btn text-left p-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 transition flex items-center justify-between";
-          if (icon) icon.classList.remove('hidden');
-        } else {
-          btn.className = "phase-btn text-left p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:bg-slate-800 transition flex items-center justify-between";
-          if (icon) icon.classList.add('hidden');
-        }
-      });
+        [1, 2, 3].forEach(num => {
+          const btn = document.getElementById(`btnPhase${num}`);
+          if (btn) {
+            const icon = btn.querySelector('svg, i');
+            if (state.activePhase === num) {
+              btn.className = "phase-btn text-left p-3 rounded-xl border border-emerald-500/40 bg-emerald-500/10 transition flex items-center justify-between";
+              if (icon) icon.classList.remove('hidden');
+            } else {
+              btn.className = "phase-btn text-left p-3 rounded-xl border border-slate-800 bg-slate-800/40 hover:bg-slate-800 transition flex items-center justify-between";
+              if (icon) icon.classList.add('hidden');
+            }
+          }
+        });
 
-      const expContainer = document.getElementById('expensesContainer');
-      expContainer.innerHTML = (state.expenses || []).map(e => `
-        <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-2.5 group">
-          <div class="flex items-center gap-2.5 overflow-hidden flex-grow">
-            <div class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 text-slate-400">
-              <i data-lucide="${e.icon || 'receipt'}" class="w-3.5 h-3.5"></i>
-            </div>
-            <span class="text-xs font-medium text-slate-300 truncate" title="${e.label}">${e.label}</span>
-          </div>
-          <div class="flex items-center gap-1.5 shrink-0">
-            <span class="text-xs text-slate-400">R$</span>
-            <input type="number" step="5" value="${e.amount}" 
-              oninput="handleExpenseChange('${e.id}', this.value)"
-              class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-semibold text-white text-right focus:outline-none focus:border-emerald-500" />
-            <button onclick="deleteExpense('${e.id}')" title="Excluir despesa" class="w-6 h-6 rounded-md hover:bg-rose-950/50 text-slate-600 hover:text-rose-400 flex items-center justify-center transition">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </div>
-        </div>
-      `).join('');
-
-      const totalExp = getTotalExpenses();
-      const netSurplus = getNetSurplus();
-      const savingsRate = state.income > 0 ? ((netSurplus / state.income) * 100).toFixed(1) : 0;
-
-      document.getElementById('badgeTotalExpenses').innerText = formatBRL(totalExp);
-      document.getElementById('labelNetSurplus').innerText = formatBRL(netSurplus);
-      document.getElementById('labelSavingsRate').innerText = `${savingsRate}%`;
-
-      document.getElementById('kpiIncome').innerText = formatBRL(state.income);
-      document.getElementById('kpiExpenses').innerText = formatBRL(totalExp);
-
-      const totalTesouro = getTotalTesouro();
-      document.getElementById('kpiTotalTesouro').innerText = formatBRL(totalTesouro);
-      document.getElementById('badgeTesouroTotalCard').innerText = formatBRL(totalTesouro);
-
-      const tesouroContainer = document.getElementById('tesouroTitlesContainer');
-      tesouroContainer.innerHTML = (state.tesouroTitles || []).map(t => `
-        <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3 group">
-          <div class="overflow-hidden">
-            <div class="text-xs font-bold text-white flex items-center gap-1.5 truncate">
-              ${t.name}
-              ${t.blocked ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-amber-400 border border-amber-500/20">Bloqueado</span>' : ''}
-            </div>
-            <div class="text-[11px] text-slate-400 mt-0.5 truncate">${t.note || t.rate}</div>
-          </div>
-          <div class="flex items-center gap-2 shrink-0">
-            <span class="text-xs font-mono font-bold text-cyan-300">${formatBRL(t.amount)}</span>
-            <button onclick="updateTesouroDynamicBalance('${t.id}')" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Atualizar</button>
-            <button onclick="deleteTesouroDynamicTitle('${t.id}')" title="Excluir título" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-600 hover:text-rose-400 inline-flex items-center justify-center transition">
-              <i data-lucide="trash-2" class="w-3 h-3"></i>
-            </button>
-          </div>
-        </div>
-      `).join('');
-
-      const smartYield = calculateSmartYield();
-      document.getElementById('kpiPassiveYield').innerText = `${formatBRL(smartYield.mensalTotal)}/mês`;
-      
-      const subEl = document.getElementById('kpiYieldSubtitle');
-      if (smartYield.isManual) {
-        subEl.innerHTML = '<i data-lucide="edit-3" class="w-3 h-3 text-amber-400"></i> Valor real ajustado à mão';
-      } else {
-        subEl.innerHTML = '<i data-lucide="coins" class="w-3 h-3 text-amber-400"></i> Pós IOF & IR (Calculado)';
-      }
-      document.getElementById('kpiYieldDaily').innerText = `+${formatBRL(smartYield.diarioTotal)}/dia útil`;
-
-      const checksDone = state.allocations.filter(a => a.checked).length;
-      const checksPercent = state.allocations.length > 0 ? Math.round((checksDone / state.allocations.length) * 100) : 0;
-      document.getElementById('kpiCheckPercent').innerText = `${checksPercent}%`;
-      document.getElementById('kpiProgressBar').style.width = `${checksPercent}%`;
-      document.getElementById('kpiChecksCount').innerText = `${checksDone} de ${state.allocations.length} concluídos`;
-      
-      const totalExec = getTotalExecutedAllocations();
-      document.getElementById('kpiExecutedAmount').innerText = formatBRL(totalExec);
-      document.getElementById('totalChecklistExecuted').innerText = formatBRL(totalExec);
-
-      const mpGiroBal = state.vault.mpGiroBalance || 12.11;
-      const mpGiroTarget = state.vault.mpGiroTarget || 1000;
-      const mpGiroPct = Math.min(100, (mpGiroBal / mpGiroTarget) * 100).toFixed(1);
-      document.getElementById('labelMpGiroProgress').innerText = `${formatBRL(mpGiroBal)} / ${formatBRL(mpGiroTarget)}`;
-      document.getElementById('barMpGiroProgress').style.width = `${mpGiroPct}%`;
-      const mpGiroDiff = mpGiroTarget - mpGiroBal;
-      document.getElementById('statusMpGiroProgress').innerText = mpGiroDiff > 0 ? `Faltam ${formatBRL(mpGiroDiff)} para o piso` : '✓ Piso de R$ 1.000 OK';
-
-      const pay99Bal = state.vault.pay99Balance || 6513.41;
-      const pay99Target = state.vault.pay99Target || 10000;
-      const pay99Pct = Math.min(100, (pay99Bal / pay99Target) * 100).toFixed(1);
-      document.getElementById('label99PayProgress').innerText = `${formatBRL(pay99Bal)} / ${formatBRL(pay99Target)}`;
-      document.getElementById('bar99PayProgress').style.width = `${pay99Pct}%`;
-      document.getElementById('percent99PayProgress').innerText = `${pay99Pct}%`;
-      const pay99Diff = pay99Target - pay99Bal;
-      document.getElementById('status99PayProgress').innerText = pay99Diff > 0 ? `Faltam ${formatBRL(pay99Diff)} para o teto` : '🎉 TETO 10K ATINGIDO!';
-
-      // Cofrinhos MP com compensação inteligente de barras e teto compartilhado
-      const rawMeli = state.vault.cofrinhoMeliBalance !== undefined ? state.vault.cofrinhoMeliBalance : 2000;
-      const rawPontuais = state.vault.cofrinhoPontuaisBalance !== undefined ? state.vault.cofrinhoPontuaisBalance : 8000;
-      const totalCofrinhosMP = rawMeli + rawPontuais;
-      
-      const meliName = state.vault.cofrinhoMeliName || 'Cofrinho MP Mercado Livre';
-      const pontuaisName = state.vault.cofrinhoPontuaisName || 'Cofrinho MP Reservas Imediatas';
-
-      document.getElementById('labelNameMeli').innerText = `${meliName} (140% CDI)`;
-      document.getElementById('labelNamePontuais').innerText = `${pontuaisName} (120% CDI)`;
-
-      // Compensação visual das barras com base no teto de 10k
-      const displayMeli = Math.min(2000, Math.max(rawMeli, totalCofrinhosMP > 2000 ? 2000 : totalCofrinhosMP));
-      const displayPontuais = Math.max(0, Math.min(8000, totalCofrinhosMP - displayMeli));
-
-      document.getElementById('labelCofrinhosMpTotal').innerText = `${formatBRL(totalCofrinhosMP)} / R$ 10.000,00`;
-
-      // A barra agora calcula a % baseado no que está efetivamente compensado no limite para evitar quebrar, mas mostra o valor real no texto
-      const meliPct = Math.min(100, (displayMeli / 2000) * 100).toFixed(1);
-      const excedenteMeliDisplay = rawMeli > 2000 ? ` (${formatBRL(rawMeli - 2000)} excede o teto de 140%)` : '';
-      
-      document.getElementById('labelCofrinhoMeli').innerText = `${formatBRL(rawMeli)} / R$ 2.000`;
-      document.getElementById('barCofrinhoMeli').style.width = `${meliPct}%`;
-      document.getElementById('percentCofrinhoMeli').innerText = `${meliPct}%`;
-      document.getElementById('statusCofrinhoMeli').innerText = `R$ ${formatBRL(Math.min(2000, rawMeli))} a 140%` + excedenteMeliDisplay;
-
-      const pontuaisPct = Math.min(100, (displayPontuais / 8000) * 100).toFixed(1);
-      document.getElementById('labelCofrinhoPontuais').innerText = `${formatBRL(rawPontuais)} / R$ 8.000`;
-      document.getElementById('barCofrinhoPontuais').style.width = `${pontuaisPct}%`;
-      document.getElementById('percentCofrinhoPontuais').innerText = `${pontuaisPct}%`;
-      document.getElementById('statusCofrinhoPontuais').innerText = totalCofrinhosMP > 10000 ? `Soma excede R$ 10k: ${formatBRL(totalCofrinhosMP - 10000)} a 100% CDI` : 'Rende até 120% CDI';
-
-      const cofBal = state.vault.cofrinhoTurboBalance || 5088.24;
-      document.getElementById('labelCofrinhoTurbo').innerText = formatBRL(cofBal);
-      document.getElementById('statusCofrinhoTurbo').innerText = `R$ 5.000 a 115% • ${formatBRL(Math.max(0, cofBal - 5000))} a 100% CDI`;
-
-      const cdbBal = state.vault.cdb102Balance || 11222.77;
-      const cdbTarget = state.vault.cdb102Target || 30000;
-      const cdbPct = Math.min(100, (cdbBal / cdbTarget) * 100).toFixed(1);
-      document.getElementById('labelCdbProgress').innerText = `${formatBRL(cdbBal)} / ${formatBRL(cdbTarget)}`;
-      document.getElementById('barCdbProgress').style.width = `${cdbPct}%`;
-      document.getElementById('percentCdbProgress').innerText = `${cdbPct}%`;
-      const cdbDiff = cdbTarget - cdbBal;
-      document.getElementById('statusCdbProgress').innerText = cdbDiff > 0 ? `Faltam ${formatBRL(cdbDiff)} para o teto` : '🎉 TETO 30K ATINGIDO!';
-
-      const totalCushion = mpGiroBal + pay99Bal + totalCofrinhosMP + cdbBal + cofBal;
-      const cushionTarget = state.vault.cushionTarget;
-      const cushionPct = Math.min(100, (totalCushion / cushionTarget) * 100).toFixed(1);
-      document.getElementById('labelTotalCushion').innerText = `${formatBRL(totalCushion)} / ${formatBRL(cushionTarget)}`;
-      document.getElementById('barTotalCushion').style.width = `${cushionPct}%`;
-      document.getElementById('percentTotalCushion').innerText = `${cushionPct}%`;
-
-      document.getElementById('labelAmortTotal').innerText = `${formatBRL(state.vault.amortAccumulated)} amortizados`;
-
-      const checklistContainer = document.getElementById('checklistContainer');
-      checklistContainer.innerHTML = state.allocations.map(item => {
-        const itemTarget = Number(item.amount) || 0;
-        const itemCurrent = Number(item.currentAmount) || 0;
-        const progressPct = itemTarget > 0 ? Math.min(100, Math.round((itemCurrent / itemTarget) * 100)) : 0;
-        const isTreasury = item.id.includes('ipca') || item.id.includes('renda');
-
-        return `
-          <div class="rounded-2xl border ${item.checked ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'} p-4 sm:p-4.5 transition-all duration-200 group">
-            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-              <div class="flex items-start gap-3 flex-grow">
-                <button type="button" onclick="toggleCheck('${item.id}')" class="mt-1 w-6 h-6 rounded-lg border flex items-center justify-center transition shrink-0 ${item.checked ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900 hover:border-slate-500 text-transparent'}">
-                  <i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>
+        const expContainer = document.getElementById('expensesContainer');
+        if (expContainer) {
+          expContainer.innerHTML = (state.expenses || []).map(e => `
+            <div class="bg-slate-950/70 border border-slate-800 rounded-xl p-3 flex items-center justify-between gap-2.5 group">
+              <div class="flex items-center gap-2.5 overflow-hidden flex-grow">
+                <div class="w-7 h-7 rounded-lg bg-slate-800 flex items-center justify-center shrink-0 text-slate-400">
+                  <i data-lucide="${e.icon || 'receipt'}" class="w-3.5 h-3.5"></i>
+                </div>
+                <span class="text-xs font-medium text-slate-300 truncate" title="${e.label}">${e.label}</span>
+              </div>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <span class="text-xs text-slate-400">R$</span>
+                <input type="number" step="5" value="${e.amount}" 
+                  oninput="handleExpenseChange('${e.id}', this.value)"
+                  class="w-20 bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs font-semibold text-white text-right focus:outline-none focus:border-emerald-500" />
+                <button onclick="deleteExpense('${e.id}')" title="Excluir despesa" class="w-6 h-6 rounded-md hover:bg-rose-950/50 text-slate-600 hover:text-rose-400 flex items-center justify-center transition">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 </button>
-                <div class="flex-grow">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-sm font-bold ${item.checked ? 'text-emerald-400' : 'text-white'}">${item.name}</span>
-                    <span class="text-[10px] px-2 py-0.5 rounded-full border font-medium ${item.badgeColor || 'border-slate-700 text-slate-300 bg-slate-800'}">${item.badge || 'Meta'}</span>
-                    ${item.checked && item.checkedAt ? `<span class="text-[10px] text-emerald-400 font-mono">Concluído em ${item.checkedAt}</span>` : ''}
-                    
-                    <button onclick="editAllocation('${item.id}')" title="Editar nome/instruções" class="w-5 h-5 rounded hover:bg-slate-800 text-slate-500 hover:text-amber-400 inline-flex items-center justify-center transition ml-1">
-                      <i data-lucide="edit-2" class="w-3 h-3"></i>
-                    </button>
-                    <button onclick="deleteAllocation('${item.id}')" title="Excluir meta" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 inline-flex items-center justify-center transition">
-                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                    </button>
-                  </div>
-                  <div class="text-xs text-slate-400 mt-1 flex items-center gap-2">
-                    <span>${item.category}</span>
-                  </div>
-                  <p class="text-[11px] text-slate-400 mt-1 italic">${item.instruction}</p>
-
-                  <div class="mt-2.5 max-w-md">
-                    <div class="flex justify-between text-[10px] text-slate-400 mb-1">
-                      <span>Progresso: <b id="prog_label_${item.id}">${formatBRL(itemCurrent)}</b> de <span id="target_label_${item.id}">${formatBRL(itemTarget)}</span></span>
-                      <span class="font-bold text-emerald-400" id="prog_pct_${item.id}">${progressPct}%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                      <div id="prog_bar_${item.id}" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 self-end sm:self-start shrink-0 pt-1">
-                ${isTreasury ? `
-                  <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1" title="Taxa real contratada na data da aplicação">
-                    <span class="text-[10px] text-slate-400">Taxa:</span>
-                    <input type="text" value="${item.customRate || ''}" 
-                      placeholder="Ex: 6.70"
-                      oninput="handleCustomRateChange('${item.id}', this.value)"
-                      class="w-12 bg-transparent border-0 text-xs font-mono font-bold text-teal-300 text-center focus:outline-none" />
-                    <span class="text-[10px] text-slate-400">%</span>
-                  </div>
-                ` : ''}
-
-                <div class="flex flex-col items-end">
-                  <div class="flex items-center gap-1 text-[10px] text-slate-400 mb-0.5">
-                    <span>Já Aportado (R$)</span>
-                  </div>
-                  <input type="number" step="50" value="${item.currentAmount || 0}"
-                    oninput="handleAllocationCurrentAmountChange('${item.id}', this.value)"
-                    placeholder="Realizado"
-                    class="w-24 bg-slate-900 border border-emerald-500/40 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-400 text-right focus:outline-none focus:border-emerald-500" />
-                </div>
-
-                <div class="flex flex-col items-end">
-                  <div class="flex items-center gap-1 text-[10px] text-slate-400 mb-0.5">
-                    <span>Meta Mês (R$)</span>
-                  </div>
-                  <input type="number" step="50" value="${item.amount}"
-                    oninput="handleAllocationAmountChange('${item.id}', this.value)"
-                    placeholder="Meta"
-                    class="w-24 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-white text-right focus:outline-none focus:border-emerald-500" />
-                </div>
               </div>
             </div>
-          </div>
-        `;
-      }).join('');
+          `).join('');
+        }
 
-      const plannedTotal = getTotalPlannedAllocations();
-      document.getElementById('totalChecklistPlanned').innerText = formatBRL(plannedTotal);
-      const diff = Math.abs(plannedTotal - netSurplus);
-      const reconBox = document.getElementById('reconciliationWarning');
-      if (diff <= 5) {
-        reconBox.className = "text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5";
-        reconBox.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 100% da sobra líquida alocada com precisão.';
-      } else if (plannedTotal < netSurplus) {
-        reconBox.className = "text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5";
-        reconBox.innerHTML = `<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Há ${formatBRL(netSurplus - plannedTotal)} sobrando sem alocação.`;
-      } else {
-        reconBox.className = "text-xs px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center gap-1.5";
-        reconBox.innerHTML = `<i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Alocações superam a sobra em ${formatBRL(plannedTotal - netSurplus)}.`;
+        const totalExp = getTotalExpenses();
+        const netSurplus = getNetSurplus();
+        const savingsRate = state.income > 0 ? ((netSurplus / state.income) * 100).toFixed(1) : 0;
+
+        safeUpdateText('badgeTotalExpenses', formatBRL(totalExp));
+        safeUpdateText('labelNetSurplus', formatBRL(netSurplus));
+        safeUpdateText('labelSavingsRate', `${savingsRate}%`);
+        safeUpdateText('kpiIncome', formatBRL(state.income));
+        safeUpdateText('kpiExpenses', formatBRL(totalExp));
+
+        const totalTesouro = getTotalTesouro();
+        safeUpdateText('kpiTotalTesouro', formatBRL(totalTesouro));
+        safeUpdateText('badgeTesouroTotalCard', formatBRL(totalTesouro));
+
+        const tesouroContainer = document.getElementById('tesouroTitlesContainer');
+        if (tesouroContainer) {
+          tesouroContainer.innerHTML = (state.tesouroTitles || []).map(t => `
+            <div class="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-center justify-between gap-3 group">
+              <div class="overflow-hidden">
+                <div class="text-xs font-bold text-white flex items-center gap-1.5 truncate">
+                  ${t.name}
+                  ${t.blocked ? '<span class="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-amber-400 border border-amber-500/20">Bloqueado</span>' : ''}
+                </div>
+                <div class="text-[11px] text-slate-400 mt-0.5 truncate">${t.note || t.rate}</div>
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="text-xs font-mono font-bold text-cyan-300">${formatBRL(t.amount)}</span>
+                <button onclick="updateTesouroDynamicBalance('${t.id}')" class="text-[10px] px-1.5 py-0.5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700">Atualizar</button>
+                <button onclick="deleteTesouroDynamicTitle('${t.id}')" title="Excluir título" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-600 hover:text-rose-400 inline-flex items-center justify-center transition">
+                  <i data-lucide="trash-2" class="w-3 h-3"></i>
+                </button>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        const smartYield = calculateSmartYield();
+        safeUpdateText('kpiPassiveYield', `${formatBRL(smartYield.mensalTotal)}/mês`);
+        
+        const subEl = document.getElementById('kpiYieldSubtitle');
+        if (subEl) {
+          if (smartYield.isManual) {
+            subEl.innerHTML = '<i data-lucide="edit-3" class="w-3 h-3 text-amber-400"></i> Valor real ajustado à mão';
+          } else {
+            subEl.innerHTML = '<i data-lucide="coins" class="w-3 h-3 text-amber-400"></i> Pós IOF & IR (Calculado)';
+          }
+        }
+        safeUpdateText('kpiYieldDaily', `+${formatBRL(smartYield.diarioTotal)}/dia útil`);
+
+        const validAllocs = state.allocations || [];
+        const checksDone = validAllocs.filter(a => a.checked).length;
+        const checksPercent = validAllocs.length > 0 ? Math.round((checksDone / validAllocs.length) * 100) : 0;
+        
+        safeUpdateText('kpiCheckPercent', `${checksPercent}%`);
+        safeUpdateWidth('kpiProgressBar', `${checksPercent}%`);
+        safeUpdateText('kpiChecksCount', `${checksDone} de ${validAllocs.length} concluídos`);
+        
+        const totalExec = getTotalExecutedAllocations();
+        safeUpdateText('kpiExecutedAmount', formatBRL(totalExec));
+        safeUpdateText('totalChecklistExecuted', formatBRL(totalExec));
+
+        const mpGiroBal = state.vault.mpGiroBalance || 12.11;
+        const mpGiroTarget = state.vault.mpGiroTarget || 1000;
+        const mpGiroPct = Math.min(100, (mpGiroBal / mpGiroTarget) * 100).toFixed(1);
+        safeUpdateText('labelMpGiroProgress', `${formatBRL(mpGiroBal)} / ${formatBRL(mpGiroTarget)}`);
+        safeUpdateWidth('barMpGiroProgress', `${mpGiroPct}%`);
+        const mpGiroDiff = mpGiroTarget - mpGiroBal;
+        safeUpdateText('statusMpGiroProgress', mpGiroDiff > 0 ? `Faltam ${formatBRL(mpGiroDiff)} para o piso` : '✓ Piso de R$ 1.000 OK');
+
+        const pay99Bal = state.vault.pay99Balance || 0;
+        const pay99Target = state.vault.pay99Target || 10000;
+        const pay99Pct = Math.min(100, (pay99Bal / pay99Target) * 100).toFixed(1);
+        safeUpdateText('label99PayProgress', `${formatBRL(pay99Bal)} / ${formatBRL(pay99Target)}`);
+        safeUpdateWidth('bar99PayProgress', `${pay99Pct}%`);
+        safeUpdateText('percent99PayProgress', `${pay99Pct}%`);
+        const pay99Diff = pay99Target - pay99Bal;
+        safeUpdateText('status99PayProgress', pay99Diff > 0 ? `Faltam ${formatBRL(pay99Diff)} para o teto` : '🎉 TETO 10K ATINGIDO!');
+
+        const rawMeli = state.vault.cofrinhoMeliBalance !== undefined ? state.vault.cofrinhoMeliBalance : 2000;
+        const rawPontuais = state.vault.cofrinhoPontuaisBalance !== undefined ? state.vault.cofrinhoPontuaisBalance : 8000;
+        const totalCofrinhosMP = rawMeli + rawPontuais;
+        
+        const meliName = state.vault.cofrinhoMeliName || 'Cofrinho MP Mercado Livre';
+        const pontuaisName = state.vault.cofrinhoPontuaisName || 'Cofrinho MP Reservas Imediatas';
+
+        safeUpdateText('labelNameMeli', `${meliName} (140% CDI)`);
+        safeUpdateText('labelNamePontuais', `${pontuaisName} (120% CDI)`);
+
+        const displayMeli = Math.min(2000, Math.max(rawMeli, totalCofrinhosMP > 2000 ? 2000 : totalCofrinhosMP));
+        const displayPontuais = Math.max(0, Math.min(8000, totalCofrinhosMP - displayMeli));
+
+        safeUpdateText('labelCofrinhosMpTotal', `${formatBRL(totalCofrinhosMP)} / R$ 10.000,00`);
+
+        const meliPct = Math.min(100, (displayMeli / 2000) * 100).toFixed(1);
+        const excedenteMeliDisplay = rawMeli > 2000 ? ` (${formatBRL(rawMeli - 2000)} excede)` : '';
+        
+        safeUpdateText('labelCofrinhoMeli', `${formatBRL(rawMeli)} / R$ 2.000`);
+        safeUpdateWidth('barCofrinhoMeli', `${meliPct}%`);
+        safeUpdateText('percentCofrinhoMeli', `${meliPct}%`);
+        safeUpdateText('statusCofrinhoMeli', `R$ ${formatBRL(Math.min(2000, rawMeli))} a 140%` + excedenteMeliDisplay);
+
+        const pontuaisPct = Math.min(100, (displayPontuais / 8000) * 100).toFixed(1);
+        safeUpdateText('labelCofrinhoPontuais', `${formatBRL(rawPontuais)} / R$ 8.000`);
+        safeUpdateWidth('barCofrinhoPontuais', `${pontuaisPct}%`);
+        safeUpdateText('percentCofrinhoPontuais', `${pontuaisPct}%`);
+        safeUpdateText('statusCofrinhoPontuais', totalCofrinhosMP > 10000 ? `Excedente de ${formatBRL(totalCofrinhosMP - 10000)} rende a 100% CDI` : 'Rende até 120% CDI');
+
+        const cofBal = state.vault.cofrinhoTurboBalance || 0;
+        safeUpdateText('labelCofrinhoTurbo', formatBRL(cofBal));
+        safeUpdateText('statusCofrinhoTurbo', `R$ 5.000 a 115% • ${formatBRL(Math.max(0, cofBal - 5000))} a 100% CDI`);
+
+        const cdbBal = state.vault.cdb102Balance || 0;
+        const cdbTarget = state.vault.cdb102Target || 30000;
+        const cdbPct = Math.min(100, (cdbBal / cdbTarget) * 100).toFixed(1);
+        safeUpdateText('labelCdbProgress', `${formatBRL(cdbBal)} / ${formatBRL(cdbTarget)}`);
+        safeUpdateWidth('barCdbProgress', `${cdbPct}%`);
+        safeUpdateText('percentCdbProgress', `${cdbPct}%`);
+        const cdbDiff = cdbTarget - cdbBal;
+        safeUpdateText('statusCdbProgress', cdbDiff > 0 ? `Faltam ${formatBRL(cdbDiff)} para o teto` : '🎉 TETO 30K ATINGIDO!');
+
+        const totalCushion = mpGiroBal + pay99Bal + totalCofrinhosMP + cdbBal + cofBal;
+        const cushionTarget = state.vault.cushionTarget;
+        const cushionPct = Math.min(100, (totalCushion / cushionTarget) * 100).toFixed(1);
+        safeUpdateText('labelTotalCushion', `${formatBRL(totalCushion)} / ${formatBRL(cushionTarget)}`);
+        safeUpdateWidth('barTotalCushion', `${cushionPct}%`);
+        safeUpdateText('percentTotalCushion', `${cushionPct}%`);
+
+        safeUpdateText('labelAmortTotal', `${formatBRL(state.vault.amortAccumulated)} amortizados`);
+
+        // Renderização Protegida do Checklist
+        const checklistContainer = document.getElementById('checklistContainer');
+        if (checklistContainer) {
+          if (!validAllocs || validAllocs.length === 0) {
+            checklistContainer.innerHTML = `
+              <div class="text-center py-8 rounded-2xl border border-dashed border-amber-500/30 bg-amber-950/10">
+                <i data-lucide="alert-circle" class="w-8 h-8 text-amber-500 mx-auto mb-2 opacity-80"></i>
+                <p class="text-amber-400 font-medium text-sm">Nenhuma meta configurada neste mês.</p>
+                <p class="text-slate-400 text-xs mt-1">Clique no botão <b class="text-slate-300">Restaurar Padrão</b> acima para recuperar as metas originais.</p>
+              </div>`;
+          } else {
+            checklistContainer.innerHTML = validAllocs.map(item => {
+              const safeId = item.id || `alloc_${Date.now()}`;
+              const safeName = item.name || 'Meta';
+              const safeCategory = item.category || 'Categoria';
+              const safeInstruction = item.instruction || '';
+              
+              const itemTarget = Number(item.amount) || 0;
+              const itemCurrent = Number(item.currentAmount) || 0;
+              const progressPct = itemTarget > 0 ? Math.min(100, Math.round((itemCurrent / itemTarget) * 100)) : 0;
+              
+              const isTreasury = (typeof safeId === 'string') ? (safeId.includes('ipca') || safeId.includes('renda')) : false;
+
+              return `
+                <div class="rounded-2xl border ${item.checked ? 'border-emerald-500/40 bg-emerald-950/20' : 'border-slate-800 bg-slate-950/60'} p-4 sm:p-4.5 transition-all duration-200 group">
+                  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                    <div class="flex items-start gap-3 flex-grow">
+                      <button type="button" onclick="toggleCheck('${safeId}')" class="mt-1 w-6 h-6 rounded-lg border flex items-center justify-center transition shrink-0 ${item.checked ? 'bg-emerald-500 border-emerald-500 text-slate-950' : 'border-slate-700 bg-slate-900 hover:border-slate-500 text-transparent'}">
+                        <i data-lucide="check" class="w-4 h-4 stroke-[3]"></i>
+                      </button>
+                      <div class="flex-grow">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <span class="text-sm font-bold ${item.checked ? 'text-emerald-400' : 'text-white'}">${safeName}</span>
+                          <span class="text-[10px] px-2 py-0.5 rounded-full border font-medium ${item.badgeColor || 'border-slate-700 text-slate-300 bg-slate-800'}">${item.badge || 'Meta'}</span>
+                          ${item.checked && item.checkedAt ? `<span class="text-[10px] text-emerald-400 font-mono">Concluído em ${item.checkedAt}</span>` : ''}
+                          
+                          <button onclick="editAllocation('${safeId}')" title="Editar nome" class="w-5 h-5 rounded hover:bg-slate-800 text-slate-500 hover:text-amber-400 inline-flex items-center justify-center transition ml-1">
+                            <i data-lucide="edit-2" class="w-3 h-3"></i>
+                          </button>
+                          <button onclick="deleteAllocation('${safeId}')" title="Excluir meta" class="w-5 h-5 rounded hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 inline-flex items-center justify-center transition">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                          </button>
+                        </div>
+                        <div class="text-xs text-slate-400 mt-1 flex items-center gap-2">
+                          <span>${safeCategory}</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400 mt-1 italic">${safeInstruction}</p>
+
+                        <div class="mt-2.5 max-w-md">
+                          <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                            <span>Progresso: <b id="prog_label_${safeId}">${formatBRL(itemCurrent)}</b> de <span id="target_label_${safeId}">${formatBRL(itemTarget)}</span></span>
+                            <span class="font-bold text-emerald-400" id="prog_pct_${safeId}">${progressPct}%</span>
+                          </div>
+                          <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                            <div id="prog_bar_${safeId}" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-1.5 rounded-full transition-all duration-300" style="width: ${progressPct}%"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 self-end sm:self-start shrink-0 pt-1">
+                      ${isTreasury ? `
+                        <div class="flex items-center gap-1 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1" title="Taxa real contratada">
+                          <span class="text-[10px] text-slate-400">Taxa:</span>
+                          <input type="text" value="${item.customRate || ''}" 
+                            placeholder="Ex: 6.70"
+                            oninput="handleCustomRateChange('${safeId}', this.value)"
+                            class="w-12 bg-transparent border-0 text-xs font-mono font-bold text-teal-300 text-center focus:outline-none" />
+                          <span class="text-[10px] text-slate-400">%</span>
+                        </div>
+                      ` : ''}
+
+                      <div class="flex flex-col items-end">
+                        <div class="flex items-center gap-1 text-[10px] text-slate-400 mb-0.5">
+                          <span>Já Aportado (R$)</span>
+                        </div>
+                        <input type="number" step="50" value="${itemCurrent}"
+                          oninput="handleAllocationCurrentAmountChange('${safeId}', this.value)"
+                          placeholder="Realizado"
+                          class="w-24 bg-slate-900 border border-emerald-500/40 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-emerald-400 text-right focus:outline-none focus:border-emerald-500" />
+                      </div>
+
+                      <div class="flex flex-col items-end">
+                        <div class="flex items-center gap-1 text-[10px] text-slate-400 mb-0.5">
+                          <span>Meta Mês (R$)</span>
+                        </div>
+                        <input type="number" step="50" value="${itemTarget}"
+                          oninput="handleAllocationAmountChange('${safeId}', this.value)"
+                          placeholder="Meta"
+                          class="w-24 bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-mono font-bold text-white text-right focus:outline-none focus:border-emerald-500" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              `;
+            }).join('');
+          }
+        }
+
+        const plannedTotal = getTotalPlannedAllocations();
+        safeUpdateText('totalChecklistPlanned', formatBRL(plannedTotal));
+        
+        const diff = Math.abs(plannedTotal - netSurplus);
+        const reconBox = document.getElementById('reconciliationWarning');
+        
+        if (reconBox) {
+          if (!validAllocs || validAllocs.length === 0) {
+            reconBox.className = "text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5";
+            reconBox.innerHTML = '<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Nenhuma meta cadastrada. Adicione uma meta ou restaure o padrão.';
+          } else if (diff <= 5) {
+            reconBox.className = "text-xs px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1.5";
+            reconBox.innerHTML = '<i data-lucide="check-circle" class="w-3.5 h-3.5"></i> 100% da sobra líquida alocada com precisão.';
+          } else if (plannedTotal < netSurplus) {
+            reconBox.className = "text-xs px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1.5";
+            reconBox.innerHTML = `<i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Há ${formatBRL(netSurplus - plannedTotal)} sobrando sem alocação.`;
+          } else {
+            reconBox.className = "text-xs px-2.5 py-1 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center gap-1.5";
+            reconBox.innerHTML = `<i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i> Alocações superam a sobra em ${formatBRL(plannedTotal - netSurplus)}.`;
+          }
+        }
+
+        const histTable = document.getElementById('historyTableBody');
+        if (histTable) {
+          if (state.history.length === 0) {
+            histTable.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-slate-500">Nenhum histórico gravado ainda.</td></tr>`;
+          } else {
+            histTable.innerHTML = state.history.map((h, i) => `
+              <tr class="hover:bg-slate-800/30 transition">
+                <td class="py-2.5 px-3 font-medium text-white">${h.month} <span class="text-[10px] text-slate-400">(${h.phase})</span></td>
+                <td class="py-2.5 px-3 font-mono text-emerald-400">${formatBRL(h.income)}</td>
+                <td class="py-2.5 px-3 font-mono text-rose-400">${formatBRL(h.expenses)}</td>
+                <td class="py-2.5 px-3 font-mono text-blue-400">${formatBRL(h.amort)}</td>
+                <td class="py-2.5 px-3 font-mono text-indigo-400">${formatBRL(h.invested)}</td>
+                <td class="py-2.5 px-3 font-mono text-teal-300">${h.rates || '-'}</td>
+                <td class="py-2.5 px-3 font-mono text-amber-300 font-semibold">${h.yieldRecorded || '-'}</td>
+                <td class="py-2.5 px-3">
+                  <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${h.done ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}">${h.checks} concluídos</span>
+                </td>
+                <td class="py-2.5 px-3 text-right">
+                  <button onclick="deleteHistoryItem(${i})" class="text-slate-500 hover:text-rose-400 transition" title="Remover"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                </td>
+              </tr>
+            `).join('');
+          }
+        }
+
+        if (window.lucide) {
+          lucide.createIcons();
+        }
+      } catch (error) {
+        console.error("Erro na renderização da tela, abortando atualização visual para não quebrar a página:", error);
       }
-
-      const histTable = document.getElementById('historyTableBody');
-      if (state.history.length === 0) {
-        histTable.innerHTML = `<tr><td colspan="9" class="py-4 text-center text-slate-500">Nenhum histórico gravado ainda.</td></tr>`;
-      } else {
-        histTable.innerHTML = state.history.map((h, i) => `
-          <tr class="hover:bg-slate-800/30 transition">
-            <td class="py-2.5 px-3 font-medium text-white">${h.month} <span class="text-[10px] text-slate-400">(${h.phase})</span></td>
-            <td class="py-2.5 px-3 font-mono text-emerald-400">${formatBRL(h.income)}</td>
-            <td class="py-2.5 px-3 font-mono text-rose-400">${formatBRL(h.expenses)}</td>
-            <td class="py-2.5 px-3 font-mono text-blue-400">${formatBRL(h.amort)}</td>
-            <td class="py-2.5 px-3 font-mono text-indigo-400">${formatBRL(h.invested)}</td>
-            <td class="py-2.5 px-3 font-mono text-teal-300">${h.rates || '-'}</td>
-            <td class="py-2.5 px-3 font-mono text-amber-300 font-semibold">${h.yieldRecorded || '-'}</td>
-            <td class="py-2.5 px-3">
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-medium ${h.done ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-400'}">${h.checks} concluídos</span>
-            </td>
-            <td class="py-2.5 px-3 text-right">
-              <button onclick="deleteHistoryItem(${i})" class="text-slate-500 hover:text-rose-400 transition" title="Remover"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-            </td>
-          </tr>
-        `).join('');
-      }
-
-      lucide.createIcons();
     }
 
     function deleteHistoryItem(index) {
