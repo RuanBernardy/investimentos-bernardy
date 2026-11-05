@@ -79,10 +79,10 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <!-- Status Firebase -->
-        <div id="dbStatus" class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-amber-950/40 text-amber-300 border border-amber-700/50 flex items-center gap-1.5 transition-colors">
+        <!-- Status Firebase Clicável (Resolve o problema do Mobile) -->
+        <button id="dbStatus" onclick="configureCloudSync()" title="Clique para sincronizar os dados do PC e Celular" class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-700/50 flex items-center gap-1.5 transition-colors cursor-pointer">
           <i data-lucide="database" class="w-3.5 h-3.5"></i> Conectando...
-        </div>
+        </button>
 
         <div class="flex items-center bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-300">
           <i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5 text-slate-400"></i>
@@ -249,24 +249,54 @@
             </div>
           </div>
 
-          <!-- 99Pay 10k (127% CDI isento) -->
-          <div class="space-y-1.5 p-3 rounded-xl bg-slate-950/70 border border-slate-800/80">
-            <div class="flex justify-between items-center text-xs">
-              <span class="text-amber-300 font-semibold flex items-center gap-1.5">
-                <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
-                99Pay 127% CDI (Conta + Cofrinho)
+          <!-- BLOCO INTEGRADO 99PAY -->
+          <div class="p-3.5 rounded-2xl bg-slate-950 border border-amber-900/40 space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-slate-800/80 gap-1">
+              <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                <i data-lucide="zap" class="w-4 h-4 text-amber-400"></i>
+                99Pay (Teto Global R$ 10.000 Isento)
               </span>
-              <div class="flex items-center gap-2">
-                <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('pay99')" title="Clique para editar ou somar" id="label99PayProgress">R$ 0,00 / R$ 5.000</span>
-                <button onclick="quickEditOrAdd('pay99')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20">Ajustar</button>
+              <span class="text-xs font-mono font-bold text-amber-300" id="label99PayTotal">R$ 0,00 / R$ 10.000</span>
+            </div>
+
+            <!-- Conta 99 (115%) -->
+            <div class="space-y-1 pl-2 border-l-2 border-amber-600/60 group">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
+                <span class="text-amber-500 font-medium">Conta 99 (115% CDI)</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('pay99Conta')" title="Clique para editar ou somar" id="label99Conta">R$ 0,00 / R$ 5.000</span>
+                  <button onclick="quickEditOrAdd('pay99Conta')" class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/30 hover:bg-amber-500/20">Ajustar</button>
+                </div>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="bar99Conta" class="bg-gradient-to-r from-amber-600 to-amber-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+              <div class="flex justify-between text-[10px] text-slate-400">
+                <span id="status99Conta">R$ 0 a 115% (Auto)</span>
+                <span class="font-bold text-amber-500" id="percent99Conta">0.0%</span>
               </div>
             </div>
-            <div class="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5">
-              <div id="bar99PayProgress" class="bg-gradient-to-r from-amber-500 to-yellow-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+
+            <!-- Cofrinho 99 (127%) -->
+            <div class="space-y-1 pl-2 border-l-2 border-yellow-500/60 group">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
+                <span class="text-yellow-400 font-medium">Cofrinho 99 (127% CDI)</span>
+                <div class="flex items-center gap-2">
+                  <span class="text-slate-300 font-mono font-bold cursor-pointer hover:underline" onclick="quickEditOrAdd('pay99Cofrinho')" title="Clique para editar ou somar" id="label99Cofrinho">R$ 0,00 / R$ 5.000</span>
+                  <button onclick="quickEditOrAdd('pay99Cofrinho')" class="text-[9px] px-1.5 py-0.5 rounded bg-yellow-500/10 text-yellow-400 border border-yellow-500/30 hover:bg-yellow-500/20">Ajustar</button>
+                </div>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                <div id="bar99Cofrinho" class="bg-gradient-to-r from-yellow-500 to-amber-400 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+              <div class="flex justify-between text-[10px] text-slate-400">
+                <span id="status99Cofrinho">R$ 0 a 127% (Auto)</span>
+                <span class="font-bold text-yellow-400" id="percent99Cofrinho">0.0%</span>
+              </div>
             </div>
-            <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="status99PayProgress">Calculando...</span>
-              <span id="percent99PayProgress" class="font-bold text-amber-400">0.0%</span>
+
+            <div class="text-[10px] text-slate-500 italic pt-1 border-t border-slate-800/60">
+              *Valores acima de R$ 5.000 em cada modalidade rendem 80% do CDI. 100% Isento de IR.
             </div>
           </div>
 
@@ -385,7 +415,7 @@
               <div id="barTotalCushion" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
             <div class="flex justify-between text-[11px] text-slate-400">
-              <span id="statusTotalCushion">Giro + 99Pay + Cofrinhos MP + Cofrinho Turbo + CDB MP</span>
+              <span id="statusTotalCushion">Soma de toda a carteira imediata.</span>
               <span id="percentTotalCushion" class="font-bold text-blue-400">0%</span>
             </div>
           </div>
@@ -565,7 +595,7 @@
     <span id="toastMsg">Operação salva com sucesso!</span>
   </div>
 
-  <!-- Firebase Scripts -->
+  <!-- Firebase Scripts e Integração Segura -->
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
@@ -649,16 +679,14 @@
       vault: {
         mpGiroBalance: 12.11,
         mpGiroTarget: 1000,
-        pay99Balance: 6513.41,
-        pay99Target: 5000,
+        pay99ContaBalance: 0.00,
+        pay99CofrinhoBalance: 6513.41,
         cofrinhoMeliName: 'Cofrinho MP Mercado Livre',
         cofrinhoPontuaisName: 'Cofrinho MP Reservas Imediatas',
         cofrinhoMeliBalance: 2000.00,
         cofrinhoPontuaisBalance: 8000.00,
-        cofrinhoGlobalTarget: 10000,
         cofrinhoTurboBalance: 5088.24,
         cdb102Balance: 11222.77,
-        cdb102Target: 30000,
         cushionTarget: 100000,
         amortAccumulated: 0
       },
@@ -698,8 +726,15 @@
         try {
           const parsed = JSON.parse(savedPermanent);
           const mergedVault = { ...defaultState.vault, ...(parsed.vault || {}) };
+          
           let titles = parsed.tesouroTitles && parsed.tesouroTitles.length > 0 ? parsed.tesouroTitles : defaultState.tesouroTitles;
           
+          // Migração do 99Pay antigo para o novo (se a conta antiga existir e a nova não)
+          if (parsed.vault && parsed.vault.pay99Balance !== undefined && mergedVault.pay99CofrinhoBalance === undefined) {
+             mergedVault.pay99CofrinhoBalance = parsed.vault.pay99Balance;
+             mergedVault.pay99ContaBalance = 0;
+          }
+
           let allocs = parsed.allocations;
           if (!allocs || allocs.length === 0) {
             allocs = JSON.parse(JSON.stringify(safeDefaultAllocations));
@@ -722,7 +757,7 @@
     let lastUpdatedByMe = false;
     let firebaseDb = null;
 
-    // Conecta de forma invísivel e automática usando a chave hardcoded na inicialização
+    // --- FIREBASE REALTIME DB LOGIC ---
     function initFirebaseAuto() {
       try {
         const config = {
@@ -741,7 +776,6 @@
         
         firebaseDb = firebase.database();
         
-        // Define a chave padrão se o usuário não tiver uma
         let syncKey = localStorage.getItem(CLOUD_SYNC_KEY);
         if (!syncKey) {
             syncKey = "ruan-invest-2026";
@@ -751,11 +785,11 @@
         firebaseDb.ref('.info/connected').on('value', (snap) => {
           const el = document.getElementById('dbStatus');
           if (snap.val() === true) {
-             el.className = "px-2.5 py-1.5 text-xs font-medium rounded-lg bg-emerald-950/40 text-emerald-300 border border-emerald-700/50 flex items-center gap-1.5 transition-colors";
-             el.innerHTML = '<i data-lucide="wifi" class="w-3.5 h-3.5"></i> Conectado (Tempo Real)';
+             el.className = "px-2.5 py-1.5 text-xs font-medium rounded-lg bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-700/50 flex items-center gap-1.5 transition-colors cursor-pointer";
+             el.innerHTML = '<i data-lucide="wifi" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Conectado (Tempo Real)</span><span class="sm:hidden">Online</span>';
           } else {
-             el.className = "px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-950/40 text-rose-300 border border-rose-700/50 flex items-center gap-1.5 transition-colors";
-             el.innerHTML = '<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Offline';
+             el.className = "px-2.5 py-1.5 text-xs font-medium rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-700/50 flex items-center gap-1.5 transition-colors cursor-pointer";
+             el.innerHTML = '<i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> <span class="hidden sm:inline">Offline</span><span class="sm:hidden">Offline</span>';
           }
           lucide.createIcons();
         });
@@ -773,9 +807,6 @@
           }
         });
         
-        document.getElementById('labelCloudSync').innerText = `Nuvem: ${syncKey}`;
-        document.getElementById('iconCloud').className = "w-3.5 h-3.5 text-emerald-400";
-
       } catch (e) {
         console.error("Erro ao inicializar Firebase Automático:", e);
       }
@@ -795,11 +826,6 @@
             firebaseDb.ref(`/${syncKey}`).set(state).then(() => {
                 setTimeout(() => { lastUpdatedByMe = false; }, 1000);
             });
-            const icon = document.getElementById('iconCloud');
-            if (icon) {
-              icon.classList.add('animate-pulse');
-              setTimeout(() => icon.classList.remove('animate-pulse'), 1000);
-            }
         }, delay);
       }
     }
@@ -807,7 +833,7 @@
     function configureCloudSync() {
       const currentBin = localStorage.getItem(CLOUD_SYNC_KEY) || "ruan-invest-2026";
       const input = prompt(
-        "Sincronização em Tempo Real (Firebase):\n\nDigite a sua CHAVE ÚNICA (Ex: ruan-invest-2026)\nUse esse mesmo nome no celular para sincronizar os dados:",
+        "A Chave Nuvem conecta seu Celular e PC na mesma sala.\n\nSua Chave Atual:",
         currentBin
       );
 
@@ -815,20 +841,20 @@
       const cleanInput = input.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
 
       if (!cleanInput) {
-        alert("Chave inválida. A sincronização permanecerá na chave atual.");
+        alert("A chave não pode estar vazia.");
         return;
       }
       
       localStorage.setItem(CLOUD_SYNC_KEY, cleanInput);
-      document.getElementById('labelCloudSync').innerText = `Nuvem: ${cleanInput}`;
       
-      // Reconecta com a nova chave e manda os dados
+      // Reconecta com a nova chave
       initFirebaseAuto();
       saveState(false, true); 
-      showToast(`Chave alterada para ${cleanInput}! Sincronizando...`);
+      showToast(`Conectado à chave ${cleanInput}!`);
     }
 
-    // --- AUTO INCREMENTO ---
+    // --- FIM DA LÓGICA DE FIREBASE ---
+
     function applyDailyCompoundInterest() {
       const todayStr = new Date().toISOString().slice(0, 10);
       const lastDateStr = localStorage.getItem(LAST_DATE_KEY);
@@ -850,14 +876,24 @@
       const cdiAnual = (state.cdiRateAnnual || 13.15) / 100;
       const liq = 0.825;
 
-      // 99Pay: 5000 a 127% (isento). O resto a 80%.
-      if (state.vault.pay99Balance) {
-        const total = state.vault.pay99Balance;
+      // 99Pay Conta: 115% ate 5k, 80% resto (Isento IR)
+      if (state.vault.pay99ContaBalance) {
+        const total = state.vault.pay99ContaBalance;
+        const b115 = Math.min(5000, total);
+        const b80 = Math.max(0, total - 5000);
+        const f115 = days => days * (Math.pow(1 + cdiAnual * 1.15, 1 / 252) - 1);
+        const f80 = days => days * (Math.pow(1 + cdiAnual * 0.80, 1 / 252) - 1);
+        state.vault.pay99ContaBalance += (b115 * f115(diffDays)) + (b80 * f80(diffDays));
+      }
+
+      // 99Pay Cofrinho: 127% ate 5k, 80% resto (Isento IR)
+      if (state.vault.pay99CofrinhoBalance) {
+        const total = state.vault.pay99CofrinhoBalance;
         const b127 = Math.min(5000, total);
         const b80 = Math.max(0, total - 5000);
         const f127 = days => days * (Math.pow(1 + cdiAnual * 1.27, 1 / 252) - 1);
         const f80 = days => days * (Math.pow(1 + cdiAnual * 0.80, 1 / 252) - 1);
-        state.vault.pay99Balance += (b127 * f127(diffDays)) + (b80 * f80(diffDays));
+        state.vault.pay99CofrinhoBalance += (b127 * f127(diffDays)) + (b80 * f80(diffDays));
       }
 
       if (state.vault.mpGiroBalance) {
@@ -958,9 +994,12 @@
       let currentVal = 0;
       let label = "";
 
-      if (targetKey === 'pay99') {
-        currentVal = state.vault.pay99Balance || 0;
-        label = "99Pay (Conta + Cofrinho)";
+      if (targetKey === 'pay99Conta') {
+        currentVal = state.vault.pay99ContaBalance || 0;
+        label = "Conta 99 (115%)";
+      } else if (targetKey === 'pay99Cofrinho') {
+        currentVal = state.vault.pay99CofrinhoBalance || 0;
+        label = "Cofrinho 99 (127%)";
       } else if (targetKey === 'cofrinhoMeli') {
         currentVal = state.vault.cofrinhoMeliBalance || 0;
         label = state.vault.cofrinhoMeliName || "Cofrinho MP Mercado Livre (140%)";
@@ -986,7 +1025,8 @@
 
       if (entradaLimpa.startsWith('+')) {
         const aporte = parseFloat(entradaLimpa.substring(1).replace(',', '.')) || 0;
-        if (targetKey === 'pay99') state.vault.pay99Balance += aporte;
+        if (targetKey === 'pay99Conta') state.vault.pay99ContaBalance += aporte;
+        if (targetKey === 'pay99Cofrinho') state.vault.pay99CofrinhoBalance += aporte;
         if (targetKey === 'cofrinhoMeli') state.vault.cofrinhoMeliBalance += aporte;
         if (targetKey === 'cofrinhoPontuais') state.vault.cofrinhoPontuaisBalance += aporte;
         if (targetKey === 'cofrinhoTurbo') state.vault.cofrinhoTurboBalance += aporte;
@@ -994,12 +1034,13 @@
         showToast(`Aporte de ${formatBRL(aporte)} somado com sucesso!`);
       } else {
         const novoTotal = parseFloat(entradaLimpa.replace(',', '.')) || 0;
-        if (targetKey === 'pay99') state.vault.pay99Balance = novoTotal;
+        if (targetKey === 'pay99Conta') state.vault.pay99ContaBalance = novoTotal;
+        if (targetKey === 'pay99Cofrinho') state.vault.pay99CofrinhoBalance = novoTotal;
         if (targetKey === 'cofrinhoMeli') state.vault.cofrinhoMeliBalance = novoTotal;
         if (targetKey === 'cofrinhoPontuais') state.vault.cofrinhoPontuaisBalance = novoTotal;
         if (targetKey === 'cofrinhoTurbo') state.vault.cofrinhoTurboBalance = novoTotal;
         if (targetKey === 'cdb102') state.vault.cdb102Balance = novoTotal;
-        showToast(`Saldo de "${label}" atualizado para ${formatBRL(novoTotal)}!`);
+        showToast(`Saldo atualizado para ${formatBRL(novoTotal)}!`);
       }
 
       saveState();
@@ -1118,6 +1159,7 @@
       }
     }
 
+    // DIGITAÇÃO SEGURA NO CHECKLIST
     function handleAllocationCurrentAmountChange(id, value) {
       const item = state.allocations.find(a => a.id === id);
       if (item) {
@@ -1207,14 +1249,29 @@
       const cdiAnual = (state.cdiRateAnnual || 13.15) / 100;
       const liq = 0.825;
       
-      const pay99Bal = state.vault.pay99Balance || 0;
-      const b127 = Math.min(5000, pay99Bal);
-      const b80_99 = Math.max(0, pay99Bal - 5000);
-      const taxa127Anual = cdiAnual * 1.27;
       const taxa80Anual = cdiAnual * 0.80;
 
-      const rend99Mensal = (b127 * (Math.pow(1 + taxa127Anual, 1 / 12) - 1)) + (b80_99 * (Math.pow(1 + taxa80Anual, 1 / 12) - 1));
-      const rend99Diario = (b127 * (Math.pow(1 + taxa127Anual, 1 / 252) - 1)) + (b80_99 * (Math.pow(1 + taxa80Anual, 1 / 252) - 1));
+      // 99Pay Conta (115%)
+      const pay99ContaBal = state.vault.pay99ContaBalance || 0;
+      const b115_99 = Math.min(5000, pay99ContaBal);
+      const b80_conta = Math.max(0, pay99ContaBal - 5000);
+      const taxa115Anual_99 = cdiAnual * 1.15;
+      
+      // 99Pay Cofrinho (127%)
+      const pay99CofBal = state.vault.pay99CofrinhoBalance || 0;
+      const b127_99 = Math.min(5000, pay99CofBal);
+      const b80_cof_99 = Math.max(0, pay99CofBal - 5000);
+      const taxa127Anual_99 = cdiAnual * 1.27;
+
+      const rend99Mensal = (b115_99 * (Math.pow(1 + taxa115Anual_99, 1 / 12) - 1)) +
+                           (b80_conta * (Math.pow(1 + taxa80Anual, 1 / 12) - 1)) +
+                           (b127_99 * (Math.pow(1 + taxa127Anual_99, 1 / 12) - 1)) +
+                           (b80_cof_99 * (Math.pow(1 + taxa80Anual, 1 / 12) - 1));
+                           
+      const rend99Diario = (b115_99 * (Math.pow(1 + taxa115Anual_99, 1 / 252) - 1)) +
+                           (b80_conta * (Math.pow(1 + taxa80Anual, 1 / 252) - 1)) +
+                           (b127_99 * (Math.pow(1 + taxa127Anual_99, 1 / 252) - 1)) +
+                           (b80_cof_99 * (Math.pow(1 + taxa80Anual, 1 / 252) - 1));
 
       const rawMeli = state.vault.cofrinhoMeliBalance || 0;
       const rawPontuais = state.vault.cofrinhoPontuaisBalance || 0;
@@ -1361,7 +1418,6 @@
     }
 
     function editVaultBalances() {
-      // Abre Modal
       document.getElementById('modalVault').classList.remove('hidden');
     }
 
@@ -1536,19 +1592,28 @@
         const mpGiroDiff = mpGiroTarget - mpGiroBal;
         safeUpdateText('statusMpGiroProgress', mpGiroDiff > 0 ? `Faltam ${formatBRL(mpGiroDiff)} para o piso` : '✓ Piso de R$ 1.000 OK');
 
-        // ATUALIZAÇÃO 99PAY 127% ATE 5K / RESTO 80%
-        const pay99Bal = state.vault.pay99Balance || 0;
-        const pay99Target = 5000;
-        const pay99Pct = Math.min(100, (pay99Bal / pay99Target) * 100).toFixed(1);
-        safeUpdateText('label99PayProgress', `${formatBRL(pay99Bal)} / R$ 5.000,00`);
-        safeUpdateWidth('bar99PayProgress', `${pay99Pct}%`);
-        safeUpdateText('percent99PayProgress', `${pay99Pct}%`);
-        if (pay99Bal > 5000) {
-          safeUpdateText('status99PayProgress', `Excedente de ${formatBRL(pay99Bal - 5000)} rende apenas 80% CDI`);
-        } else {
-          safeUpdateText('status99PayProgress', `Rende 127% CDI isento de IR (Auto)`);
-        }
+        // ATUALIZAÇÃO 99PAY DIVIDIDO EM 2
+        const pay99ContaBal = state.vault.pay99ContaBalance || 0;
+        const pay99CofBal = state.vault.pay99CofrinhoBalance || 0;
+        const total99Pay = pay99ContaBal + pay99CofBal;
+        
+        safeUpdateText('label99PayTotal', `${formatBRL(total99Pay)} / R$ 10.000,00`);
+        
+        const contaPct = Math.min(100, (pay99ContaBal / 5000) * 100).toFixed(1);
+        safeUpdateText('label99Conta', `${formatBRL(pay99ContaBal)} / R$ 5.000`);
+        safeUpdateWidth('bar99Conta', `${contaPct}%`);
+        safeUpdateText('percent99Conta', `${contaPct}%`);
+        const excedConta = pay99ContaBal > 5000 ? ` (${formatBRL(pay99ContaBal - 5000)} a 80%)` : '';
+        safeUpdateText('status99Conta', `R$ ${formatBRL(Math.min(5000, pay99ContaBal))} a 115%` + excedConta);
 
+        const cof99Pct = Math.min(100, (pay99CofBal / 5000) * 100).toFixed(1);
+        safeUpdateText('label99Cofrinho', `${formatBRL(pay99CofBal)} / R$ 5.000`);
+        safeUpdateWidth('bar99Cofrinho', `${cof99Pct}%`);
+        safeUpdateText('percent99Cofrinho', `${cof99Pct}%`);
+        const excedCof = pay99CofBal > 5000 ? ` (${formatBRL(pay99CofBal - 5000)} a 80%)` : '';
+        safeUpdateText('status99Cofrinho', `R$ ${formatBRL(Math.min(5000, pay99CofBal))} a 127%` + excedCof);
+
+        // Cofrinhos MP 
         const rawMeli = state.vault.cofrinhoMeliBalance !== undefined ? state.vault.cofrinhoMeliBalance : 2000;
         const rawPontuais = state.vault.cofrinhoPontuaisBalance !== undefined ? state.vault.cofrinhoPontuaisBalance : 8000;
         const totalCofrinhosMP = rawMeli + rawPontuais;
@@ -1591,7 +1656,7 @@
         const cdbDiff = cdbTarget - cdbBal;
         safeUpdateText('statusCdbProgress', cdbDiff > 0 ? `Faltam ${formatBRL(cdbDiff)} para o teto` : '🎉 TETO 30K ATINGIDO!');
 
-        const totalCushion = mpGiroBal + pay99Bal + totalCofrinhosMP + cdbBal + cofBal;
+        const totalCushion = mpGiroBal + total99Pay + totalCofrinhosMP + cdbBal + cofBal;
         const cushionTarget = state.vault.cushionTarget;
         const cushionPct = Math.min(100, (totalCushion / cushionTarget) * 100).toFixed(1);
         safeUpdateText('labelTotalCushion', `${formatBRL(totalCushion)} / ${formatBRL(cushionTarget)}`);
@@ -1755,7 +1820,10 @@
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  
+  // Tenta conectar usando as chaves fixas do código de imediato
   initFirebaseAuto();
+  
   applyDailyCompoundInterest();
   render();
 });
