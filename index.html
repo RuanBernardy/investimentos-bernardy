@@ -79,7 +79,6 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <!-- Status Firebase Clicável (Resolve o problema do Mobile) -->
         <button id="dbStatus" onclick="configureCloudSync()" title="Clique para sincronizar os dados do PC e Celular" class="px-2.5 py-1.5 text-xs font-medium rounded-lg bg-amber-950/40 hover:bg-amber-900/60 text-amber-300 border border-amber-700/50 flex items-center gap-1.5 transition-colors cursor-pointer">
           <i data-lucide="database" class="w-3.5 h-3.5"></i> Conectando...
         </button>
@@ -487,7 +486,7 @@
           </div>
         </div>
 
-        <!-- Allocation Checklist Section SEGURO CONTRA CRASHES -->
+        <!-- Allocation Checklist Section -->
         <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
           <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800">
             <div>
@@ -595,7 +594,7 @@
     <span id="toastMsg">Operação salva com sucesso!</span>
   </div>
 
-  <!-- Firebase Scripts e Integração Segura -->
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-database-compat.js"></script>
 
@@ -729,7 +728,6 @@
           
           let titles = parsed.tesouroTitles && parsed.tesouroTitles.length > 0 ? parsed.tesouroTitles : defaultState.tesouroTitles;
           
-          // Migração do 99Pay antigo para o novo (se a conta antiga existir e a nova não)
           if (parsed.vault && parsed.vault.pay99Balance !== undefined && mergedVault.pay99CofrinhoBalance === undefined) {
              mergedVault.pay99CofrinhoBalance = parsed.vault.pay99Balance;
              mergedVault.pay99ContaBalance = 0;
@@ -757,7 +755,6 @@
     let lastUpdatedByMe = false;
     let firebaseDb = null;
 
-    // --- FIREBASE REALTIME DB LOGIC ---
     function initFirebaseAuto() {
       try {
         const config = {
@@ -846,14 +843,10 @@
       }
       
       localStorage.setItem(CLOUD_SYNC_KEY, cleanInput);
-      
-      // Reconecta com a nova chave
       initFirebaseAuto();
       saveState(false, true); 
       showToast(`Conectado à chave ${cleanInput}!`);
     }
-
-    // --- FIM DA LÓGICA DE FIREBASE ---
 
     function applyDailyCompoundInterest() {
       const todayStr = new Date().toISOString().slice(0, 10);
@@ -876,7 +869,6 @@
       const cdiAnual = (state.cdiRateAnnual || 13.15) / 100;
       const liq = 0.825;
 
-      // 99Pay Conta: 115% ate 5k, 80% resto (Isento IR)
       if (state.vault.pay99ContaBalance) {
         const total = state.vault.pay99ContaBalance;
         const b115 = Math.min(5000, total);
@@ -886,7 +878,6 @@
         state.vault.pay99ContaBalance += (b115 * f115(diffDays)) + (b80 * f80(diffDays));
       }
 
-      // 99Pay Cofrinho: 127% ate 5k, 80% resto (Isento IR)
       if (state.vault.pay99CofrinhoBalance) {
         const total = state.vault.pay99CofrinhoBalance;
         const b127 = Math.min(5000, total);
@@ -929,7 +920,7 @@
       saveState(true);
     }
 
-    // --- FUNÇÕES DE ACESSO SEGURO AO DOM (PREVINE CRASH) ---
+    // --- FUNÇÕES DE ACESSO SEGURO AO DOM ---
     function safeUpdateText(id, text) {
       const el = document.getElementById(id);
       if (el) el.innerText = text;
@@ -1159,7 +1150,6 @@
       }
     }
 
-    // DIGITAÇÃO SEGURA NO CHECKLIST
     function handleAllocationCurrentAmountChange(id, value) {
       const item = state.allocations.find(a => a.id === id);
       if (item) {
@@ -1417,23 +1407,6 @@
       }
     }
 
-    function editVaultBalances() {
-      document.getElementById('modalVault').classList.remove('hidden');
-    }
-
-    function closeModalVault() {
-      document.getElementById('modalVault').classList.add('hidden');
-    }
-
-    function saveModalVault() {
-      state.cdiRateAnnual = parseFloat(document.getElementById('inputVaultCDIRate').value) || 13.15;
-      state.vault.amortAccumulated = parseFloat(document.getElementById('inputVaultAmortTotal').value) || 0;
-      recalculateAllocationsAuto();
-      closeModalVault();
-      saveState();
-      showToast('Configurações salvas!');
-    }
-
     function exportDataJSON() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -1604,14 +1577,14 @@
         safeUpdateWidth('bar99Conta', `${contaPct}%`);
         safeUpdateText('percent99Conta', `${contaPct}%`);
         const excedConta = pay99ContaBal > 5000 ? ` (${formatBRL(pay99ContaBal - 5000)} a 80%)` : '';
-        safeUpdateText('status99Conta', `R$ ${formatBRL(Math.min(5000, pay99ContaBal))} a 115%` + excedConta);
+        safeUpdateText('status99Conta', `${formatBRL(Math.min(5000, pay99ContaBal))} a 115%` + excedConta);
 
         const cof99Pct = Math.min(100, (pay99CofBal / 5000) * 100).toFixed(1);
         safeUpdateText('label99Cofrinho', `${formatBRL(pay99CofBal)} / R$ 5.000`);
         safeUpdateWidth('bar99Cofrinho', `${cof99Pct}%`);
         safeUpdateText('percent99Cofrinho', `${cof99Pct}%`);
         const excedCof = pay99CofBal > 5000 ? ` (${formatBRL(pay99CofBal - 5000)} a 80%)` : '';
-        safeUpdateText('status99Cofrinho', `R$ ${formatBRL(Math.min(5000, pay99CofBal))} a 127%` + excedCof);
+        safeUpdateText('status99Cofrinho', `${formatBRL(Math.min(5000, pay99CofBal))} a 127%` + excedCof);
 
         // Cofrinhos MP 
         const rawMeli = state.vault.cofrinhoMeliBalance !== undefined ? state.vault.cofrinhoMeliBalance : 2000;
@@ -1635,7 +1608,7 @@
         safeUpdateText('labelCofrinhoMeli', `${formatBRL(rawMeli)} / R$ 2.000`);
         safeUpdateWidth('barCofrinhoMeli', `${meliPct}%`);
         safeUpdateText('percentCofrinhoMeli', `${meliPct}%`);
-        safeUpdateText('statusCofrinhoMeli', `R$ ${formatBRL(Math.min(2000, rawMeli))} a 140%` + excedenteMeliDisplay);
+        safeUpdateText('statusCofrinhoMeli', `${formatBRL(Math.min(2000, rawMeli))} a 140%` + excedenteMeliDisplay);
 
         const pontuaisPct = Math.min(100, (displayPontuais / 8000) * 100).toFixed(1);
         safeUpdateText('labelCofrinhoPontuais', `${formatBRL(rawPontuais)} / R$ 8.000`);
@@ -1644,8 +1617,15 @@
         safeUpdateText('statusCofrinhoPontuais', totalCofrinhosMP > 10000 ? `Excedente de ${formatBRL(totalCofrinhosMP - 10000)} rende a 100% CDI` : 'Rende até 120% CDI');
 
         const cofBal = state.vault.cofrinhoTurboBalance || 0;
+        const cofTarget = 5000;
+        const cofTurboPct = Math.min(100, (cofBal / cofTarget) * 100).toFixed(1);
+        
         safeUpdateText('labelCofrinhoTurbo', formatBRL(cofBal));
-        safeUpdateText('statusCofrinhoTurbo', `R$ 5.000 a 115% • ${formatBRL(Math.max(0, cofBal - 5000))} a 100% CDI`);
+        safeUpdateWidth('barCofrinhoTurbo', `${cofTurboPct}%`);
+        
+        const valorAteTetoTurbo = Math.min(5000, cofBal);
+        const valorExcedenteTurbo = Math.max(0, cofBal - 5000);
+        safeUpdateText('statusCofrinhoTurbo', `${formatBRL(valorAteTetoTurbo)} a 115% • ${formatBRL(valorExcedenteTurbo)} a 100% CDI`);
 
         const cdbBal = state.vault.cdb102Balance || 0;
         const cdbTarget = state.vault.cdb102Target || 30000;
