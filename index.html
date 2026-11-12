@@ -1219,4 +1219,131 @@ function viewCaixa() {
   const accHTML = state.accounts.map(a => {
     const my = accYield(a, 12);
     return `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(a.name)}</span>${a.taxed ? '' : '<span class="tag g">isento IR</span>'}<div class="hint">${esc(a.inst || '')} · ${accRateLabel(a)} · rende ≈ <b class="green">${brl(my)}</b>/mês</div></div><div class="num" style="font-weight:700">${brl(a.balance)}</div></div>
-      ${a.target ? `<div style="margin-top:7px">${progress(a.balance, a.target)}<div class="hint">${a.balance >= a.target ? '✓ meta atingida' : 'faltam ' + brl(a.target - a.b
+      ${a.target ? `<div style="margin-top:7px">${progress(a.balance, a.target)}<div class="hint">${a.balance >= a.target ? '✓ meta atingida' : 'faltam ' + brl(a.target - a.balance) + ' para ' + brl(a.target)}</div></div>` : ''}
+      <div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="aporteTo" data-id="${a.id}">Aportar</button><button class="btn sm" data-act="adjustAccount" data-id="${a.id}">Ajustar saldo</button><button class="btn sm" data-act="editAccount" data-id="${a.id}">Editar</button><button class="btn sm ghost danger" data-act="delAccount" data-id="${a.id}">✕</button></div></div>`;
+  }).join('');
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <h2>Caixa de liquidez <button class="btn sm" data-act="addAccount">+ Conta</button></h2>
+      <div style="margin-bottom:14px"><div class="row between"><span class="hint">Colchão total</span><span class="num"><b>${brl(cushion)}</b> <span class="mut">/ ${brl(state.cushionTarget)}</span> <button class="btn sm ghost" data-act="editCushion">meta</button></span></div>
+        <div style="margin-top:6px">${progress(cushion, state.cushionTarget, 'linear-gradient(90deg,#3b82f6,#22d3ee)')}</div></div>
+      ${accHTML || '<div class="empty">Cadastre suas contas e cofrinhos.</div>'}
+      <div class="hint">O saldo cresce sozinho a cada dia útil usando o CDI de ${pct(state.cdiRateAnnual, 2)} a.a. (ajustável em ⚙). Ajuste o saldo quando quiser alinhar com o app do banco.</div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Tesouro Direto <span class="row"><b class="cyan num">${brl(T.tesouro)}</b><button class="btn sm" data-act="addTesouro">+ Título</button></span></h2>
+        ${state.tesouro.map(t => `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(t.name)}</span>${t.blocked ? '<span class="tag a">bloqueado</span>' : ''}<div class="hint">${esc(t.rate)}${t.coupon ? ` · cupom ≈ <b class="green">${brl(couponNet(t))}</b> em mai e nov` : ''}</div></div><div class="num cyan" style="font-weight:700">${brl(t.amount)}</div></div>
+          <div class="row" style="margin-top:8px">${t.blocked ? '' : `<button class="btn sm primary" data-act="aporteTesouro" data-id="${t.id}">Aportar</button>`}<button class="btn sm" data-act="editTesouro" data-id="${t.id}">Atualizar / editar</button><button class="btn sm ghost danger" data-act="delTesouro" data-id="${t.id}">✕</button></div></div>`).join('') || '<div class="empty">Nenhum título.</div>'}
+        <div class="hint">Cupons: estimativa de ≈2,96% por semestre menos 15% de IR. Confirme no extrato e corrija no título se preferir.</div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h2>Financiamento — amortização <button class="btn sm" data-act="editAmort">Editar</button></h2>
+        <div class="big blue">${brl(state.amortAccumulated)}</div><div class="hint">Total amortizado até agora. Registre novas amortizações em “Registrar aporte”.</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function viewFiis() {
+  const T = totals(), pos = T.pos, P = passiveMonthly();
+  const pl = T.fiis - T.fiisCost, dy = T.fiisCost > 0 ? P.fii * 12 / T.fiisCost * 100 : 0;
+  const trades = [...state.fiis.trades].sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.id > a.id ? 1 : -1));
+  const provs = [...state.proventos].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const recMes = state.proventos.filter(x => (x.date || '').slice(0, 7) === state.selectedMonth).reduce((s, x) => s + x.total, 0);
+  const hasToken = !!(localStorage.getItem(TK) || localStorage.getItem(FK)), hasUS = pos.some(p => p.cur === 'USD');
+  const byCls = {}; pos.forEach(p => { byCls[p.cl.l] = (byCls[p.cl.l] || 0) + p.value; });
+  const fx = state.fx || {};
+  return `
+  <div class="grid kpis">
+    <div class="card"><div class="lbl">Valor atual</div><div class="big violet">${brl(T.fiis)}</div><div class="hint">Investido: ${brl(T.fiisCost)}</div></div>
+    <div class="card"><div class="lbl">Resultado</div><div class="big ${pl >= 0 ? 'green' : 'rose'}">${pl >= 0 ? '+' : ''}${brl(pl)}</div><div class="hint">${T.fiisCost > 0 ? pct(pl / T.fiisCost * 100) + ' sobre o custo' : '—'}</div></div>
+    <div class="card"><div class="lbl">Proventos / mês</div><div class="big amber">${brl(P.fii)}</div><div class="hint">Estimativa (média mensal)</div></div>
+    <div class="card"><div class="lbl">Recebido em ${mlabel(state.selectedMonth)}</div><div class="big green">${brl(recMes)}</div><div class="hint">Yield projetado: ${pct(dy)} a.a.</div></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h2>Carteira: FIIs, ações e ETFs <span class="row"><button class="btn sm" data-act="refreshQuotes">↻ Cotações</button><button class="btn sm" data-act="addProvento">+ Provento</button><button class="btn sm primary" data-act="addTrade" data-v="C">+ Registrar compra</button></span></h2>
+    <div class="hint" style="margin:-6px 0 10px">${esc(uiMsg.quotes) || (hasToken ? 'As cotações atualizam sozinhas a cada 15 min em horário de pregão, com esta página aberta.' : 'Para cotações automáticas, adicione o token da brapi (B3) e/ou a chave do Finnhub (EUA) em ⚙. Enquanto isso, digite o preço em “Editar”.')}</div>
+    ${Object.keys(byCls).length > 1 ? `<div class="legend" style="margin:0 0 10px">${Object.entries(byCls).map(([k, v]) => `<span style="--c:var(--violet)">${k} <b>${brl(v)}</b></span>`).join('')}</div>` : ''}
+    ${hasUS ? `<div class="hint" style="margin:0 0 10px">Dólar: <b>${fxRate() ? 'R$ ' + fxRate().toFixed(4).replace('.', ',') : 'indisponível'}</b> (${fx.manual ? 'manual' : 'automático'}). O resultado dos ativos dos EUA usa o dólar de hoje sobre o preço médio em dólar — não inclui a variação do câmbio desde a compra. Proventos dos EUA na estimativa já descontam 30% retidos.</div>` : ''}
+    ${pos.length ? `<div class="scroll"><table><thead><tr><th>Ativo</th><th>Qtd.</th><th>Preço médio</th><th>Cotação</th><th>Dia</th><th>Valor (R$)</th><th>Resultado</th><th>Prov./cota</th><th>Renda/mês</th><th>Yield a.a.</th><th></th></tr></thead><tbody>
+      ${pos.map(p => `<tr><td><b>${esc(p.ticker)}</b><span class="tag">${p.cl.l}</span></td><td class="num">${p.qty}</td><td class="num">${money(p.avg, p.cur)}</td><td class="num">${money(p.price, p.cur)}${p.hasQuote ? '' : '<span class="tag">s/ cotação</span>'}</td>
+        <td class="num ${p.change > 0 ? 'green' : p.change < 0 ? 'rose' : 'mut'}">${p.change == null ? '—' : (p.change > 0 ? '+' : '') + pct(p.change, 2)}</td>
+        <td class="num">${p.noFx ? '<span class="tag a">sem dólar</span>' : brl(p.value)}</td><td class="num ${p.pl >= 0 ? 'green' : 'rose'}">${p.noFx ? '—' : (p.pl >= 0 ? '+' : '') + brl(p.pl) + '<br><small>' + pct(p.plPct) + '</small>'}</td>
+        <td class="num">${p.dps ? (p.cur === 'USD' ? usd4(p.dps) : brl4(p.dps)) + `<br><small class="mut">${p.freq}×/ano</small>` : '—'}</td><td class="num amber">${p.dps ? brl(p.income) : '—'}</td><td class="num">${p.dps ? pct(p.dyAnual) : '—'}</td>
+        <td><button class="btn sm" data-act="editFii" data-id="${esc(p.ticker)}">Editar</button></td></tr>`).join('')}
+    </tbody></table></div>` : `<div class="empty">Nenhum ativo ainda.<br><br><button class="btn primary" data-act="addTrade" data-v="C">+ Registrar sua primeira compra</button></div>`}
+  </div>
+
+  ${provs.length ? `<div class="card" style="margin-top:12px"><h2>Proventos recebidos</h2><div class="scroll"><table><thead><tr><th>Data</th><th class="l">Ativo</th><th>Por cota</th><th>Qtd.</th><th>Recebido (R$)</th><th></th></tr></thead><tbody>
+    ${provs.map(x => `<tr><td>${(x.date || '').split('-').reverse().join('/')}</td><td class="l"><b>${esc(x.ticker)}</b></td><td class="num">${x.cur === 'USD' ? usd4(x.perShare) : brl4(x.perShare)}</td><td class="num">${x.qty}</td><td class="num green">${brl(x.total)}</td><td><button class="btn sm ghost danger" data-act="delProvento" data-id="${x.id}">✕</button></td></tr>`).join('')}
+    </tbody></table></div></div>` : ''}
+
+  ${trades.length ? `<div class="card" style="margin-top:12px"><h2>Histórico de operações</h2><div class="scroll"><table><thead><tr><th>Data</th><th class="l">Ativo</th><th class="l">Tipo</th><th>Qtd.</th><th>Preço</th><th>Total</th><th></th></tr></thead><tbody>
+    ${trades.map(t => `<tr><td>${(t.date || '').split('-').reverse().join('/')}</td><td class="l"><b>${esc(t.ticker)}</b></td><td class="l ${t.side === 'V' ? 'rose' : 'green'}">${t.side === 'V' ? 'Venda' : 'Compra'}</td><td class="num">${t.qty}</td><td class="num">${money(t.price, t.cur)}</td><td class="num">${money(t.qty * t.price + (t.side === 'V' ? -(t.fees || 0) : (t.fees || 0)), t.cur)}</td><td><button class="btn sm ghost danger" data-act="delTrade" data-id="${t.id}">✕</button></td></tr>`).join('')}
+    </tbody></table></div></div>` : ''}`;
+}
+
+function viewProj() {
+  const N = 20, start = state.selectedMonth, T = totals(), P = passiveMonthly();
+  let patr = T.patrimonio; const rows = [];
+  for (let i = 0; i < N; i++) {
+    const m = addMonths(start, i), inc = incomeFor(m).value, exp = totalExpenses(), sobra = inc - exp;
+    const cup = couponsInMonth(m), passivo = P.caixa + P.fii + cup;
+    const invest = (sobra > 0 ? sobra * state.projSavePct / 100 : sobra);
+    patr += invest + passivo;
+    rows.push({ m, inc, exp, sobra, cup, passivo, patr });
+  }
+  const maxV = Math.max(...rows.map(r => Math.max(r.inc, r.exp)), 1);
+  return `
+  <div class="card">
+    <h2>Renda × despesas, mês a mês <span class="sub">${mlabel(rows[0].m)} → ${mlabel(rows[N - 1].m)}</span></h2>
+    <div class="chart">${rows.map(r => `<div class="col" title="${mlabel(r.m)} — renda ${brl(r.inc)} · despesas ${brl(r.exp)}"><div class="bars"><i style="height:${r.inc / maxV * 100}%;background:var(--brand)"></i><i style="height:${r.exp / maxV * 100}%;background:var(--rose)"></i></div><small>${mlabel(r.m)}</small></div>`).join('')}</div>
+    <div class="legend"><span style="--c:var(--brand)">Renda prevista</span><span style="--c:var(--rose)">Despesas fixas</span></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h2>Projeção de patrimônio e proventos
+      <span class="row"><label class="hint" for="sp" style="margin:0">Quanto da sobra vira investimento</label><input id="sp" class="inl num" style="width:62px" type="number" min="0" max="100" value="${state.projSavePct}" data-chg="setSavePct" /><span class="hint" style="margin:0">%</span></span></h2>
+    <div class="scroll"><table><thead><tr><th>Mês</th><th>Renda</th><th>Despesas</th><th>Sobra</th><th>Cupom Tesouro</th><th>Renda passiva</th><th>Patrimônio projetado</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td>${mlabel(r.m)}</td><td class="num green">${brl(r.inc)}</td><td class="num rose">${brl(r.exp)}</td><td class="num ${r.sobra >= 0 ? '' : 'rose'}">${brl(r.sobra)}</td><td class="num">${r.cup ? brl(r.cup) : '—'}</td><td class="num amber">${brl(r.passivo)}</td><td class="num" style="font-weight:700">${brl(r.patr)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="hint" style="margin-top:10px">Como é calculado: a renda de cada mês é a soma dos projetos ativos (aba Renda). A renda passiva usa os saldos e proventos <b>de hoje</b> (juros do caixa líquidos de IR + proventos de FIIs, ações e ETFs + cupons do Tesouro), reinvestida no patrimônio. Meses com despesa maior que a renda saem do patrimônio. É uma estimativa, não uma garantia: o CDI, os proventos e as cotações mudam.</div>
+  </div>`;
+}
+
+/* =========================================================
+   Render
+   ========================================================= */
+const TABS = [['resumo', 'Resumo'], ['renda', 'Renda & Despesas'], ['caixa', 'Caixa & Renda Fixa'], ['fiis', 'Ações & FIIs'], ['analise', 'Análise'], ['proj', 'Projeção']];
+function render() {
+  if (gateLocked) return;
+  try {
+    $('month').value = state.selectedMonth;
+    $('tabs').innerHTML = TABS.map(([k, l]) => `<button class="tab ${tab === k ? 'active' : ''}" data-act="tab" data-tab="${k}">${l}</button>`).join('');
+    const v = { resumo: viewResumo, renda: viewRenda, caixa: viewCaixa, fiis: viewFiis, analise: viewAnalise, proj: viewProj }[tab] || viewResumo;
+    const y = window.scrollY; $('view').innerHTML = v(); window.scrollTo(0, y);
+    setSyncPill();
+  } catch (e) { console.error('Erro ao renderizar:', e); $('view').innerHTML = `<div class="empty">Erro ao desenhar a tela: ${esc(e.message)}<br>Seus dados estão salvos. Use ⚙ → Exportar backup.</div>`; }
+}
+
+/* importar backup */
+const imp = document.createElement('input'); imp.type = 'file'; imp.accept = 'application/json'; imp.id = 'importFile'; imp.style.display = 'none'; document.body.appendChild(imp);
+imp.addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { try { const o = JSON.parse(r.result); state = normalize(o); state.updatedAt = Date.now(); save(); closeSheet(); toast('Backup importado'); } catch (er) { alert('Arquivo de backup inválido.'); } };
+  r.readAsText(f); imp.value = '';
+});
+
+(function boot() {
+  try { persistLocal(); } catch (e) {}       // grava a versão migrada (e o backup da antiga já foi guardado)
+  if (initFirebase()) return;                // com login ativo, tudo (juros, cotações, tela) acontece depois do login
+  synced = true; applyDailyCompound(true); render();
+  if (localStorage.getItem(TK) && fiiPositions().length) refreshQuotes(true);
+})();
+</script>
+</body>
+</html>
