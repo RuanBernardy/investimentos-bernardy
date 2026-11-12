@@ -410,8 +410,11 @@ function startSync() {
 /* Recupera dados salvos antes do login (ficavam em /users/anon) e os traz para a conta atual */
 async function recoverLegacy(auto) {
   try {
-    const old = (await fb.ref('/users/anon').once('value')).val();
-    if (old && old.v >= 2) {
+    let old = null, found = false;
+    for (const p of ['/ruan-invest-2026', '/users/anon']) {   // versão sem login e versão com login antiga
+      try { const v = (await fb.ref(p).once('value')).val(); if (v && v.v >= 2) { old = v; break; } } catch (e) { found = found || false; }
+    }
+    if (old) {
       const m = state.selectedMonth; state = normalize(old); state.selectedMonth = m; state.updatedAt = Date.now();
       persistLocal(); pushNow(); render(); toast('Dados antigos recuperados');
     } else { if (auto) pushNow(); else toast('Não achei dados antigos na nuvem'); }
