@@ -167,6 +167,14 @@
     <button type="button" class="linkbtn" id="gateReset">Esqueci a senha</button>
     <button type="button" class="linkbtn" id="gateToggle">Primeiro acesso? Criar conta</button>
   </form>
+  <div class="sheet hidden" id="gateVerify">
+    <h3>Confirme seu e-mail</h3>
+    <p class="hint" id="gateVerTxt" style="margin:0 0 14px"></p>
+    <div class="err" id="gateVerErr"></div>
+    <button type="button" class="btn primary" style="width:100%;padding:10px" id="gateVerOk">Já confirmei</button>
+    <button type="button" class="linkbtn" id="gateVerResend">Reenviar e-mail</button>
+    <button type="button" class="linkbtn" id="gateVerOut">Usar outra conta</button>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
@@ -348,24 +356,37 @@ function initFirebase() {   // chamado uma vez no boot; devolve true se o login 
     if (!firebase.apps.length) firebase.initializeApp(FB_CONFIG);
     fb = firebase.database();
     showGate('loading');
-    firebase.auth().onAuthStateChanged(async u => {
-      if (!u) { authUser = null; stopSync(); showGate('login'); return; }
-      showGate('loading');
-      // Dono: o primeiro cadastro vira o único dono. Qualquer outra conta é recusada.
-      try {
-        const ref = fb.ref('/owner'); let o = (await ref.once('value')).val();
-        if (!o) { await ref.set(u.uid); o = u.uid; }
-        if (o !== u.uid) {
-          gateMsg = 'Este sistema é particular: o cadastro já foi feito pelo dono. Acesso não autorizado.';
-          try { await u.delete(); } catch (e) { await firebase.auth().signOut(); }
-          return;
-        }
-      } catch (e) { console.error(e); gateMsg = 'Não consegui validar o acesso — confira as regras do Firebase.'; await firebase.auth().signOut(); return; }
-      authUser = u; hideGate(); startSync();
-    });
+    firebase.auth().onAuthStateChanged(onUser);
     return true;
   } catch (e) { console.error('Firebase:', e); fb = null; hideGate(); return false; }
 }
+/* Só o e-mail do dono entra, e só depois de clicar no link de confirmação enviado a ele. As regras do banco repetem essa checagem no servidor. */
+const OWNER_EMAIL = 'ruanbernardy@yahoo.com.br';
+async function onUser(u) {
+  if (!u) { authUser = null; stopSync(); showGate('login'); return; }
+  if ((u.email || '').toLowerCase() !== OWNER_EMAIL) {
+    gateMsg = 'Acesso não autorizado: este sistema é particular.';
+    try { await u.delete(); } catch (e) { await firebase.auth().signOut(); }
+    return;
+  }
+  if (!u.emailVerified) {
+    authUser = null; stopSync(); showGate('verify');
+    $('gateVerTxt').textContent = 'Enviamos um link de confirmação para ' + u.email + '. Abra o e-mail (veja também o spam), toque no link e volte aqui.';
+    return;
+  }
+  authUser = u; hideGate(); startSync();
+}
+$('gateVerOk').addEventListener('click', async () => {
+  const u = firebase.auth().currentUser; if (!u) return; $('gateVerErr').textContent = '';
+  try { await u.reload(); if (firebase.auth().currentUser.emailVerified) { await firebase.auth().currentUser.getIdToken(true); onUser(firebase.auth().currentUser); } else { $('gateVerErr').style.color = ''; $('gateVerErr').textContent = 'Ainda não confirmado. Toque no link do e-mail primeiro.'; } }
+  catch (e) { $('gateVerErr').textContent = 'Não foi possível verificar agora. Tente de novo.'; }
+});
+$('gateVerResend').addEventListener('click', async () => {
+  const u = firebase.auth().currentUser; if (!u) return;
+  try { await u.sendEmailVerification(); $('gateVerErr').style.color = 'var(--brand)'; $('gateVerErr').textContent = 'E-mail reenviado.'; }
+  catch (e) { $('gateVerErr').style.color = ''; $('gateVerErr').textContent = e.code === 'auth/too-many-requests' ? 'Aguarde alguns minutos para reenviar.' : 'Não foi possível reenviar.'; }
+});
+$('gateVerOut').addEventListener('click', () => firebase.auth().signOut());
 function startSync() {
   stopSync();
   connRef = fb.ref('.info/connected'); connRef.on('value', s => { fbConnected = s.val() === true; setSyncPill(); });
@@ -417,16 +438,22 @@ function showGate(mode) {
   if (mode === 'login' && gateMsg) { $('gateErr').style.color = ''; $('gateErr').textContent = gateMsg; gateMsg = ''; }
   $('gateLoading').classList.toggle('hidden', mode !== 'loading');
   $('gateForm').classList.toggle('hidden', mode !== 'login');
+  $('gateVerify').classList.toggle('hidden', mode !== 'verify');
 }
 function hideGate() { gateLocked = false; $('gate').classList.add('hidden'); $('g_pass').value = ''; $('gateErr').textContent = ''; }
 const AUTH_ERR = { 'auth/invalid-credential': 'E-mail ou senha incorretos.', 'auth/wrong-password': 'E-mail ou senha incorretos.', 'auth/user-not-found': 'E-mail ou senha incorretos.',
   'auth/invalid-email': 'E-mail inválido.', 'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos.', 'auth/network-request-failed': 'Sem conexão com a internet.', 'auth/user-disabled': 'Conta desativada.',
-  'auth/email-already-in-use': 'Este e-mail já tem conta. Toque em "Já tenho conta".', 'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.', 'auth/operation-not-allowed': 'Ative "E-mail/senha" no Firebase (Authentication → Método de login).' };
+  'auth/email-already-in-use': 'Este e-mail já tem conta. Toque em "Já tenho conta".', 'x/not-owner': 'Este e-mail não está autorizado a criar conta.', 'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.', 'auth/operation-not-allowed': 'Ative "E-mail/senha" no Firebase (Authentication → Método de login).' };
 $('gateForm').addEventListener('submit', async e => {
   e.preventDefault(); $('gateErr').textContent = ''; $('gateBtn').disabled = true;
   try {
     const em = $('g_email').value.trim(), pw = $('g_pass').value;
-    if (gateSignup) { if (pw.length < 6) throw { code: 'auth/weak-password' }; await firebase.auth().createUserWithEmailAndPassword(em, pw); }
+    if (gateSignup) {
+      if (em.toLowerCase() !== OWNER_EMAIL) throw { code: 'x/not-owner' };
+      if (pw.length < 6) throw { code: 'auth/weak-password' };
+      const cred = await firebase.auth().createUserWithEmailAndPassword(em, pw);
+      try { await cred.user.sendEmailVerification(); } catch (e2) {}
+    }
     else await firebase.auth().signInWithEmailAndPassword(em, pw);
   }
   catch (er) { $('gateErr').textContent = AUTH_ERR[er.code] || 'Não foi possível entrar (' + (er.code || er.message) + ').'; }
