@@ -372,7 +372,7 @@ function startSync() {
   dataRef = fb.ref(dbPath());
   dataRef.on('value', snap => {
     const r = snap.val();
-    if (!r) { pushNow(); }
+    if (!r) { if (!state.fiis.trades.length) recoverLegacy(true); else pushNow(); }
     else if (!(r.v >= 2)) {            // dados na nuvem ainda no formato antigo: migra a partir deles
       if (state.updatedAt > 1) pushNow();
       else { const m = state.selectedMonth; state = normalize(r); state.selectedMonth = m; state.updatedAt = Date.now(); persistLocal(); pushNow(); render(); }
@@ -385,6 +385,16 @@ function startSync() {
   }, err => { console.error(err); toast('O banco recusou o acesso — confira as regras do Firebase'); });
   setTimeout(() => { if (!synced && authUser) { synced = true; applyDailyCompound(false); render(); } }, 4000); // sem conexão: segue local
   render();
+}
+/* Recupera dados salvos antes do login (ficavam em /users/anon) e os traz para a conta atual */
+async function recoverLegacy(auto) {
+  try {
+    const old = (await fb.ref('/users/anon').once('value')).val();
+    if (old && old.v >= 2) {
+      const m = state.selectedMonth; state = normalize(old); state.selectedMonth = m; state.updatedAt = Date.now();
+      persistLocal(); pushNow(); render(); toast('Dados antigos recuperados');
+    } else { if (auto) pushNow(); else toast('Não achei dados antigos na nuvem'); }
+  } catch (e) { console.error(e); if (auto) pushNow(); else toast('Sem permissão para ler os dados antigos — veja as regras do Firebase'); }
 }
 function stopSync() {
   if (dataRef) { dataRef.off(); dataRef = null; }
@@ -699,6 +709,7 @@ const A = {
 
   /* ---- configurações ---- */
   settings() { settingsSheet(); },
+  recoverOld() { recoverLegacy(false); },
   exportJSON() {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `investimentos_backup_${todayStr()}.json`;
@@ -818,7 +829,7 @@ function settingsSheet() {
       <div class="hint">Conta gratuita em finnhub.io → copie a API key. Também fica só neste aparelho.</div></div>
     <div class="field"><label>Dólar (R$) — deixe vazio para automático</label><input id="s_fx" value="${state.fx && state.fx.manual && state.fx.rate ? String(state.fx.rate).replace('.', ',') : ''}" placeholder="${fxRate() ? 'atual: ' + fxRate().toFixed(4).replace('.', ',') : 'ex: 5,40'}" /></div>
     ${authUser ? `<div class="field"><label>Conta conectada</label><div class="row between"><span class="mut">${esc(authUser.email)}</span><button type="button" class="btn sm danger" data-act="logout">Sair</button></div></div>` : ''}
-    <div class="row" style="margin-bottom:6px"><button type="button" class="btn sm" data-act="exportJSON">⬇ Exportar backup</button><button type="button" class="btn sm" data-act="importJSON">⬆ Importar backup</button></div>
+    <div class="row" style="margin-bottom:6px"><button type="button" class="btn sm" data-act="exportJSON">⬇ Exportar backup</button><button type="button" class="btn sm" data-act="importJSON">⬆ Importar backup</button>${authUser ? '<button type="button" class="btn sm" data-act="recoverOld">↺ Recuperar dados antigos</button>' : ''}</div>
     <div class="actions"><button type="button" class="btn" data-act="closeSheet">Cancelar</button><button class="btn primary">Salvar</button></div></form>`);
   $('setForm').onsubmit = e => {
     e.preventDefault();
