@@ -188,7 +188,7 @@
 const SK = 'FINANCE_ALLOCATOR_DATA_PERMANENT';
 const CK = 'FINANCE_CLOUD_SYNC_BIN_ID';
 const FK = 'FINANCE_FINNHUB_KEY';      // chave do Finnhub (cotações EUA): também só neste aparelho
-const TK = 'FINANCE_BRAPI_TOKEN';      // token de cotações: fica SÓ neste aparelho (não vai pro Firebase)
+try { localStorage.removeItem('FINANCE_BRAPI_TOKEN'); } catch (e) {}   // a chave da brapi não fica mais no navegador: quem usa é o robô do GitHub Actions
 const BK = 'FINANCE_BACKUP_PRE_V2';
 const TABK = 'FINANCE_LAST_TAB';
 
@@ -467,7 +467,7 @@ $('gateReset').addEventListener('click', async () => {
   try { await firebase.auth().sendPasswordResetEmail(em); $('gateErr').style.color = 'var(--brand)'; $('gateErr').textContent = 'Se o e-mail existir, enviamos um link para redefinir a senha.'; }
   catch (er) { $('gateErr').style.color = ''; $('gateErr').textContent = AUTH_ERR[er.code] || 'Não foi possível enviar o e-mail.'; }
 });
-function firstSyncDone() { if (synced) return; synced = true; applyDailyCompound(true); render(); if (localStorage.getItem(TK) && fiiPositions().length) refreshQuotes(true); }
+function firstSyncDone() { if (synced) return; synced = true; applyDailyCompound(true); render(); if (fiiPositions().length) refreshQuotes(true); }
 function persistLocal() { try { localStorage.setItem(SK, JSON.stringify(state)); } catch (e) {} }
 function pushNow() {
   if (!fb || !authUser) return;
@@ -853,8 +853,6 @@ function settingsSheet() {
       <div class="field"><label>CDI atual (% a.a.)</label><input id="s_cdi" type="number" step="0.01" value="${state.cdiRateAnnual}" /></div>
       <div class="field"><label>IR sobre rendimentos (%)</label><input id="s_ir" type="number" step="0.5" value="${state.irRate}" /><div class="hint">17,5% p/ prazos acima de 360 dias</div></div>
     </div>
-    <div class="field"><label>Token brapi.dev (B3: FIIs, ações, ETFs, BDRs)</label><input id="s_tok" type="password" value="${esc(localStorage.getItem(TK) || '')}" placeholder="cole aqui o token gratuito" autocomplete="off" />
-      <div class="hint">Conta gratuita em brapi.dev → copie o token. O plano gratuito consulta 1 ativo por vez e tem ~30 min de atraso. Fica só neste aparelho — repita no celular.</div></div>
     <div class="field"><label>Chave Finnhub (ações e ETFs dos EUA)</label><input id="s_fk" type="password" value="${esc(localStorage.getItem(FK) || '')}" placeholder="cole aqui a API key gratuita" autocomplete="off" />
       <div class="hint">Conta gratuita em finnhub.io → copie a API key. Também fica só neste aparelho.</div></div>
     <div class="field"><label>Dólar (R$) — deixe vazio para automático</label><input id="s_fx" value="${state.fx && state.fx.manual && state.fx.rate ? String(state.fx.rate).replace('.', ',') : ''}" placeholder="${fxRate() ? 'atual: ' + fxRate().toFixed(4).replace('.', ',') : 'ex: 5,40'}" /></div>
@@ -864,8 +862,8 @@ function settingsSheet() {
   $('setForm').onsubmit = e => {
     e.preventDefault();
     state.cdiRateAnnual = num($('s_cdi').value) || 13.15; state.irRate = num($('s_ir').value);
-    const tok = $('s_tok').value.trim(), fk = $('s_fk').value.trim();
-    try { tok ? localStorage.setItem(TK, tok) : localStorage.removeItem(TK); fk ? localStorage.setItem(FK, fk) : localStorage.removeItem(FK); } catch (er) {}
+    const fk = $('s_fk').value.trim();
+    try { fk ? localStorage.setItem(FK, fk) : localStorage.removeItem(FK); } catch (er) {}
     const fxv = num($('s_fx').value);
     if (fxv > 0) state.fx = { rate: fxv, at: Date.now(), manual: true }; else if (state.fx) state.fx.manual = false;
     save(); closeSheet(); toast('Configurações salvas');
@@ -892,12 +890,9 @@ function errReason(e, src) {
   if (!s) return 'sem conexão ou bloqueio do navegador';
   return 'erro ' + s;
 }
-async function quoteB3(tk, token) {
-  const j = await getJSON(`https://brapi.dev/api/quote/${encodeURIComponent(tk)}${token ? '?token=' + encodeURIComponent(token) : ''}`);
-  const it = toArr(j && j.results)[0], d = it && (it.data || it);
-  if (!d || !(Number(d.regularMarketPrice) > 0)) { const e = new Error('sem preço'); e.status = 404; throw e; }
-  const ch = Number(d.regularMarketChangePercent);
-  return { price: Number(d.regularMarketPrice), change: isFinite(ch) ? ch : null };
+/* B3: os preços vêm do quotes.json, gravado pelo robô do GitHub Actions (que usa a chave da brapi guardada como Secret). */
+async function loadRobot() {
+  try { const r = await fetch('./quotes.json?t=' + Date.now(), { cache: 'no-store' }); return r.ok ? await r.json() : null; } catch (e) { return null; }
 }
 async function quoteUS(tk, key) {
   const j = await getJSON(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(tk)}&token=${encodeURIComponent(key)}`);
@@ -913,7 +908,7 @@ async function refreshQuotes(silent) {
   if (refreshing) return;
   const pos = fiiPositions();
   if (!pos.length) { if (!silent) toast('Registre uma compra primeiro'); return; }
-  const tokB = localStorage.getItem(TK) || '', keyU = localStorage.getItem(FK) || '';
+  const keyU = localStorage.getItem(FK) || '', robot = pos.some(p => p.cl.src !== 'us') ? await loadRobot() : null;
   refreshing = true; uiMsg.quotes = 'Atualizando cotações…'; if (tab === 'fiis') render();
   let ok = 0, changed = false; const fails = [];
   if (pos.some(p => p.cur === 'USD') && !(state.fx && state.fx.manual)) {
@@ -924,19 +919,26 @@ async function refreshQuotes(silent) {
     try {
       let q;
       if (src === 'us') { if (!keyU) { fails.push(`${p.ticker}: falta a chave do Finnhub (⚙)`); continue; } q = await quoteUS(p.ticker, keyU); }
-      else { q = await quoteB3(p.ticker, tokB); await sleep(450); }   // plano gratuito: 1 consulta por vez
+      else {
+        const r = robot && robot.quotes && robot.quotes[p.ticker.toUpperCase()];
+        if (!r || !(Number(r.price) > 0)) { fails.push(`${p.ticker}: ${robot ? 'não está em tickers.json (robô) ou sem preço' : 'robô ainda não publicou o quotes.json'}`); continue; }
+        q = { price: Number(r.price), change: isFinite(Number(r.change)) && r.change !== null ? Number(r.change) : null };
+      }
       state.fiis.quotes[tkKey(p.ticker)] = { price: q.price, change: q.change, at: Date.now() }; ok++; changed = true;
     } catch (e) { fails.push(`${p.ticker}: ${errReason(e, src)}`); if (e.status === 429) await sleep(1500); }
   }
-  const fiiT = pos.filter(p => p.cls === 'fii').map(p => p.ticker);
-  if (tokB && fiiT.length) {   // dividendos de FIIs na brapi: só planos pagos — se não houver acesso, segue com o valor digitado
-    try {
-      const j = await getJSON(`https://brapi.dev/api/v2/fii/dividends?symbols=${fiiT.join(',')}`, { headers: { Authorization: 'Bearer ' + tokB } });
-      const by = {};
-      toArr(j && j.dividends).forEach(d => { const s = (d.symbol || '').toUpperCase(); if (!s || !(d.rate > 0)) return; if (!by[s] || (d.paymentDate || '') > (by[s].paymentDate || '')) by[s] = d; });
-      Object.entries(by).forEach(([s, d]) => { const key = tkKey(s), cur = state.fiis.divs[key]; if (!cur || !cur.manual) { state.fiis.divs[key] = { value: Number(d.rate), freq: 12, date: (d.paymentDate || '').slice(0, 10), manual: false }; changed = true; } });
-    } catch (e) {}
+  // proventos vindos do robô (nunca sobrescrevem o que você digitou à mão)
+  if (robot && robot.dividends) {
+    const yearAgo = new Date(Date.now() - 365 * 864e5).toISOString().slice(0, 10);
+    pos.filter(p => p.cl.src !== 'us').forEach(p => {
+      const list = toArr(robot.dividends[p.ticker.toUpperCase()]).filter(d => Number(d.rate) > 0); if (!list.length) return;
+      const key = tkKey(p.ticker), cur = state.fiis.divs[key]; if (cur && cur.manual) return;
+      const d = p.cls === 'fii' ? { value: Number(list[0].rate), freq: 12, date: list[0].paymentDate || '' }
+        : { value: list.filter(x => (x.paymentDate || '') >= yearAgo).reduce((t, x) => t + Number(x.rate), 0), freq: 1, date: list[0].paymentDate || '' };   // ações/ETFs: soma dos últimos 12 meses
+      if (d.value > 0) { state.fiis.divs[key] = { ...d, manual: false }; changed = true; }
+    });
   }
+  if (robot && robot.updatedAt && Date.now() - Date.parse(robot.updatedAt) > 36 * 36e5) fails.push('o robô não atualiza há mais de 1 dia (veja a aba Actions no GitHub)');
   refreshing = false;
   const hh = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   uiMsg.quotes = (ok ? `Cotações atualizadas às ${hh} (${ok} de ${pos.length})` : 'Não consegui atualizar nenhuma cotação') + (fails.length ? ' — falhas: ' + fails.join('; ') : '') + '. Digite à mão em “Editar” se precisar.';
@@ -944,8 +946,8 @@ async function refreshQuotes(silent) {
   if (!silent) toast(ok ? 'Cotações atualizadas' : 'Cotações indisponíveis');
 }
 function marketOpen() { const d = new Date(), w = d.getDay(), h = d.getHours() + d.getMinutes() / 60; return w >= 1 && w <= 5 && h >= 9.9 && h <= 19; }
-// a cada 15 min no horário de pregão (a brapi gratuita tem 15.000 consultas/mês e atraso de ~30 min)
-setInterval(() => { if (document.visibilityState === 'visible' && (localStorage.getItem(TK) || localStorage.getItem(FK)) && marketOpen() && !gateLocked && fiiPositions().length) refreshQuotes(true); }, 15 * 60 * 1000);
+// relê o quotes.json a cada 15 min no horário de pregão
+setInterval(() => { if (document.visibilityState === 'visible' && marketOpen() && !gateLocked && fiiPositions().length) refreshQuotes(true); }, 15 * 60 * 1000);
 
 /* =========================================================
    Análise de ativos — triagem por indicadores (regras gerais, editáveis no código)
@@ -1294,7 +1296,7 @@ function viewFiis() {
   const trades = [...state.fiis.trades].sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.id > a.id ? 1 : -1));
   const provs = [...state.proventos].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
   const recMes = state.proventos.filter(x => (x.date || '').slice(0, 7) === state.selectedMonth).reduce((s, x) => s + x.total, 0);
-  const hasToken = !!(localStorage.getItem(TK) || localStorage.getItem(FK)), hasUS = pos.some(p => p.cur === 'USD');
+  const hasToken = true, hasUS = pos.some(p => p.cur === 'USD');
   const byCls = {}; pos.forEach(p => { byCls[p.cl.l] = (byCls[p.cl.l] || 0) + p.value; });
   const fx = state.fx || {};
   return `
@@ -1307,7 +1309,7 @@ function viewFiis() {
 
   <div class="card" style="margin-top:12px">
     <h2>Carteira: FIIs, ações e ETFs <span class="row"><button class="btn sm" data-act="refreshQuotes">↻ Cotações</button><button class="btn sm" data-act="addProvento">+ Provento</button><button class="btn sm primary" data-act="addTrade" data-v="C">+ Registrar compra</button></span></h2>
-    <div class="hint" style="margin:-6px 0 10px">${esc(uiMsg.quotes) || (hasToken ? 'As cotações atualizam sozinhas a cada 15 min em horário de pregão, com esta página aberta.' : 'Para cotações automáticas, adicione o token da brapi (B3) e/ou a chave do Finnhub (EUA) em ⚙. Enquanto isso, digite o preço em “Editar”.')}</div>
+    <div class="hint" style="margin:-6px 0 10px">${esc(uiMsg.quotes) || (hasToken ? 'Cotações da B3 vêm do robô (a cada 30 min no pregão, ~30 min de atraso). Ativos novos precisam entrar em tickers.json. Ações dos EUA: chave do Finnhub em ⚙.' : '')}</div>
     ${Object.keys(byCls).length > 1 ? `<div class="legend" style="margin:0 0 10px">${Object.entries(byCls).map(([k, v]) => `<span style="--c:var(--violet)">${k} <b>${brl(v)}</b></span>`).join('')}</div>` : ''}
     ${hasUS ? `<div class="hint" style="margin:0 0 10px">Dólar: <b>${fxRate() ? 'R$ ' + fxRate().toFixed(4).replace('.', ',') : 'indisponível'}</b> (${fx.manual ? 'manual' : 'automático'}). O resultado dos ativos dos EUA usa o dólar de hoje sobre o preço médio em dólar — não inclui a variação do câmbio desde a compra. Proventos dos EUA na estimativa já descontam 30% retidos.</div>` : ''}
     ${pos.length ? `<div class="scroll"><table><thead><tr><th>Ativo</th><th>Qtd.</th><th>Preço médio</th><th>Cotação</th><th>Dia</th><th>Valor (R$)</th><th>Resultado</th><th>Prov./cota</th><th>Renda/mês</th><th>Yield a.a.</th><th></th></tr></thead><tbody>
@@ -1383,7 +1385,7 @@ imp.addEventListener('change', e => {
   try { persistLocal(); } catch (e) {}       // grava a versão migrada (e o backup da antiga já foi guardado)
   if (initFirebase()) return;                // com login ativo, tudo (juros, cotações, tela) acontece depois do login
   synced = true; applyDailyCompound(true); render();
-  if (localStorage.getItem(TK) && fiiPositions().length) refreshQuotes(true);
+  if (fiiPositions().length) refreshQuotes(true);
 })();
 </script>
 </body>
