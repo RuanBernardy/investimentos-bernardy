@@ -1,0 +1,34 @@
+name: Atualizar cotações
+
+on:
+  schedule:
+    - cron: '*/30 13-21 * * 1-5'   # a cada 30 min no pregão (UTC; B3 abre ~10h de Brasília)
+    - cron: '0 11 * * *'           # uma vez por dia cedo
+  workflow_dispatch:
+  push:
+    paths: ['tickers.json']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quotes
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Buscar dados na brapi
+        env:
+          BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
+        run: node scripts/update-quotes.mjs
+      - name: Publicar quotes.json
+        run: |
+          git config user.name "robo-cotacoes"
+          git config user.email "actions@users.noreply.github.com"
+          git add quotes.json
+          git diff --cached --quiet && echo "sem mudanças" || (git commit -m "cotações: $(date -u +%F\ %H:%M)" && git pull --rebase && git push)
