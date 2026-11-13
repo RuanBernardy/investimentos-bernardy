@@ -1,0 +1,258 @@
+{
+  "updatedAt": "2026-11-13T20:34:08.550Z",
+  "quotes": {
+    "MXRF11": {
+      "price": 8.82,
+      "change": 1.38,
+      "time": "2026-11-13T20:33:30.000Z"
+    },
+    "HGLG11": {
+      "price": 146.38,
+      "change": 0.47,
+      "time": "2026-11-13T20:32:30.000Z"
+    },
+    "LVBI11": {
+      "price": 102.52,
+      "change": 2.98,
+      "time": "2026-11-13T20:30:30.000Z"
+    },
+    "TRXF11": {
+      "price": 55.2,
+      "change": 1.47,
+      "time": "2026-11-13T20:32:30.000Z"
+    },
+    "XPML11": {
+      "price": 90.39,
+      "change": 0.98,
+      "time": "2026-11-13T20:33:30.000Z"
+    },
+    "EGIE3": {
+      "price": 26.28,
+      "change": -0.27,
+      "time": "2026-11-13T20:32:30.000Z"
+    },
+    "ALUP11": {
+      "price": 33.26,
+      "change": 0.51,
+      "time": "2026-11-13T20:33:30.000Z"
+    }
+  },
+  "dividends": {
+    "MXRF11": [
+      {
+        "rate": 0.095,
+        "paymentDate": "2026-11-16",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2026-10-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2026-09-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2026-08-14",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2026-07-14",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2026-06-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2026-05-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.095,
+        "paymentDate": "2026-04-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2026-03-13",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2026-02-13",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2026-01-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2025-12-12",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 0.1,
+        "paymentDate": "2025-11-14",
+        "label": "RENDIMENTO"
+      }
+    ],
+    "HGLG11": [
+      {
+        "rate": 1.17,
+        "paymentDate": "2026-11-16",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.17,
+        "paymentDate": "2026-10-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.17,
+        "paymentDate": "2026-09-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.17,
+        "paymentDate": "2026-08-14",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.1,
+        "paymentDate": "2026-07-14",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.1,
+        "paymentDate": "2026-06-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.1,
+        "paymentDate": "2026-05-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.1,
+        "paymentDate": "2026-04-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.1,
+        "paymentDate": "2026-03-13",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.1,
+        "paymentDate": "2026-02-13",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.1,
+        "paymentDate": "2026-01-15",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.1,
+        "paymentDate": "2025-12-12",
+        "label": "RENDIMENTO"
+      },
+      {
+        "rate": 1.1,
+        "paymentDate": "2025-11-14",
+        "label": "RENDIMENTO"
+      }
+    ]
+  },
+  "indicators": {
+    "MXRF11": {
+      "priceToNav": 0.9302279,
+      "dividendYield12m": 0.13735633,
+      "dividendYield1m": 0.011494253,
+      "navPerShare": 9.352547,
+      "equity": 5304823085.04,
+      "asOf": "2026-09-01 00:00:00+00"
+    },
+    "HGLG11": {
+      "priceToNav": 0.88042647,
+      "dividendYield12m": 0.092044756,
+      "dividendYield1m": 0.00803075,
+      "navPerShare": 165.476630173739,
+      "equity": 7546017797.39,
+      "asOf": "2026-09-01 00:00:00+00"
+    }
+  },
+  "fx": {},
+  "macro": {},
+  "errors": [
+    {
+      "what": "fii/dividends LVBI11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "fii/dividends TRXF11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "fii/dividends XPML11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "stocks/dividends EGIE3",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "stocks/dividends ALUP11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "fii/indicators LVBI11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "fii/indicators TRXF11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "fii/indicators XPML11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "stocks/statistics EGIE3",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "stocks/statistics ALUP11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "dólar",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "macro",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    }
+  ]
+}
