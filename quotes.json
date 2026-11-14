@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-14T00:59:08.304Z",
+  "updatedAt": "2026-11-14T16:50:55.930Z",
   "quotes": {
     "MXRF11": {
       "price": 8.75,
@@ -176,7 +176,7 @@
   "indicators": {
     "MXRF11": {
       "priceToNav": 0.95455915,
-      "dividendYield12m": 0.13657142,
+      "dividendYield12m": 0.12514286,
       "dividendYield1m": 0.011428571,
       "navPerShare": 9.166535,
       "equity": 5199316226.31,
@@ -184,7 +184,7 @@
     },
     "HGLG11": {
       "priceToNav": 0.884837,
-      "dividendYield12m": 0.091836736,
+      "dividendYield12m": 0.08430352,
       "dividendYield1m": 0.008012601,
       "navPerShare": 165.02474631029,
       "equity": 7656899371.48,
