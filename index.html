@@ -568,6 +568,7 @@ function applyDailyCompound(bump = true) {
 
 /* Fração do mês m que a fonte paga. Início/fim podem ser mês (AAAA-MM = mês cheio) ou data (AAAA-MM-DD): no mês da data, paga proporcional aos dias. */
 function srcFactor(x, m) {
+  if (x.lag === '1' && !x.once) m = addMonths(m, -1);   // paga no mês seguinte: o que cai em m é o trabalhado no mês anterior
   const s = x.start || '', e = x.end || '';
   if (x.once) return s.slice(0, 7) === m ? 1 : 0;   // pagamento único (doação, trabalho de 1 dia): valor inteiro no mês da data
   if ((s && s.slice(0, 7) > m) || (e && e.slice(0, 7) < m)) return 0;
@@ -697,6 +698,19 @@ const A = {
       onSubmit(v) { state.plan = { amort: num(v.amort), tesouro: num(v.tesouro), fii: num(v.fii) }; save(); } });
   },
   addAporte(pre) { aporteForm(typeof pre === 'string' ? pre : ''); },
+  editCatAporte(c) {
+    const m = state.selectedMonth, names = { amort: 'Amortização do financiamento', tesouro: 'Tesouro Direto', caixa: 'Renda Fixa', fii: 'Renda variável' };
+    const cur = aportesOfMonth(m).filter(a => a.cat === c).reduce((t, a) => t + a.amount, 0);
+    openForm({ title: `${names[c]} — investido em ${mlabel(m)}`, note: `Hoje o total é ${brl(cur)}. Digite o valor correto: o sistema cria um ajuste com a diferença, sem mexer em nenhum saldo. Dá para desfazer o ajuste em “Lançamentos”.`,
+      fields: [{ k: 'v', label: 'Total investido no mês (R$)', value: Math.round(cur * 100) / 100, required: true }],
+      onSubmit(v) {
+        const diff = Math.round((num(v.v) - cur) * 100) / 100; if (v.v === '' || num(v.v) < 0) { toast('Informe um valor'); return false; }
+        if (Math.abs(diff) < 0.005) return;
+        const today = todayStr(), date = today.slice(0, 7) === m ? today : m + '-28';
+        state.aportes.push({ id: uid('ap'), date, cat: c, kind: 'ajuste', target: '', label: 'Ajuste manual', amount: diff, noBal: true });
+        save(); toast(`Total de ${names[c]} agora é ${brl(num(v.v))}`);
+      } });
+  },
   delAporte(id) {
     const a = state.aportes.find(x => x.id === id); if (!a) return;
     if (!confirm(`Desfazer o aporte de ${brl(a.amount)}?${a.noBal ? ' Nenhum saldo será alterado.' : ' O saldo do destino será revertido.'}`)) return;
@@ -836,10 +850,11 @@ function sourceForm(src) {
     fields: [{ k: 'n', label: 'Nome (ex: Projeto X)', value: src.name, required: true }, { k: 'v', label: 'Valor líquido mensal (R$)', value: src.amount },
              { k: 'once', label: 'Tipo', type: 'select', value: src.once ? '1' : '0', options: [['0', 'Recorrente (todo mês entre o início e o fim)'], ['1', 'Pagamento único (doação, trabalho de 1 dia)']], hint: 'Único: o valor inteiro entra só no mês da data de início, sem proporção.' },
              { row: [{ k: 's', label: 'Início / data do recebimento', type: 'date', value: asDate(src.start, false) }, { k: 'e', label: 'Fim (só recorrente)', type: 'date', value: asDate(src.end, true), hint: 'Vazio = sem fim' }] },
+             { k: 'lag', label: 'Quando o dinheiro cai na conta', type: 'select', value: src.lag === '1' ? '1' : '0', options: [['0', 'No próprio mês'], ['1', 'No mês seguinte (paga o mês trabalhado)']], hint: 'Ex.: começou 19/10 e o 1º pagamento veio em novembro, proporcional aos dias de outubro.' },
              { k: 'prop', label: 'Primeiro e último mês', type: 'select', value: src.prop === '0' ? '0' : '1', options: [['1', 'Pagar proporcional aos dias'], ['0', 'Pagar o mês cheio']] }],
     onSubmit(v) {
       if (!v.n.trim()) return false;
-      const data = { name: v.n.trim(), amount: num(v.v), start: v.s || '', end: v.once === '1' ? '' : (v.e || ''), prop: v.prop === '0' ? '0' : '1', once: v.once === '1' };
+      const data = { name: v.n.trim(), amount: num(v.v), start: v.s || '', end: v.once === '1' ? '' : (v.e || ''), prop: v.prop === '0' ? '0' : '1', lag: v.lag === '1' ? '1' : '0', once: v.once === '1' };
       if (isNew) state.incomeSources.push({ id: uid('src'), ...data }); else Object.assign(src, data);
       save();
     } });
@@ -884,7 +899,7 @@ function tesouroForm(t) {
     } });
 }
 function aporteForm(preset) {
-  const opts = [...state.accounts.map(a => [`account:${a.id}`, `Caixa — ${a.name}`]),
+  const opts = [...state.accounts.map(a => [`account:${a.id}`, `Renda fixa — ${a.name}`]),
                 ...state.tesouro.filter(t => !t.blocked).map(t => [`tesouro:${t.id}`, `Tesouro — ${t.name}`]),
                 ['amort:', 'Amortização do financiamento']];
   openForm({ title: 'Registrar aporte', note: 'O aporte conta na meta do mês. Escolha abaixo se o saldo do destino também deve ser alterado. Para FIIs, ações e ETFs use “Registrar compra” na aba Ações & FIIs.',
@@ -1272,7 +1287,7 @@ function viewResumo() {
   const T = totals(), P = passiveMonthly(), ap = aportesOfMonth(m);
   const done = c => ap.filter(a => a.cat === c).reduce((s, a) => s + a.amount, 0);
   const plan = state.plan, caixaPlan = Math.max(0, sobra - plan.amort - plan.tesouro - plan.fii);
-  const rows = [['amort', 'Amortização do financiamento', plan.amort, 'var(--blue)'], ['tesouro', 'Tesouro Direto', plan.tesouro, 'var(--cyan)'], ['caixa', 'Caixa & renda fixa de liquidez', caixaPlan, 'var(--brand)'], ['fii', 'Renda variável (FIIs, ações, ETFs)', plan.fii, 'var(--violet)']];
+  const rows = [['amort', 'Amortização do financiamento', plan.amort, 'var(--blue)'], ['tesouro', 'Tesouro Direto', plan.tesouro, 'var(--cyan)'], ['caixa', 'Renda Fixa', caixaPlan, 'var(--brand)'], ['fii', 'Renda variável (FIIs, ações, ETFs)', plan.fii, 'var(--violet)']];
   const totalDone = ap.reduce((s, a) => s + a.amount, 0);
   const tot = T.patrimonio || 1;
   const next3 = [0, 1, 2].map(i => { const mm = addMonths(curMonth(), i); return { m: mm, cup: couponsInMonth(mm), fii: P.fii }; });
@@ -1288,8 +1303,8 @@ function viewResumo() {
   <div class="grid cols2" style="margin-top:12px">
     <div class="card">
       <h2>Aportes de ${mlabel(m)} <span class="sub">${brl(totalDone)} de ${brl(Math.max(0, sobra))}</span></h2>
-      ${rows.map(([c, name, planned, color]) => `<div class="item"><div class="row between"><span class="name">${name}</span><span class="num mut">${planned > 0 ? `${brl(done(c))} / ${brl(planned)}` : `${brl(done(c))} <small>investidos · sem meta</small>`}</span></div><div style="margin-top:7px">${progress(planned > 0 ? done(c) : done(c) > 0 ? 1 : 0, planned > 0 ? planned : 1, color)}</div></div>`).join('')}
-      <div class="item"><div class="row between"><span class="lbl">Total investido em ${mlabel(m)}</span><b class="num green" style="font-size:18px">${brl(totalDone)}</b></div><div class="hint">Soma de todos os aportes e compras do mês. Desde o início: <b>${brl(state.aportes.reduce((t, a) => t + a.amount, 0))}</b></div></div>
+      ${rows.map(([c, name, planned, color]) => `<div class="item"><div class="row between"><span class="name">${name} <button class="btn sm ghost" data-act="editCatAporte" data-id="${c}" title="Corrigir o valor investido">✎</button></span><span class="num mut">${planned > 0 ? `${brl(done(c))} / ${brl(planned)}` : `${brl(done(c))} <small>investidos · sem meta</small>`}</span></div><div style="margin-top:7px">${progress(planned > 0 ? done(c) : done(c) > 0 ? 1 : 0, planned > 0 ? planned : 1, color)}</div></div>`).join('')}
+      <div class="item"><div class="row between"><span class="lbl">Total investido em ${mlabel(m)}</span><b class="num green" style="font-size:18px">${brl(totalDone)}</b></div></div>
       <div class="row" style="margin-top:12px"><button class="btn primary" data-act="addAporte">+ Registrar aporte</button><button class="btn" data-act="addTrade" data-v="C">+ Compra de ativo</button><button class="btn ghost" data-act="editPlan">Editar metas</button></div>
       ${sobra < plan.amort + plan.tesouro + plan.fii ? `<div class="hint rose" style="margin-top:10px">As metas somam mais do que a sobra do mês (${brl(plan.amort + plan.tesouro + plan.fii)}).</div>` : ''}
     </div>
@@ -1299,13 +1314,12 @@ function viewResumo() {
       ${pieChart([['Caixa', T.caixa, 'var(--brand)'], ['Tesouro', T.tesouro, 'var(--cyan)'], ['Renda variável', T.fiis, 'var(--violet)']])}
       <h2 style="margin-top:20px">Próximos 3 meses (estimativa)</h2>
       <table><tbody>${next3.map(x => `<tr><td>${mlabel(x.m)}</td><td class="mut">${x.cup ? 'cupom Tesouro ' + brl(x.cup) : '—'}</td><td class="amber">proventos ${brl(x.fii)}</td></tr>`).join('')}</tbody></table>
-      <div class="hint">Rendimento do caixa acumulado em ${mlabel(curMonth())}: <b class="green">${brl(ySoFar)}</b> (calculado automaticamente a cada dia útil).</div>
     </div>
   </div>
 
   <div class="card" style="margin-top:12px">
     <h2>Lançamentos de ${mlabel(m)}</h2>
-    ${ap.length ? `<div class="scroll"><table><thead><tr><th>Data</th><th class="l">Destino</th><th>Valor</th><th></th></tr></thead><tbody>${[...ap].sort((a, b) => b.date.localeCompare(a.date)).map(a => `<tr><td>${a.date.split('-').reverse().join('/')}</td><td class="l">${esc(a.label || ({amort:'Amortização',tesouro:'Tesouro',caixa:'Caixa',fii:'FIIs'}[a.cat] || 'Aporte'))}</td><td class="num green">${brl(a.amount)}</td><td>${a.kind === 'fii' ? '' : `<button class="btn sm ghost danger" data-act="delAporte" data-id="${a.id}">Desfazer</button>`}</td></tr>`).join('')}</tbody></table></div>` : `<div class="empty">Nenhum aporte registrado neste mês.</div>`}
+    ${ap.length ? `<div class="scroll"><table><thead><tr><th>Data</th><th class="l">Destino</th><th>Valor</th><th></th></tr></thead><tbody>${[...ap].sort((a, b) => b.date.localeCompare(a.date)).map(a => `<tr><td>${a.date.split('-').reverse().join('/')}</td><td class="l">${esc(a.label || ({amort:'Amortização',tesouro:'Tesouro',caixa:'Renda fixa',fii:'Renda variável'}[a.cat] || 'Aporte'))}</td><td class="num green">${brl(a.amount)}</td><td>${a.kind === 'fii' ? '' : `<button class="btn sm ghost danger" data-act="delAporte" data-id="${a.id}">Desfazer</button>`}</td></tr>`).join('')}</tbody></table></div>` : `<div class="empty">Nenhum aporte registrado neste mês.</div>`}
   </div>
   ${aportesHistCard()}
   ${snapshotCard()}`;
@@ -1335,7 +1349,7 @@ function viewRenda() {
   <div class="grid cols2">
     <div class="card">
       <h2>Fontes de renda <button class="btn sm" data-act="addSource">+ Fonte</button></h2>
-      ${srcs.length ? srcs.map(s => `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(s.name)}</span>${active(s) ? '<span class="tag g">ativo em ' + mlabel(m) + '</span>' : '<span class="tag">inativo</span>'}<div class="hint">${s.once ? 'pagamento único em ' + fmtSrcDate(s.start) : (s.start ? 'de ' + fmtSrcDate(s.start) : '') + ' ' + (s.end ? 'até ' + fmtSrcDate(s.end) : '· sem data de término')}${srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? ` · <b class="amber">proporcional em ${mlabel(m)}: ${Math.round(srcFactor(s, m) * 100)}% do mês</b>` : ''}</div></div>
+      ${srcs.length ? srcs.map(s => `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(s.name)}</span>${active(s) ? '<span class="tag g">ativo em ' + mlabel(m) + '</span>' : '<span class="tag">inativo</span>'}<div class="hint">${s.lag === '1' && !s.once ? 'paga no mês seguinte · ' : ''}${s.once ? 'pagamento único em ' + fmtSrcDate(s.start) : (s.start ? 'de ' + fmtSrcDate(s.start) : '') + ' ' + (s.end ? 'até ' + fmtSrcDate(s.end) : '· sem data de término')}${srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? ` · <b class="amber">proporcional em ${mlabel(m)}: ${Math.round(srcFactor(s, m) * 100)}% do mês</b>` : ''}</div></div>
         <div class="num ${active(s) ? 'green' : 'mut'}" style="font-weight:700">${brl(srcAmount(s, m))}${srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? `<div class="hint" style="text-align:right">de ${brl(s.amount)}</div>` : ''}</div></div>
         <div class="row" style="margin-top:6px"><button class="btn sm" data-act="editSource" data-id="${s.id}">Editar</button><button class="btn sm ghost danger" data-act="delSource" data-id="${s.id}">Remover</button></div></div>`).join('') : '<div class="empty">Cadastre suas bolsas e projetos.</div>'}
       <div class="item"><div class="row between"><span class="lbl">Total previsto em ${mlabel(m)}</span><span class="num" style="font-weight:800;font-size:17px">${brl(state.incomeSources.reduce((s, x) => s + srcAmount(x, m), 0))}</span></div>
