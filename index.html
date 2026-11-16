@@ -589,9 +589,14 @@ function incomeFor(m) {
 }
 const totalExpenses = () => state.expenses.reduce((s, e) => s + (Number(e.amount) || 0), 0);
 
-function couponNet(t) {  // cupom semestral líquido (IR 15%) — ESTIMATIVA
-  const gross = (t.couponOverride !== null && t.couponOverride !== undefined && t.couponOverride !== '') ? Number(t.couponOverride) : (t.amount || 0) * (Math.pow(1.06, 0.5) - 1);
-  return gross * 0.85;
+function lastRealCoupon(t) {   // último cupom que você registrou como recebido deste título
+  const r = state.proventos.filter(x => x.kind === 'tesouro' && x.tid === t.id).sort((x, y) => (y.date || '').localeCompare(x.date || ''))[0];
+  return r ? r.total : null;
+}
+function couponNet(t) {  // cupom semestral líquido. Prioridade: valor que você digitou > último cupom recebido > estimativa (≈2,96% do saldo menos 15% de IR)
+  if (t.couponOverride !== null && t.couponOverride !== undefined && t.couponOverride !== '') return Number(t.couponOverride) || 0;
+  const last = lastRealCoupon(t); if (last != null) return last;
+  return (t.amount || 0) * (Math.pow(1.06, 0.5) - 1) * 0.85;
 }
 function couponsInMonth(m) {
   const mm = monthNum(m);
@@ -897,7 +902,7 @@ function tesouroForm(t) {
   openForm({ title: isNew ? 'Novo título do Tesouro' : 'Editar título', note: 'O saldo é o valor líquido que aparece no app (marcação a mercado). Atualize quando quiser conferir.',
     fields: [{ k: 'n', label: 'Nome', value: t.name, required: true }, { row: [{ k: 'v', label: 'Valor atual (R$)', value: t.amount }, { k: 'r', label: 'Taxa contratada', value: t.rate }] },
              { k: 'c', label: 'Paga cupom (juros semestrais)?', type: 'select', value: t.coupon ? '1' : '0', options: [['0', 'Não'], ['1', 'Sim — maio e novembro']], hint: 'Os títulos IPCA+ com Juros Semestrais 2045 e 2055 pagam em maio e novembro.' },
-             { k: 'co', label: 'Cupom líquido por semestre (opcional)', value: t.couponOverride ?? '', hint: 'Se vazio, estimo ≈ 2,96% do saldo menos 15% de IR. Confira no extrato e corrija aqui se quiser.' },
+             { k: 'co', label: 'Cupom líquido por semestre (opcional)', value: t.couponOverride ?? '', hint: 'Se vazio, uso o último cupom que você registrou como recebido; sem nenhum registro, estimo ≈ 2,96% do saldo menos 15% de IR.' },
              { k: 'b', label: 'Aceita novos aportes?', type: 'select', value: t.blocked ? '1' : '0', options: [['0', 'Sim'], ['1', 'Não (bloqueado)']] }],
     onSubmit(v) {
       if (!v.n.trim()) return false;
