@@ -306,7 +306,7 @@ function migrate(raw) {
 function normalize(raw) {
   let s = (raw && raw.v >= 2) ? raw : migrate(raw || {});
   s.selectedMonth = s.selectedMonth || curMonth();
-  s.incomeSources = toArr(s.incomeSources);
+  s.incomeSources = toArr(s.incomeSources).map(x => ({ ...x, real: (x.real && typeof x.real === 'object') ? x.real : {} }));
   s.incomeOverrides = (s.incomeOverrides && typeof s.incomeOverrides === 'object') ? s.incomeOverrides : {};
   s.expenses = toArr(s.expenses);
   s.accounts = toArr(s.accounts).map(a => ({ ...a, tiers: toArr(a.tiers), tiersAfter: toArr(a.tiersAfter), earned: a.earned || {} }));
@@ -577,7 +577,9 @@ function srcFactor(x, m) {
   const from = s.length === 10 && s.slice(0, 7) === m ? +s.slice(8) : 1, to = e.length === 10 && e.slice(0, 7) === m ? +e.slice(8) : dim;
   return to < from ? 0 : Math.min(1, (to - from + 1) / dim);
 }
-const srcAmount = (x, m) => (Number(x.amount) || 0) * srcFactor(x, m);
+const srcForecast = (x, m) => (Number(x.amount) || 0) * srcFactor(x, m);          // o que deveria cair, pelo cadastro
+const srcHasReal = (x, m) => !!x.real && x.real[m] !== undefined && x.real[m] !== null && x.real[m] !== '';
+const srcAmount = (x, m) => srcHasReal(x, m) ? Number(x.real[m]) || 0 : srcForecast(x, m);   // se você informou o que ganhou, vale o real
 const fmtSrcDate = d => !d ? '' : d.length === 10 ? d.split('-').reverse().join('/') : mlabel(d);
 function incomeFor(m) {
   const ov = state.incomeOverrides[m];
@@ -710,6 +712,12 @@ const A = {
         state.aportes.push({ id: uid('ap'), date, cat: c, kind: 'ajuste', target: '', label: 'Ajuste manual', amount: diff, noBal: true });
         save(); toast(`Total de ${names[c]} agora é ${brl(num(v.v))}`);
       } });
+  },
+  realSource(id) {
+    const x = state.incomeSources.find(c => c.id === id), m = state.selectedMonth, f = Math.round(srcForecast(x, m) * 100) / 100;
+    openForm({ title: `${x.name} — o que você recebeu em ${mlabel(m)}`, note: `Pelo cadastro, o previsto para este mês é ${brl(f)}. Digite o valor que realmente caiu. Deixe vazio para voltar ao valor previsto. Vale só para ${mlabel(m)}.`,
+      fields: [{ k: 'v', label: 'Valor recebido (R$)', value: srcHasReal(x, m) ? x.real[m] : f }],
+      onSubmit(v) { x.real = x.real || {}; if (String(v.v).trim() === '') delete x.real[m]; else x.real[m] = num(v.v); save(); toast(String(v.v).trim() === '' ? 'Voltou ao valor previsto' : 'Valor real registrado'); } });
   },
   delAporte(id) {
     const a = state.aportes.find(x => x.id === id); if (!a) return;
@@ -1343,15 +1351,15 @@ function snapshotCard() {
 
 function viewRenda() {
   const m = state.selectedMonth, inc = incomeFor(m), exp = totalExpenses(), sobra = inc.value - exp;
-  const active = s => srcFactor(s, m) > 0;
+  const active = s => srcFactor(s, m) > 0 || srcHasReal(s, m);
   const srcs = [...state.incomeSources].sort((a, b) => (a.end || '9999').localeCompare(b.end || '9999'));
   return `
   <div class="grid cols2">
     <div class="card">
       <h2>Fontes de renda <button class="btn sm" data-act="addSource">+ Fonte</button></h2>
-      ${srcs.length ? srcs.map(s => `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(s.name)}</span>${active(s) ? '<span class="tag g">ativo em ' + mlabel(m) + '</span>' : '<span class="tag">inativo</span>'}<div class="hint">${s.lag === '1' && !s.once ? 'paga no mês seguinte · ' : ''}${s.once ? 'pagamento único em ' + fmtSrcDate(s.start) : (s.start ? 'de ' + fmtSrcDate(s.start) : '') + ' ' + (s.end ? 'até ' + fmtSrcDate(s.end) : '· sem data de término')}${srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? ` · <b class="amber">proporcional em ${mlabel(m)}: ${Math.round(srcFactor(s, m) * 100)}% do mês</b>` : ''}</div></div>
-        <div class="num ${active(s) ? 'green' : 'mut'}" style="font-weight:700">${brl(srcAmount(s, m))}${srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? `<div class="hint" style="text-align:right">de ${brl(s.amount)}</div>` : ''}</div></div>
-        <div class="row" style="margin-top:6px"><button class="btn sm" data-act="editSource" data-id="${s.id}">Editar</button><button class="btn sm ghost danger" data-act="delSource" data-id="${s.id}">Remover</button></div></div>`).join('') : '<div class="empty">Cadastre suas bolsas e projetos.</div>'}
+      ${srcs.length ? srcs.map(s => `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(s.name)}</span>${active(s) ? '<span class="tag g">ativo em ' + mlabel(m) + '</span>' : '<span class="tag">inativo</span>'}<div class="hint">${s.lag === '1' && !s.once ? 'paga no mês seguinte · ' : ''}${s.once ? 'pagamento único em ' + fmtSrcDate(s.start) : (s.start ? 'de ' + fmtSrcDate(s.start) : '') + ' ' + (s.end ? 'até ' + fmtSrcDate(s.end) : '· sem data de término')}${srcHasReal(s, m) ? ` · <b class="green">valor real informado</b>` : srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? ` · <b class="amber">proporcional em ${mlabel(m)}: ${Math.round(srcFactor(s, m) * 100)}% do mês</b>` : ''}</div></div>
+        <div class="num ${active(s) ? 'green' : 'mut'}" style="font-weight:700">${brl(srcAmount(s, m))}${srcHasReal(s, m) ? `<div class="hint" style="text-align:right">previsto ${brl(srcForecast(s, m))}</div>` : srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? `<div class="hint" style="text-align:right">de ${brl(s.amount)}</div>` : ''}</div></div>
+        <div class="row" style="margin-top:6px"><button class="btn sm" data-act="realSource" data-id="${s.id}">${srcHasReal(s, m) ? 'Alterar valor real' : 'Valor real do mês'}</button><button class="btn sm" data-act="editSource" data-id="${s.id}">Editar</button><button class="btn sm ghost danger" data-act="delSource" data-id="${s.id}">Remover</button></div></div>`).join('') : '<div class="empty">Cadastre suas bolsas e projetos.</div>'}
       <div class="item"><div class="row between"><span class="lbl">Total previsto em ${mlabel(m)}</span><span class="num" style="font-weight:800;font-size:17px">${brl(state.incomeSources.reduce((s, x) => s + srcAmount(x, m), 0))}</span></div>
         ${inc.manual ? `<div class="row between" style="margin-top:8px"><span class="hint">Você informou ${brl(inc.value)} para este mês</span><span></span></div>` : ''}
         <div class="row" style="margin-top:8px"><button class="btn sm" data-act="setOverride">${inc.manual ? 'Alterar renda real' : 'Informar renda real do mês'}</button></div></div>
