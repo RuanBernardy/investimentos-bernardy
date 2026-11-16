@@ -128,6 +128,10 @@
   .chart .bars i{display:block;width:42%;max-width:14px;border-radius:3px 3px 0 0;min-height:1px}
   .chart small{font-size:10px;color:var(--mut)}
   @media (max-width:520px){ .big{font-size:19px} .brand small{display:none} }
+.pie{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:16px;margin-top:6px}
+.pie svg{width:170px;max-width:100%;flex:0 0 auto;transform:none}
+.pie svg circle{transition:opacity .15s}.pie svg circle:hover{opacity:.8}
+.pielegend{flex:1 1 180px;display:grid;gap:10px;min-width:180px}
 </style>
 </head>
 <body>
@@ -1284,16 +1288,15 @@ function viewResumo() {
   <div class="grid cols2" style="margin-top:12px">
     <div class="card">
       <h2>Aportes de ${mlabel(m)} <span class="sub">${brl(totalDone)} de ${brl(Math.max(0, sobra))}</span></h2>
-      ${rows.map(([c, name, planned, color]) => `<div class="item"><div class="row between"><span class="name">${name}</span><span class="num mut">${brl(done(c))} / ${brl(planned)}</span></div><div style="margin-top:7px">${progress(done(c), planned, color)}</div></div>`).join('')}
+      ${rows.map(([c, name, planned, color]) => `<div class="item"><div class="row between"><span class="name">${name}</span><span class="num mut">${planned > 0 ? `${brl(done(c))} / ${brl(planned)}` : `${brl(done(c))} <small>investidos · sem meta</small>`}</span></div><div style="margin-top:7px">${progress(planned > 0 ? done(c) : done(c) > 0 ? 1 : 0, planned > 0 ? planned : 1, color)}</div></div>`).join('')}
       <div class="item"><div class="row between"><span class="lbl">Total investido em ${mlabel(m)}</span><b class="num green" style="font-size:18px">${brl(totalDone)}</b></div><div class="hint">Soma de todos os aportes e compras do mês. Desde o início: <b>${brl(state.aportes.reduce((t, a) => t + a.amount, 0))}</b></div></div>
       <div class="row" style="margin-top:12px"><button class="btn primary" data-act="addAporte">+ Registrar aporte</button><button class="btn" data-act="addTrade" data-v="C">+ Compra de ativo</button><button class="btn ghost" data-act="editPlan">Editar metas</button></div>
       ${sobra < plan.amort + plan.tesouro + plan.fii ? `<div class="hint rose" style="margin-top:10px">As metas somam mais do que a sobra do mês (${brl(plan.amort + plan.tesouro + plan.fii)}).</div>` : ''}
     </div>
 
     <div class="card">
-      <h2>Onde está o seu dinheiro</h2>
-      <div class="stack"><i style="width:${T.caixa / tot * 100}%;background:var(--brand)"></i><i style="width:${T.tesouro / tot * 100}%;background:var(--cyan)"></i><i style="width:${T.fiis / tot * 100}%;background:var(--violet)"></i></div>
-      <div class="legend"><span style="--c:var(--brand)">Caixa <b>${brl(T.caixa)}</b></span><span style="--c:var(--cyan)">Tesouro <b>${brl(T.tesouro)}</b></span><span style="--c:var(--violet)">Renda variável <b>${brl(T.fiis)}</b></span></div>
+      <h2>Minha Carteira <span class="sub">${brl(T.patrimonio)}</span></h2>
+      ${pieChart([['Caixa', T.caixa, 'var(--brand)'], ['Tesouro', T.tesouro, 'var(--cyan)'], ['Renda variável', T.fiis, 'var(--violet)']])}
       <h2 style="margin-top:20px">Próximos 3 meses (estimativa)</h2>
       <table><tbody>${next3.map(x => `<tr><td>${mlabel(x.m)}</td><td class="mut">${x.cup ? 'cupom Tesouro ' + brl(x.cup) : '—'}</td><td class="amber">proventos ${brl(x.fii)}</td></tr>`).join('')}</tbody></table>
       <div class="hint">Rendimento do caixa acumulado em ${mlabel(curMonth())}: <b class="green">${brl(ySoFar)}</b> (calculado automaticamente a cada dia útil).</div>
@@ -1311,6 +1314,13 @@ function aportesHistCard() {
   const by = {}; state.aportes.forEach(a => { const k = (a.date || '').slice(0, 7); if (k) by[k] = (by[k] || 0) + a.amount; });
   const keys = Object.keys(by).sort().reverse().slice(0, 12); if (keys.length < 2) return '';
   return `<div class="card" style="margin-top:12px"><h2>Quanto investi por mês <span class="sub">${brl(Object.values(by).reduce((t, v) => t + v, 0))} no total</span></h2><div class="scroll"><table><thead><tr><th>Mês</th><th>Investido</th></tr></thead><tbody>${keys.map(k => `<tr><td>${mlabel(k)}</td><td class="num green">${brl(by[k])}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+/* Gráfico de pizza (rosca) em SVG, sem biblioteca */
+function pieChart(items) {
+  const total = items.reduce((t, i) => t + Math.max(0, i[1]), 0), R = 15.9155; let acc = 0;
+  const arcs = total > 0 ? items.filter(i => i[1] > 0).map(([n, v, c]) => { const f = v / total * 100, a = `<circle r="${R}" cx="21" cy="21" fill="none" stroke="${c}" stroke-width="7" stroke-dasharray="${f} ${100 - f}" stroke-dashoffset="${25 - acc}"><title>${esc(n)}: ${brl(v)} (${pct(f)})</title></circle>`; acc += f; return a; }).join('') : '';
+  return `<div class="pie"><svg viewBox="0 0 42 42" role="img" aria-label="Distribuição da carteira"><circle r="${R}" cx="21" cy="21" fill="none" stroke="var(--line, #263149)" stroke-width="7"/>${arcs}<text x="21" y="20" text-anchor="middle" font-size="3.4" fill="currentColor" opacity=".6">Total</text><text x="21" y="25" text-anchor="middle" font-size="4" font-weight="700" fill="currentColor">${total > 0 ? brl(total).replace('R$ ', '') : '—'}</text></svg>
+    <div class="pielegend">${items.map(([n, v, c]) => `<div class="row between"><span style="display:inline-flex;align-items:center;gap:8px"><i style="width:11px;height:11px;border-radius:50%;background:${c};display:inline-block"></i>${n}</span><span><b class="num">${brl(v)}</b> <span class="mut">${total > 0 ? pct(v / total * 100) : ''}</span></span></div>`).join('')}</div></div>`;
 }
 function snapshotCard() {
   const keys = Object.keys(state.snapshots).sort().slice(-12); if (keys.length < 2) return '';
