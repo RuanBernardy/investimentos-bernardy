@@ -321,6 +321,7 @@ function normalize(raw) {
   if (!s.mercado) s.mercado = { ifixPVP: 0.82, ifixDY: 13.45, at: '2026-11-11' };   // valores do painel que você fotografou; edite em Análise
   s.fx = (s.fx && typeof s.fx === 'object') ? s.fx : { rate: 0, at: 0, manual: false };
   s.plan = s.plan || { amort: 2000, tesouro: 3900, fii: 0 };
+  if (s.plan.caixa === undefined) s.plan.caixa = null;   // null = automático (o que sobrar)
   s.yieldByMonth = s.yieldByMonth || {};
   s.snapshots = s.snapshots || {};
   s.cdiRateAnnual = s.cdiRateAnnual || 13.15;
@@ -651,13 +652,14 @@ function closeSheet() { $('modal').classList.add('hidden'); $('sheet').innerHTML
 $('modal').addEventListener('mousedown', e => { if (e.target === $('modal')) closeSheet(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSheet(); });
 
-function openForm({ title, fields, submit = 'Salvar', onSubmit, note }) {
+function openForm({ title, fields, submit = 'Salvar', onSubmit, note, onOpen }) {
   const html = fields.map(f => {
     if (f.row) return `<div class="two">${f.row.map(fieldHTML).join('')}</div>`;
     return fieldHTML(f);
   }).join('');
   openSheet(`<form id="theForm"><h3>${esc(title)}</h3>${note ? `<p class="hint" style="margin:-6px 0 12px">${note}</p>` : ''}${html}
     <div class="actions"><button type="button" class="btn" data-act="closeSheet">Cancelar</button><button class="btn primary">${esc(submit)}</button></div></form>`);
+  if (onOpen) onOpen();
   $('theForm').onsubmit = e => {
     e.preventDefault();
     const v = {};
@@ -700,9 +702,11 @@ const A = {
 
   /* ---- plano / aportes ---- */
   editPlan() {
-    openForm({ title: 'Metas de aporte do mês', note: 'O que sobrar da renda (depois das despesas e dessas metas) vai automaticamente para a meta de Caixa.',
-      fields: [{ k: 'amort', label: 'Amortização do financiamento (R$)', value: state.plan.amort }, { k: 'tesouro', label: 'Tesouro Direto (R$)', value: state.plan.tesouro }, { k: 'fii', label: 'Renda variável: FIIs, ações, ETFs (R$)', value: state.plan.fii }],
-      onSubmit(v) { state.plan = { amort: num(v.amort), tesouro: num(v.tesouro), fii: num(v.fii) }; save(); } });
+    openForm({ title: 'Metas de aporte do mês', note: 'Quanto você pretende investir em cada categoria neste mês. Em Renda Fixa, deixe vazio para ser automático: vai para lá o que sobrar da renda depois das despesas e das outras metas.',
+      fields: [{ k: 'amort', label: 'Amortização do financiamento (R$)', value: state.plan.amort }, { k: 'tesouro', label: 'Tesouro Direto (R$)', value: state.plan.tesouro },
+               { k: 'caixa', label: 'Renda Fixa: cofrinhos, CDB… (R$)', value: state.plan.caixa ?? '', hint: 'Vazio = automático (o que sobrar).' },
+               { k: 'fii', label: 'Renda variável: FIIs, ações, ETFs (R$)', value: state.plan.fii }],
+      onSubmit(v) { state.plan = { amort: num(v.amort), tesouro: num(v.tesouro), caixa: String(v.caixa).trim() === '' ? null : num(v.caixa), fii: num(v.fii) }; save(); } });
   },
   addAporte(pre) { aporteForm(typeof pre === 'string' ? pre : ''); },
   editCatAporte(c) {
@@ -862,9 +866,14 @@ function sourceForm(src) {
   openForm({ title: isNew ? 'Nova fonte de renda' : 'Editar fonte de renda', note: 'Cadastre cada bolsa/projeto separadamente. Informe o dia em que começa e termina: no primeiro e no último mês o valor é pago proporcional aos dias (ex.: começa dia 16 de um mês de 30 dias = 15/30 do valor).',
     fields: [{ k: 'n', label: 'Nome (ex: Projeto X)', value: src.name, required: true }, { k: 'v', label: 'Valor líquido mensal (R$)', value: src.amount },
              { k: 'once', label: 'Tipo', type: 'select', value: src.once ? '1' : '0', options: [['0', 'Recorrente (todo mês entre o início e o fim)'], ['1', 'Pagamento único (doação, trabalho de 1 dia)']], hint: 'Único: o valor inteiro entra só no mês da data de início, sem proporção.' },
-             { row: [{ k: 's', label: 'Início / data do recebimento', type: 'date', value: asDate(src.start, false) }, { k: 'e', label: 'Fim (só recorrente)', type: 'date', value: asDate(src.end, true), hint: 'Vazio = sem fim' }] },
+             { row: [{ k: 's', label: 'Início (data)', type: 'date', value: asDate(src.start, false) }, { k: 'e', label: 'Fim (só recorrente)', type: 'date', value: asDate(src.end, true), hint: 'Vazio = sem fim' }] },
              { k: 'lag', label: 'Quando o dinheiro cai na conta', type: 'select', value: src.lag === '1' ? '1' : '0', options: [['0', 'No próprio mês'], ['1', 'No mês seguinte (paga o mês trabalhado)']], hint: 'Ex.: começou 19/10 e o 1º pagamento veio em novembro, proporcional aos dias de outubro.' },
              { k: 'prop', label: 'Primeiro e último mês', type: 'select', value: src.prop === '0' ? '0' : '1', options: [['1', 'Pagar proporcional aos dias'], ['0', 'Pagar o mês cheio']] }],
+    onOpen() {   // pagamento único: esconde o que só vale para bolsas recorrentes
+      const sel = $('f_once'), box = id => $(id).closest('.field');
+      const sync = () => { const once = sel.value === '1'; ['f_e', 'f_lag', 'f_prop'].forEach(id => { box(id).style.display = once ? 'none' : ''; }); box('f_s').querySelector('label').textContent = once ? 'Data do recebimento' : 'Início (data)'; };
+      sel.addEventListener('change', sync); sync();
+    },
     onSubmit(v) {
       if (!v.n.trim()) return false;
       const data = { name: v.n.trim(), amount: num(v.v), start: v.s || '', end: v.once === '1' ? '' : (v.e || ''), prop: v.prop === '0' ? '0' : '1', lag: v.lag === '1' ? '1' : '0', once: v.once === '1' };
@@ -1299,7 +1308,7 @@ function viewResumo() {
   const m = state.selectedMonth, inc = incomeFor(m), exp = totalExpenses(), sobra = inc.value - exp;
   const T = totals(), P = passiveMonthly(), ap = aportesOfMonth(m);
   const done = c => ap.filter(a => a.cat === c).reduce((s, a) => s + a.amount, 0);
-  const plan = state.plan, caixaPlan = Math.max(0, sobra - plan.amort - plan.tesouro - plan.fii);
+  const plan = state.plan, caixaAuto = Math.max(0, sobra - plan.amort - plan.tesouro - plan.fii), caixaPlan = plan.caixa != null && plan.caixa !== '' ? Number(plan.caixa) : caixaAuto;
   const rows = [['amort', 'Amortização do financiamento', plan.amort, 'var(--blue)'], ['tesouro', 'Tesouro Direto', plan.tesouro, 'var(--cyan)'], ['caixa', 'Renda Fixa', caixaPlan, 'var(--brand)'], ['fii', 'Renda variável (FIIs, ações, ETFs)', plan.fii, 'var(--violet)']];
   const totalDone = ap.reduce((s, a) => s + a.amount, 0);
   const tot = T.patrimonio || 1;
@@ -1319,7 +1328,7 @@ function viewResumo() {
       ${rows.map(([c, name, planned, color]) => `<div class="item"><div class="row between"><span class="name">${name} <button class="btn sm ghost" data-act="editCatAporte" data-id="${c}" title="Corrigir o valor investido">✎</button></span><span class="num mut">${planned > 0 ? `${brl(done(c))} / ${brl(planned)}` : `${brl(done(c))} <small>investidos · sem meta</small>`}</span></div><div style="margin-top:7px">${progress(planned > 0 ? done(c) : done(c) > 0 ? 1 : 0, planned > 0 ? planned : 1, color)}</div></div>`).join('')}
       <div class="item"><div class="row between"><span class="lbl">Total investido em ${mlabel(m)}</span><b class="num green" style="font-size:18px">${brl(totalDone)}</b></div></div>
       <div class="row" style="margin-top:12px"><button class="btn primary" data-act="addAporte">+ Registrar aporte</button><button class="btn" data-act="addTrade" data-v="C">+ Compra de ativo</button><button class="btn ghost" data-act="editPlan">Editar metas</button></div>
-      ${sobra < plan.amort + plan.tesouro + plan.fii ? `<div class="hint rose" style="margin-top:10px">As metas somam mais do que a sobra do mês (${brl(plan.amort + plan.tesouro + plan.fii)}).</div>` : ''}
+      ${(() => { const metas = plan.amort + plan.tesouro + plan.fii + (plan.caixa != null && plan.caixa !== '' ? Number(plan.caixa) : 0); return sobra < metas ? `<div class="hint rose" style="margin-top:10px">As metas somam mais do que a sobra do mês (${brl(metas)}).</div>` : ''; })()}
     </div>
 
     <div class="card">
