@@ -565,6 +565,7 @@ function applyDailyCompound(bump = true) {
 /* Fração do mês m que a fonte paga. Início/fim podem ser mês (AAAA-MM = mês cheio) ou data (AAAA-MM-DD): no mês da data, paga proporcional aos dias. */
 function srcFactor(x, m) {
   const s = x.start || '', e = x.end || '';
+  if (x.once) return s.slice(0, 7) === m ? 1 : 0;   // pagamento único (doação, trabalho de 1 dia): valor inteiro no mês da data
   if ((s && s.slice(0, 7) > m) || (e && e.slice(0, 7) < m)) return 0;
   if (x.prop === '0') return 1;
   const [y, mo] = m.split('-').map(Number), dim = new Date(y, mo, 0).getDate();
@@ -587,7 +588,10 @@ function couponNet(t) {  // cupom semestral líquido (IR 15%) — ESTIMATIVA
 }
 function couponsInMonth(m) {
   const mm = monthNum(m);
-  return state.tesouro.filter(t => t.coupon && toArr(t.couponMonths).includes(mm)).reduce((s, t) => s + couponNet(t), 0);
+  return state.tesouro.filter(t => t.coupon && toArr(t.couponMonths).includes(mm)).reduce((s, t) => {
+    const real = state.proventos.filter(x => x.kind === 'tesouro' && x.tid === t.id && (x.date || '').slice(0, 7) === m);
+    return s + (real.length ? real.reduce((a, x) => a + x.total, 0) : couponNet(t));   // se já recebeu neste mês, vale o valor real
+  }, 0);
 }
 
 function fiiPositions() {
@@ -691,7 +695,8 @@ const A = {
   addAporte(pre) { aporteForm(typeof pre === 'string' ? pre : ''); },
   delAporte(id) {
     const a = state.aportes.find(x => x.id === id); if (!a) return;
-    if (!confirm(`Desfazer o aporte de ${brl(a.amount)}? O saldo do destino será revertido.`)) return;
+    if (!confirm(`Desfazer o aporte de ${brl(a.amount)}?${a.noBal ? ' Nenhum saldo será alterado.' : ' O saldo do destino será revertido.'}`)) return;
+    if (a.noBal) { state.aportes = state.aportes.filter(x => x.id !== id); save(); toast('Aporte removido'); return; }
     if (a.kind === 'account') { const x = state.accounts.find(c => c.id === a.target); if (x) x.balance = Math.max(0, x.balance - a.amount); }
     if (a.kind === 'tesouro') { const x = state.tesouro.find(c => c.id === a.target); if (x) x.amount = Math.max(0, x.amount - a.amount); }
     if (a.kind === 'amort') state.amortAccumulated = Math.max(0, state.amortAccumulated - a.amount);
@@ -722,6 +727,19 @@ const A = {
 
   /* ---- tesouro ---- */
   addTesouro() { tesouroForm(); },
+  cupomTesouro(id) {
+    const t = state.tesouro.find(x => x.id === id);
+    openForm({ title: `Cupom recebido — ${t.name}`, note: 'Informe o valor LÍQUIDO que caiu na conta (já sem o IR). Ele é somado ao total recebido e, se escolher uma conta, entra no saldo dela.',
+      fields: [{ k: 'v', label: 'Valor recebido (R$)', required: true, value: t.coupon ? Math.round(couponNet(t) * 100) / 100 : '' },
+               { k: 'd', label: 'Data do pagamento', type: 'date', value: todayStr() },
+               { k: 'cred', label: 'Creditar em qual conta?', type: 'select', value: invAcc(), options: accOptions(true) }],
+      onSubmit(v) {
+        const total = num(v.v); if (!(total > 0)) { toast('Informe o valor'); return false; }
+        state.proventos.push({ id: uid('pv'), date: v.d || todayStr(), ticker: t.name, perShare: 0, qty: 1, cur: 'BRL', total, credit: v.cred || '', kind: 'tesouro', tid: t.id });
+        if (v.cred) { const acc = state.accounts.find(a => a.id === v.cred); if (acc) acc.balance = (acc.balance || 0) + total; }
+        save(); toast(`Cupom de ${brl(total)} registrado`);
+      } });
+  },
   editTesouro(id) { tesouroForm(state.tesouro.find(t => t.id === id)); },
   delTesouro(id) { const t = state.tesouro.find(x => x.id === id); if (t && confirm(`Remover "${t.name}"?`)) { state.tesouro = state.tesouro.filter(x => x.id !== id); save(); } },
   aporteTesouro(id) { aporteForm('tesouro:' + id); },
@@ -812,11 +830,12 @@ function sourceForm(src) {
   const asDate = (d, last) => !d ? '' : d.length === 10 ? d : (last ? (() => { const [y, mo] = d.split('-').map(Number); return d + '-' + pad(new Date(y, mo, 0).getDate()); })() : d + '-01');
   openForm({ title: isNew ? 'Nova fonte de renda' : 'Editar fonte de renda', note: 'Cadastre cada bolsa/projeto separadamente. Informe o dia em que começa e termina: no primeiro e no último mês o valor é pago proporcional aos dias (ex.: começa dia 16 de um mês de 30 dias = 15/30 do valor).',
     fields: [{ k: 'n', label: 'Nome (ex: Projeto X)', value: src.name, required: true }, { k: 'v', label: 'Valor líquido mensal (R$)', value: src.amount },
-             { row: [{ k: 's', label: 'Início (data)', type: 'date', value: asDate(src.start, false) }, { k: 'e', label: 'Fim (data)', type: 'date', value: asDate(src.end, true), hint: 'Vazio = sem fim' }] },
+             { k: 'once', label: 'Tipo', type: 'select', value: src.once ? '1' : '0', options: [['0', 'Recorrente (todo mês entre o início e o fim)'], ['1', 'Pagamento único (doação, trabalho de 1 dia)']], hint: 'Único: o valor inteiro entra só no mês da data de início, sem proporção.' },
+             { row: [{ k: 's', label: 'Início / data do recebimento', type: 'date', value: asDate(src.start, false) }, { k: 'e', label: 'Fim (só recorrente)', type: 'date', value: asDate(src.end, true), hint: 'Vazio = sem fim' }] },
              { k: 'prop', label: 'Primeiro e último mês', type: 'select', value: src.prop === '0' ? '0' : '1', options: [['1', 'Pagar proporcional aos dias'], ['0', 'Pagar o mês cheio']] }],
     onSubmit(v) {
       if (!v.n.trim()) return false;
-      const data = { name: v.n.trim(), amount: num(v.v), start: v.s || '', end: v.e || '', prop: v.prop === '0' ? '0' : '1' };
+      const data = { name: v.n.trim(), amount: num(v.v), start: v.s || '', end: v.once === '1' ? '' : (v.e || ''), prop: v.prop === '0' ? '0' : '1', once: v.once === '1' };
       if (isNew) state.incomeSources.push({ id: uid('src'), ...data }); else Object.assign(src, data);
       save();
     } });
@@ -864,12 +883,19 @@ function aporteForm(preset) {
   const opts = [...state.accounts.map(a => [`account:${a.id}`, `Caixa — ${a.name}`]),
                 ...state.tesouro.filter(t => !t.blocked).map(t => [`tesouro:${t.id}`, `Tesouro — ${t.name}`]),
                 ['amort:', 'Amortização do financiamento']];
-  openForm({ title: 'Registrar aporte', note: 'O valor entra no saldo do destino escolhido e conta na meta do mês. Para FIIs, ações e ETFs use “Registrar compra” na aba Ações & FIIs.',
+  openForm({ title: 'Registrar aporte', note: 'O aporte conta na meta do mês. Escolha abaixo se o saldo do destino também deve ser alterado. Para FIIs, ações e ETFs use “Registrar compra” na aba Ações & FIIs.',
     fields: [{ k: 'dest', label: 'Destino', type: 'select', value: preset || opts[0][0], options: opts },
-             { row: [{ k: 'v', label: 'Valor (R$)', value: '', required: true }, { k: 'd', label: 'Data', type: 'date', value: todayStr() }] }],
+             { row: [{ k: 'v', label: 'Valor (R$)', value: '', required: true }, { k: 'd', label: 'Data', type: 'date', value: todayStr() }] },
+             { k: 'bal', label: 'O que fazer com os saldos?', type: 'select', value: '0', options: [['0', 'Só registrar (não muda nenhum saldo)'], ['1', 'Somar ao saldo do destino']], hint: 'Só registrar mostra o aporte na meta do mês sem mexer em valores. Depois você atualiza o saldo quando o dinheiro estiver investido.' }],
     onSubmit(v) {
       const amount = num(v.v); if (amount <= 0) { toast('Informe um valor'); return false; }
-      const [kind, target] = v.dest.split(':'); let label = '', cat = '';
+      const [kind, target] = v.dest.split(':'); let label = '', cat = ''; const bal = v.bal === '1';
+      if (!bal) {
+        const a = kind === 'account' ? state.accounts.find(x => x.id === target) : null, t = kind === 'tesouro' ? state.tesouro.find(x => x.id === target) : null;
+        label = a ? a.name : t ? t.name : 'Amortização do financiamento'; cat = kind === 'account' ? 'caixa' : kind === 'tesouro' ? 'tesouro' : 'amort';
+        state.aportes.push({ id: uid('ap'), date: v.d || todayStr(), cat, kind, target, label, amount, noBal: true });
+        save(); toast(`Aporte de ${brl(amount)} registrado (saldos intactos)`); return;
+      }
       if (kind === 'account') { const a = state.accounts.find(x => x.id === target); if (a.cap > 0 && (a.balance || 0) + amount > a.cap + 0.005) { toast(`${a.name} aceita no máximo ${brl(a.cap)}: cabem mais ${brl(Math.max(0, a.cap - (a.balance || 0)))}`); return false; } a.balance = (a.balance || 0) + amount; label = a.name; cat = 'caixa'; }
       if (kind === 'tesouro') { const t = state.tesouro.find(x => x.id === target); t.amount = (t.amount || 0) + amount; label = t.name; cat = 'tesouro'; }
       if (kind === 'amort') { state.amortAccumulated += amount; label = 'Amortização do financiamento'; cat = 'amort'; }
@@ -1259,6 +1285,7 @@ function viewResumo() {
     <div class="card">
       <h2>Aportes de ${mlabel(m)} <span class="sub">${brl(totalDone)} de ${brl(Math.max(0, sobra))}</span></h2>
       ${rows.map(([c, name, planned, color]) => `<div class="item"><div class="row between"><span class="name">${name}</span><span class="num mut">${brl(done(c))} / ${brl(planned)}</span></div><div style="margin-top:7px">${progress(done(c), planned, color)}</div></div>`).join('')}
+      <div class="item"><div class="row between"><span class="lbl">Total investido em ${mlabel(m)}</span><b class="num green" style="font-size:18px">${brl(totalDone)}</b></div><div class="hint">Soma de todos os aportes e compras do mês. Desde o início: <b>${brl(state.aportes.reduce((t, a) => t + a.amount, 0))}</b></div></div>
       <div class="row" style="margin-top:12px"><button class="btn primary" data-act="addAporte">+ Registrar aporte</button><button class="btn" data-act="addTrade" data-v="C">+ Compra de ativo</button><button class="btn ghost" data-act="editPlan">Editar metas</button></div>
       ${sobra < plan.amort + plan.tesouro + plan.fii ? `<div class="hint rose" style="margin-top:10px">As metas somam mais do que a sobra do mês (${brl(plan.amort + plan.tesouro + plan.fii)}).</div>` : ''}
     </div>
@@ -1277,7 +1304,13 @@ function viewResumo() {
     <h2>Lançamentos de ${mlabel(m)}</h2>
     ${ap.length ? `<div class="scroll"><table><thead><tr><th>Data</th><th class="l">Destino</th><th>Valor</th><th></th></tr></thead><tbody>${[...ap].sort((a, b) => b.date.localeCompare(a.date)).map(a => `<tr><td>${a.date.split('-').reverse().join('/')}</td><td class="l">${esc(a.label || ({amort:'Amortização',tesouro:'Tesouro',caixa:'Caixa',fii:'FIIs'}[a.cat] || 'Aporte'))}</td><td class="num green">${brl(a.amount)}</td><td>${a.kind === 'fii' ? '' : `<button class="btn sm ghost danger" data-act="delAporte" data-id="${a.id}">Desfazer</button>`}</td></tr>`).join('')}</tbody></table></div>` : `<div class="empty">Nenhum aporte registrado neste mês.</div>`}
   </div>
+  ${aportesHistCard()}
   ${snapshotCard()}`;
+}
+function aportesHistCard() {
+  const by = {}; state.aportes.forEach(a => { const k = (a.date || '').slice(0, 7); if (k) by[k] = (by[k] || 0) + a.amount; });
+  const keys = Object.keys(by).sort().reverse().slice(0, 12); if (keys.length < 2) return '';
+  return `<div class="card" style="margin-top:12px"><h2>Quanto investi por mês <span class="sub">${brl(Object.values(by).reduce((t, v) => t + v, 0))} no total</span></h2><div class="scroll"><table><thead><tr><th>Mês</th><th>Investido</th></tr></thead><tbody>${keys.map(k => `<tr><td>${mlabel(k)}</td><td class="num green">${brl(by[k])}</td></tr>`).join('')}</tbody></table></div></div>`;
 }
 function snapshotCard() {
   const keys = Object.keys(state.snapshots).sort().slice(-12); if (keys.length < 2) return '';
@@ -1292,7 +1325,7 @@ function viewRenda() {
   <div class="grid cols2">
     <div class="card">
       <h2>Fontes de renda <button class="btn sm" data-act="addSource">+ Fonte</button></h2>
-      ${srcs.length ? srcs.map(s => `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(s.name)}</span>${active(s) ? '<span class="tag g">ativo em ' + mlabel(m) + '</span>' : '<span class="tag">inativo</span>'}<div class="hint">${s.start ? 'de ' + fmtSrcDate(s.start) : ''} ${s.end ? 'até ' + fmtSrcDate(s.end) : '· sem data de término'}${srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? ` · <b class="amber">proporcional em ${mlabel(m)}: ${Math.round(srcFactor(s, m) * 100)}% do mês</b>` : ''}</div></div>
+      ${srcs.length ? srcs.map(s => `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(s.name)}</span>${active(s) ? '<span class="tag g">ativo em ' + mlabel(m) + '</span>' : '<span class="tag">inativo</span>'}<div class="hint">${s.once ? 'pagamento único em ' + fmtSrcDate(s.start) : (s.start ? 'de ' + fmtSrcDate(s.start) : '') + ' ' + (s.end ? 'até ' + fmtSrcDate(s.end) : '· sem data de término')}${srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? ` · <b class="amber">proporcional em ${mlabel(m)}: ${Math.round(srcFactor(s, m) * 100)}% do mês</b>` : ''}</div></div>
         <div class="num ${active(s) ? 'green' : 'mut'}" style="font-weight:700">${brl(srcAmount(s, m))}${srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? `<div class="hint" style="text-align:right">de ${brl(s.amount)}</div>` : ''}</div></div>
         <div class="row" style="margin-top:6px"><button class="btn sm" data-act="editSource" data-id="${s.id}">Editar</button><button class="btn sm ghost danger" data-act="delSource" data-id="${s.id}">Remover</button></div></div>`).join('') : '<div class="empty">Cadastre suas bolsas e projetos.</div>'}
       <div class="item"><div class="row between"><span class="lbl">Total previsto em ${mlabel(m)}</span><span class="num" style="font-weight:800;font-size:17px">${brl(state.incomeSources.reduce((s, x) => s + srcAmount(x, m), 0))}</span></div>
@@ -1333,8 +1366,9 @@ function viewCaixa() {
       <div class="card">
         <h2>Tesouro Direto <span class="row"><b class="cyan num">${brl(T.tesouro)}</b><button class="btn sm" data-act="addTesouro">+ Título</button></span></h2>
         ${state.tesouro.map(t => `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(t.name)}</span>${t.blocked ? '<span class="tag a">bloqueado</span>' : ''}<div class="hint">${esc(t.rate)}${t.coupon ? ` · cupom ≈ <b class="green">${brl(couponNet(t))}</b> em mai e nov` : ''}</div></div><div class="num cyan" style="font-weight:700">${brl(t.amount)}</div></div>
-          <div class="row" style="margin-top:8px">${t.blocked ? '' : `<button class="btn sm primary" data-act="aporteTesouro" data-id="${t.id}">Aportar</button>`}<button class="btn sm" data-act="editTesouro" data-id="${t.id}">Atualizar / editar</button><button class="btn sm ghost danger" data-act="delTesouro" data-id="${t.id}">✕</button></div></div>`).join('') || '<div class="empty">Nenhum título.</div>'}
-        <div class="hint">Cupons: estimativa de ≈2,96% por semestre menos 15% de IR. Confirme no extrato e corrija no título se preferir.</div>
+          <div class="row" style="margin-top:8px">${t.blocked ? '' : `<button class="btn sm primary" data-act="aporteTesouro" data-id="${t.id}">Aportar</button>`}${t.coupon ? `<button class="btn sm" data-act="cupomTesouro" data-id="${t.id}">Cupom recebido</button>` : ''}<button class="btn sm" data-act="editTesouro" data-id="${t.id}">Atualizar / editar</button><button class="btn sm ghost danger" data-act="delTesouro" data-id="${t.id}">✕</button></div></div>`).join('') || '<div class="empty">Nenhum título.</div>'}
+        ${(() => { const cp = state.proventos.filter(x => x.kind === 'tesouro').sort((a, b) => (b.date || '').localeCompare(a.date || '')); return cp.length ? `<div class="item"><div class="row between"><span class="lbl">Cupons recebidos (total)</span><b class="green num">${brl(cp.reduce((t, x) => t + x.total, 0))}</b></div>${cp.map(x => `<div class="row between" style="margin-top:6px"><span class="hint">${(x.date || '').split('-').reverse().join('/')} · ${esc(x.ticker)}</span><span class="row"><span class="num green">${brl(x.total)}</span><button class="btn sm ghost danger" data-act="delProvento" data-id="${x.id}">✕</button></span></div>`).join('')}</div>` : ''; })()}
+        <div class="hint">Cupons: estimativa de ≈2,96% por semestre menos 15% de IR. Quando cair, toque em “Cupom recebido” no título e informe o valor real.</div>
       </div>
       <div class="card" style="margin-top:12px">
         <h2>Financiamento — amortização <button class="btn sm" data-act="editAmort">Editar</button></h2>
@@ -1348,8 +1382,8 @@ function viewFiis() {
   const T = totals(), pos = T.pos, P = passiveMonthly();
   const pl = T.fiis - T.fiisCost, dy = T.fiisCost > 0 ? P.fii * 12 / T.fiisCost * 100 : 0;
   const trades = [...state.fiis.trades].sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.id > a.id ? 1 : -1));
-  const provs = [...state.proventos].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-  const recMes = state.proventos.filter(x => (x.date || '').slice(0, 7) === state.selectedMonth).reduce((s, x) => s + x.total, 0);
+  const provs = state.proventos.filter(x => x.kind !== 'tesouro').sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const recMes = state.proventos.filter(x => x.kind !== 'tesouro').filter(x => (x.date || '').slice(0, 7) === state.selectedMonth).reduce((s, x) => s + x.total, 0);
   const hasToken = true, hasUS = pos.some(p => p.cur === 'USD');
   const byCls = {}; pos.forEach(p => { byCls[p.cl.l] = (byCls[p.cl.l] || 0) + p.value; });
   const fx = state.fx || {};
