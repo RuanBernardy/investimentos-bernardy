@@ -1,40 +1,40 @@
 {
-  "updatedAt": "2026-11-16T22:44:42.729Z",
+  "updatedAt": "2026-11-17T19:37:56.810Z",
   "quotes": {
     "MXRF11": {
-      "price": 8.58,
-      "change": -1.94,
-      "time": "2026-11-16T21:31:30.000Z"
+      "price": 8.65,
+      "change": 0.82,
+      "time": "2026-11-17T19:37:30.000Z"
     },
     "HGLG11": {
-      "price": 143.12,
-      "change": -1.99,
-      "time": "2026-11-16T21:31:30.000Z"
+      "price": 143.21,
+      "change": 0.06,
+      "time": "2026-11-17T19:37:30.000Z"
     },
     "LVBI11": {
-      "price": 98.01,
-      "change": -3.98,
-      "time": "2026-11-16T21:31:30.000Z"
+      "price": 98.49,
+      "change": 0.49,
+      "time": "2026-11-17T19:36:30.000Z"
     },
     "TRXF11": {
-      "price": 54.79,
-      "change": -1.79,
-      "time": "2026-11-16T21:31:30.000Z"
+      "price": 54.57,
+      "change": -0.4,
+      "time": "2026-11-17T19:36:30.000Z"
     },
     "XPML11": {
-      "price": 89.7,
-      "change": -2.5,
-      "time": "2026-11-16T21:31:30.000Z"
+      "price": 89.1,
+      "change": -0.67,
+      "time": "2026-11-17T19:37:30.000Z"
     },
     "EGIE3": {
-      "price": 25.7,
-      "change": -2.1,
-      "time": "2026-11-16T21:31:30.000Z"
+      "price": 25.71,
+      "change": 0.04,
+      "time": "2026-11-17T19:37:30.000Z"
     },
     "ALUP11": {
-      "price": 33.09,
-      "change": -0.21,
-      "time": "2026-11-16T21:31:30.000Z"
+      "price": 33.1,
+      "change": 0.03,
+      "time": "2026-11-17T19:37:30.000Z"
     }
   },
   "dividends": {
@@ -175,17 +175,17 @@
   },
   "indicators": {
     "MXRF11": {
-      "priceToNav": 0.95455915,
-      "dividendYield12m": 0.136,
-      "dividendYield1m": 0.0108571425,
+      "priceToNav": 0.93601346,
+      "dividendYield12m": 0.13869464,
+      "dividendYield1m": 0.011072261,
       "navPerShare": 9.166535,
       "equity": 5199316226.31,
       "asOf": "2026-10-01 00:00:00+00"
     },
     "HGLG11": {
-      "priceToNav": 0.884837,
-      "dividendYield12m": 0.09231612,
-      "dividendYield1m": 0.008012601,
+      "priceToNav": 0.86726385,
+      "dividendYield12m": 0.09418669,
+      "dividendYield1m": 0.008174958,
       "navPerShare": 165.02474631029,
       "equity": 7656899371.48,
       "asOf": "2026-10-01 00:00:00+00"
