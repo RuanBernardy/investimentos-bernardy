@@ -1238,4 +1238,352 @@ const VERDICTS = {
   buy:   { c: 'v-buy',   t: 'Bom candidato a compra', d: 'Os indicadores ficam bem acima das faixas de referência. Mesmo assim, leia os pontos de atenção e confirme os dados nas fontes oficiais antes de comprar.' },
   ok:    { c: 'v-ok',    t: 'Razoável — espere um preço melhor ou aporte pequeno', d: 'Há pontos bons e pontos que pedem cuidado. Dá para acompanhar e reavaliar com novos dados.' },
   weak:  { c: 'v-weak',  t: 'Fraco — só com um motivo forte', d: 'Vários indicadores ficam abaixo das faixas de referência.' },
- 
+  avoid: { c: 'v-avoid', t: 'Evitar por ora', d: 'Indicadores ruins ou sinais de alerta importantes.' },
+  ins:   { c: 'v-ins',   t: 'Dados insuficientes', d: 'Preencha mais indicadores (pelo menos cerca de 60% do peso da análise) para ter um resultado confiável.' }
+};
+function analyse(cls, d) {
+  const ctx = { cdi: state.cdiRateAnnual || 13.15, ...(state.mercado || {}) };
+  const defs = critOf(cls).fields.filter(f => f.f && (!f.show || f.show(d)));
+  const items = []; let totW = 0, gotW = 0, sum = 0; const flags = [], warns = [];
+  for (const f of defs) {
+    totW += f.w;
+    const raw = d[f.k]; const has = f.type === 'select' ? (raw !== undefined && raw !== null && raw !== '') : (raw !== undefined && raw !== null && raw !== '' && isFinite(raw));
+    if (!has) { items.push({ l: f.l, v: '—', s: null, m: 'Não informado', w: f.w }); continue; }
+    const r = f.f(f.type === 'select' ? raw : Number(raw), ctx, d);
+    gotW += f.w; sum += r.s * f.w;
+    if (r.flag) flags.push(r.flag); if (r.warn) warns.push(r.warn);
+    items.push({ l: f.l, v: f.type === 'select' ? (f.options.find(o => o[0] === raw) || [0, raw])[1] : nf(raw) + (f.u ? ' ' + f.u : ''), s: r.s, m: r.m, w: f.w, rule: f.rule || '', ok: (f.pass && f.type !== 'select') ? !!f.pass(Number(raw), d) : null });
+  }
+  const coverage = totW ? gotW / totW : 0, nota = gotW ? Math.round(sum / gotW * 100) : 0;
+  let k = nota >= 75 ? 'buy' : nota >= 60 ? 'ok' : nota >= 45 ? 'weak' : 'avoid';
+  if (flags.length >= 2) k = 'avoid'; else if (flags.length === 1 && k === 'buy') k = 'ok';
+  if (coverage < 0.6) k = 'ins';
+  return { nota, k, coverage, items, flags, warns };
+}
+const badge = s => s == null ? '<span class="tag">—</span>' : s >= 0.75 ? '<span class="tag g">Bom</span>' : s >= 0.5 ? '<span class="tag a">Ok</span>' : s >= 0.3 ? '<span class="tag o">Atenção</span>' : '<span class="tag r">Ruim</span>';
+
+function analysisFieldsHTML(cls, d) {
+  return critOf(cls).fields.filter(f => !f.show || f.show(d)).map(f => {
+    const val = d[f.k] ?? f.dflt ?? '';
+    const lab = `${esc(f.l)}${f.u ? ` <span class="mut">(${esc(f.u)})</span>` : ''}`;
+    if (f.type === 'select') return `<div class="field"><label>${lab}</label><select data-ak="${f.k}" ${f.k === 'tipo' ? 'data-rerender="1"' : ''}>${f.options.map(([v, l]) => `<option value="${v}" ${v === val ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div>`;
+    return `<div class="field"><label>${lab}</label><input data-ak="${f.k}" inputmode="decimal" value="${esc(val === '' ? '' : String(val).replace('.', ','))}" placeholder="${f.w ? '' : 'opcional'}" />${f.hint ? `<div class="hint">${esc(f.hint)}</div>` : ''}</div>`;
+  }).join('');
+}
+function readAnalysisFields() {
+  const d = {}; document.querySelectorAll('#af [data-ak]').forEach(el => { const v = el.value.trim(); d[el.dataset.ak] = el.tagName === 'SELECT' ? v : (v === '' ? null : num(v)); }); return d;
+}
+function analysisForm(a) {
+  const cls = a ? a.cls : 'fii', d0 = a ? clone(a.data || {}) : {};
+  openSheet(`<form id="anForm"><h3>${a ? 'Editar análise' : 'Nova análise de ativo'}</h3>
+    <p class="hint" style="margin:-6px 0 12px">Preencha o que conseguir (Status Invest, Fundamentus, site do gestor ou relatório gerencial). Campo vazio é ignorado, mas com poucos dados o resultado fica “insuficiente”.</p>
+    <div class="two"><div class="field"><label>Tipo de ativo</label><select id="a_cls">${Object.entries(ACLS).map(([k, c]) => `<option value="${k}" ${k === cls ? 'selected' : ''}>${c.l}</option>`).join('')}</select></div>
+    <div class="field"><label>Ticker ou nome</label><input id="a_tk" value="${esc(a ? a.ticker : '')}" placeholder="MXRF11, PETR4, VOO…" required /></div></div>
+    <div id="af">${analysisFieldsHTML(cls, d0)}</div>
+    <div class="actions"><button type="button" class="btn" data-act="closeSheet">Cancelar</button><button class="btn primary">Analisar</button></div></form>`);
+  $('sheet').classList.add('wide');
+  const redraw = () => { const d = readAnalysisFields(); $('af').innerHTML = analysisFieldsHTML($('a_cls').value, d); };
+  $('a_cls').onchange = () => { $('af').innerHTML = analysisFieldsHTML($('a_cls').value, {}); };
+  $('af').addEventListener('change', e => { if (e.target.dataset.rerender) redraw(); });
+  $('anForm').onsubmit = e => {
+    e.preventDefault();
+    const tk = $('a_tk').value.trim().toUpperCase(); if (!tk) return;
+    const rec = { id: a ? a.id : uid('an'), ticker: tk, cls: $('a_cls').value, date: todayStr(), data: readAnalysisFields() };
+    rec.nota = analyse(rec.cls, rec.data).nota; rec.k = analyse(rec.cls, rec.data).k;
+    if (a) Object.assign(a, rec); else state.analises.push(rec);
+    save(true); showAnalysis(rec.id);
+  };
+}
+function showAnalysis(id) {
+  const a = state.analises.find(x => x.id === id); if (!a) return;
+  const r = analyse(a.cls, a.data), V = VERDICTS[r.k], owned = fiiPositions().find(p => p.ticker === a.ticker);
+  openSheet(`<h3>${esc(a.ticker)} <span class="tag">${aCls(a.cls).l}</span>${owned ? '<span class="tag g">você tem ' + owned.qty + '</span>' : ''}</h3>
+    <div class="row" style="align-items:flex-end;gap:14px;margin-bottom:6px"><div class="big ${V.c}" style="font-size:38px;margin:0">${r.k === 'ins' ? '—' : r.nota}</div><div class="grow"><div class="name ${V.c}" style="font-weight:700">${V.t}</div><div class="hint" style="margin:2px 0 0">${V.d}</div></div></div>
+    <div class="bar" style="margin:8px 0 14px"><i style="width:${r.nota}%;background:var(--${r.k === 'buy' ? 'brand' : r.k === 'ok' ? 'amber' : r.k === 'ins' ? 'mut' : 'rose'})"></i></div>
+    ${r.flags.length ? `<div class="alert">${r.flags.map(f => '⚠ ' + esc(f)).join('<br>')}</div>` : ''}
+    ${r.warns.length ? `<div class="alert soft">${r.warns.map(f => 'ℹ ' + esc(f)).join('<br>')}</div>` : ''}
+    <table><tbody>${r.items.map(i => `<tr><td class="l"><b>${esc(i.l)}</b><div class="hint" style="margin:2px 0 0">${esc(i.m)}${i.rule ? ` · <span class="${i.ok ? 'green' : 'rose'}">regra da aula: ${esc(i.rule)} ${i.ok ? '✓' : '✗'}</span>` : ''}</div></td><td class="num">${esc(i.v)}</td><td>${badge(i.s)}</td></tr>`).join('')}</tbody></table>
+    <div class="hint" style="margin-top:12px">Dados preenchidos: ${Math.round(r.coverage * 100)}% do peso. Atualizado em ${a.date.split('-').reverse().join('/')}. Triagem baseada em faixas gerais de referência — não é recomendação de investimento. Setores diferem (ex.: bancos e seguradoras não usam dívida/EBITDA), e indicadores bons não garantem retorno futuro.</div>
+    <div class="actions"><button class="btn" data-act="editAnalise" data-id="${a.id}">Editar dados</button><button class="btn primary" data-act="closeSheet">Fechar</button></div>`);
+  $('sheet').classList.add('wide');
+}
+Object.assign(A, {
+  newAnalise() { analysisForm(); },
+  editAnalise(id) { closeSheet(); analysisForm(state.analises.find(x => x.id === id)); },
+  openAnalise(id) { showAnalysis(id); },
+  delAnalise(id) { const a = state.analises.find(x => x.id === id); if (a && confirm(`Remover a análise de ${a.ticker}?`)) { state.analises = state.analises.filter(x => x.id !== id); save(); } },
+  editMercado() {
+    const m = state.mercado || {};
+    const fmt = v => v ? String(v).replace('.', ',') : '';
+    openForm({ title: 'Contexto de mercado', note: 'Dados gerais que ajudam a comparar cada ativo com o mercado (ex.: painéis do Status Invest, B3 ou da sua corretora). Deixe vazio o que não souber.',
+      fields: [{ row: [{ k: 'ib', label: 'P/L do Ibovespa hoje', value: fmt(m.ibovPL) }, { k: 'iba', label: 'P/L médio do Ibovespa (15 anos)', value: fmt(m.ibovPLavg) }] },
+               { row: [{ k: 'ip', label: 'P/VP médio do IFIX', value: fmt(m.ifixPVP) }, { k: 'iy', label: 'Yield médio do IFIX (%)', value: fmt(m.ifixDY) }] }],
+      onSubmit(v) { const o = { ibovPL: num(v.ib), ibovPLavg: num(v.iba), ifixPVP: num(v.ip), ifixDY: num(v.iy), at: todayStr() }; Object.keys(o).forEach(k => { if (!o[k] && k !== 'at') delete o[k]; }); state.mercado = o; save(); toast('Contexto atualizado'); } });
+  }
+});
+
+function viewAnalise() {
+  const m = state.mercado || {}, cdi = state.cdiRateAnnual || 13.15;
+  const leitura = [];
+  if (m.ibovPL && m.ibovPLavg) { const d = (m.ibovPL / m.ibovPLavg - 1) * 100; leitura.push(`Ibovespa: P/L ${nf(m.ibovPL)} está <b class="${d < -8 ? 'green' : d > 8 ? 'rose' : 'amber'}">${nf(Math.abs(d))}% ${d < 0 ? 'abaixo' : 'acima'}</b> da média de 15 anos (${nf(m.ibovPLavg)}).`); }
+  if (m.ifixPVP) leitura.push(`IFIX: P/VP médio ${nf(m.ifixPVP)} — fundos negociam, em média, <b class="${m.ifixPVP < 0.95 ? 'green' : m.ifixPVP > 1.05 ? 'rose' : 'amber'}">${m.ifixPVP < 1 ? 'com desconto de ' + nf((1 - m.ifixPVP) * 100) + '%' : 'com prêmio de ' + nf((m.ifixPVP - 1) * 100) + '%'}</b> sobre o valor patrimonial.`);
+  if (m.ifixDY) leitura.push(`IFIX: yield médio ${pctN(m.ifixDY)} vs CDI ${pctN(cdi)} (CDI líquido ≈ ${pctN(cdi * 0.85)}).`);
+  const list = [...state.analises].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  return `
+  <div class="card">
+    <h2>Contexto de mercado <button class="btn sm" data-act="editMercado">Atualizar</button></h2>
+    ${leitura.length ? leitura.map(t => `<div style="padding:5px 0">${t}</div>`).join('') : '<div class="hint">Informe o P/L do Ibovespa, o P/VP e o yield médio do IFIX para comparar cada ativo com o mercado.</div>'}
+    ${m.at ? `<div class="hint">Atualizado em ${m.at.split('-').reverse().join('/')}.</div>` : ''}
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h2>Análises de ativos <button class="btn sm primary" data-act="newAnalise">+ Nova análise</button></h2>
+    <div class="hint" style="margin:-6px 0 10px">Escolha o tipo (FII, ação, ETF, ação dos EUA ou renda fixa), informe os indicadores e veja a nota de 0 a 100 e o veredito. Os pesos e as faixas são regras gerais de triagem.</div>
+    ${list.length ? `<div class="scroll"><table><thead><tr><th>Ativo</th><th>Nota</th><th class="l">Veredito</th><th>Data</th><th></th></tr></thead><tbody>
+      ${list.map(a => { const r = analyse(a.cls, a.data), V = VERDICTS[r.k]; return `<tr><td><b>${esc(a.ticker)}</b><span class="tag">${aCls(a.cls).l}</span></td><td class="num ${V.c}" style="font-weight:800">${r.k === 'ins' ? '—' : r.nota}</td><td class="l ${V.c}">${V.t}</td><td class="num mut">${(a.date || '').split('-').reverse().join('/')}</td>
+        <td><button class="btn sm" data-act="openAnalise" data-id="${a.id}">Ver</button> <button class="btn sm ghost danger" data-act="delAnalise" data-id="${a.id}">✕</button></td></tr>`; }).join('')}
+    </tbody></table></div>` : `<div class="empty">Nenhuma análise ainda.<br><br><button class="btn primary" data-act="newAnalise">+ Analisar um ativo</button></div>`}
+  </div>
+  <div class="card" style="margin-top:12px"><h2>Como a nota é calculada</h2>
+    <div class="hint" style="font-size:12.5px"><b>Linhas de corte da aula:</b> FII — P/VP &lt; 1 e vacância &lt; 5%; ações — ROE &gt; 15%, margem líquida &gt; 10%, dívida líquida/EBITDA &lt; 3 e P/L &lt; 15; renda fixa — taxa acima da Selic, pós-fixado no curto prazo e IPCA+ no longo (prefixado = mais risco). Itens qualitativos (governança, localização, inquilinos, padrão construtivo, emissor) você escolhe numa lista. Cada indicador recebe uma pontuação de 0 a 1 conforme faixas de referência (por exemplo, FII: P/VP até 0,95 pontua mais; vacância acima de 20% é alerta), multiplicada por um peso. A nota é a média ponderada dos indicadores que você preencheu. ≥ 75 = bom candidato; 60–74 = razoável; 45–59 = fraco; abaixo disso = evitar. Alertas graves (ex.: prejuízo, inadimplência alta, dívida acima de 4x EBITDA) impedem a nota máxima; dois ou mais alertas viram “evitar”. O DY dos FIIs é comparado ao CDI líquido (≈ CDI menos 15% de IR) definido em ⚙. É uma ferramenta de triagem para organizar a decisão — não substitui leitura do relatório gerencial, análise do setor e do seu perfil, nem é recomendação de investimento.</div></div>`;
+}
+
+/* =========================================================
+   Views
+   ========================================================= */
+const progress = (v, t, color) => `<div class="bar"><i style="width:${t > 0 ? Math.min(100, v / t * 100) : 0}%;${color ? `background:${color}` : ''}"></i></div>`;
+
+function viewResumo() {
+  const m = state.selectedMonth, inc = incomeFor(m), exp = totalExpenses(), sobra = inc.value - exp;
+  const T = totals(), P = passiveMonthly(), ap = aportesOfMonth(m);
+  const done = c => ap.filter(a => a.cat === c).reduce((s, a) => s + a.amount, 0);
+  const plan = state.plan, caixaAuto = Math.max(0, sobra - plan.amort - plan.tesouro - plan.fii), caixaPlan = plan.caixa != null && plan.caixa !== '' ? Number(plan.caixa) : caixaAuto;
+  const rows = [['amort', 'Amortização do financiamento', plan.amort, 'var(--blue)'], ['tesouro', 'Tesouro Direto', plan.tesouro, 'var(--cyan)'], ['caixa', 'Renda Fixa', caixaPlan, 'var(--brand)'], ['fii', 'Renda variável (FIIs, ações, ETFs)', plan.fii, 'var(--violet)']];
+  const totalDone = ap.reduce((s, a) => s + a.amount, 0);
+  const tot = T.patrimonio || 1;
+  const next3 = [0, 1, 2].map(i => { const mm = addMonths(curMonth(), i); return { m: mm, cup: couponsInMonth(mm), fii: P.fii }; });
+  const ySoFar = state.yieldByMonth[curMonth()] || 0;
+  return `
+  <div class="grid kpis">
+    <div class="card"><div class="lbl">Patrimônio total</div><div class="big">${brl(T.patrimonio)}</div><div class="hint">Caixa + Tesouro + Renda variável</div></div>
+    <div class="card"><div class="lbl">Renda de ${mlabel(m)}</div><div class="big green">${brl(inc.value)}</div><div class="hint">${inc.manual ? 'Valor informado por você' : 'Soma dos projetos ativos'}</div></div>
+    <div class="card"><div class="lbl">Despesas fixas</div><div class="big rose">${brl(exp)}</div><div class="hint">Sobra: <b class="${sobra >= 0 ? 'green' : 'rose'}">${brl(sobra)}</b></div></div>
+    <div class="card"><div class="lbl">Renda passiva / mês</div><div class="big amber">${brl(P.total)}</div><div class="hint">Caixa ${brl(P.caixa)} · Ações/FIIs ${brl(P.fii)} · Cupons ${brl(P.cupons)}</div></div>
+  </div>
+
+  <div class="grid cols2" style="margin-top:12px">
+    <div class="card">
+      <h2>Aportes de ${mlabel(m)} <span class="sub">${brl(totalDone)} de ${brl(Math.max(0, sobra))}</span></h2>
+      ${rows.map(([c, name, planned, color]) => `<div class="item"><div class="row between"><span class="name">${name} <button class="btn sm ghost" data-act="editCatAporte" data-id="${c}" title="Corrigir o valor investido">✎</button></span><span class="num mut">${planned > 0 ? `${brl(done(c))} / ${brl(planned)}` : `${brl(done(c))} <small>investidos · sem meta</small>`}</span></div><div style="margin-top:7px">${progress(planned > 0 ? done(c) : done(c) > 0 ? 1 : 0, planned > 0 ? planned : 1, color)}</div></div>`).join('')}
+      <div class="item"><div class="row between"><span class="lbl">Total investido em ${mlabel(m)}</span><b class="num green" style="font-size:18px">${brl(totalDone)}</b></div></div>
+      <div class="row" style="margin-top:12px"><button class="btn primary" data-act="addAporte">+ Registrar aporte</button><button class="btn" data-act="addTrade" data-v="C">+ Compra de ativo</button><button class="btn ghost" data-act="editPlan">Editar metas</button></div>
+      ${(() => { const metas = plan.amort + plan.tesouro + plan.fii + (plan.caixa != null && plan.caixa !== '' ? Number(plan.caixa) : 0); return sobra < metas ? `<div class="hint rose" style="margin-top:10px">As metas somam mais do que a sobra do mês (${brl(metas)}).</div>` : ''; })()}
+    </div>
+
+    <div class="card">
+      <h2>Minha Carteira <span class="sub">${brl(T.patrimonio)}</span></h2>
+      ${pieChart([['Caixa', T.caixa, 'var(--brand)'], ['Tesouro', T.tesouro, 'var(--cyan)'], ['Renda variável', T.fiis, 'var(--violet)'], ...(T.meli > 0 ? [['Meli Dólar', T.meli, 'var(--amber)']] : [])])}
+      <h2 style="margin-top:20px">Próximos 3 meses (estimativa)</h2>
+      <table><tbody>${next3.map(x => `<tr><td>${mlabel(x.m)}</td><td class="mut">${x.cup ? 'cupom Tesouro ' + brl(x.cup) : '—'}</td><td class="amber">proventos ${brl(x.fii)}</td></tr>`).join('')}</tbody></table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h2>Lançamentos de ${mlabel(m)}</h2>
+    ${ap.length ? `<div class="scroll"><table><thead><tr><th>Data</th><th class="l">Destino</th><th>Valor</th><th></th></tr></thead><tbody>${[...ap].sort((a, b) => b.date.localeCompare(a.date)).map(a => `<tr><td>${a.date.split('-').reverse().join('/')}</td><td class="l">${esc(a.label || ({amort:'Amortização',tesouro:'Tesouro',caixa:'Renda fixa',fii:'Renda variável'}[a.cat] || 'Aporte'))}</td><td class="num green">${brl(a.amount)}</td><td>${a.kind === 'fii' ? '' : `<button class="btn sm ghost danger" data-act="delAporte" data-id="${a.id}">Desfazer</button>`}</td></tr>`).join('')}</tbody></table></div>` : `<div class="empty">Nenhum aporte registrado neste mês.</div>`}
+  </div>
+  ${aportesHistCard()}
+  ${snapshotCard()}`;
+}
+function aportesHistCard() {
+  const by = {}; state.aportes.forEach(a => { const k = (a.date || '').slice(0, 7); if (k) by[k] = (by[k] || 0) + a.amount; });
+  const keys = Object.keys(by).sort().reverse().slice(0, 12); if (keys.length < 2) return '';
+  return `<div class="card" style="margin-top:12px"><h2>Quanto investi por mês <span class="sub">${brl(Object.values(by).reduce((t, v) => t + v, 0))} no total</span></h2><div class="scroll"><table><thead><tr><th>Mês</th><th>Investido</th></tr></thead><tbody>${keys.map(k => `<tr><td>${mlabel(k)}</td><td class="num green">${brl(by[k])}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+/* Gráfico de pizza (rosca) em SVG, sem biblioteca */
+function pieChart(items) {
+  const total = items.reduce((t, i) => t + Math.max(0, i[1]), 0), R = 15.9155; let acc = 0;
+  const arcs = total > 0 ? items.filter(i => i[1] > 0).map(([n, v, c]) => { const f = v / total * 100, a = `<circle r="${R}" cx="21" cy="21" fill="none" stroke="${c}" stroke-width="7" stroke-dasharray="${f} ${100 - f}" stroke-dashoffset="${25 - acc}"><title>${esc(n)}: ${brl(v)} (${pct(f)})</title></circle>`; acc += f; return a; }).join('') : '';
+  return `<div class="pie"><svg viewBox="0 0 42 42" role="img" aria-label="Distribuição da carteira"><circle r="${R}" cx="21" cy="21" fill="none" stroke="var(--line, #263149)" stroke-width="7"/>${arcs}<text x="21" y="20" text-anchor="middle" font-size="3.4" fill="currentColor" opacity=".6">Total</text><text x="21" y="25" text-anchor="middle" font-size="4" font-weight="700" fill="currentColor">${total > 0 ? brl(total).replace('R$ ', '') : '—'}</text></svg>
+    <div class="pielegend">${items.map(([n, v, c]) => `<div class="row between"><span style="display:inline-flex;align-items:center;gap:8px"><i style="width:11px;height:11px;border-radius:50%;background:${c};display:inline-block"></i>${n}</span><span><b class="num">${brl(v)}</b> <span class="mut">${total > 0 ? pct(v / total * 100) : ''}</span></span></div>`).join('')}</div></div>`;
+}
+function snapshotCard() {
+  const keys = Object.keys(state.snapshots).sort().slice(-12); if (keys.length < 2) return '';
+  return `<div class="card" style="margin-top:12px"><h2>Evolução do patrimônio <span class="sub">registrado automaticamente</span></h2><div class="scroll"><table><thead><tr><th>Mês</th><th>Patrimônio</th><th>Caixa</th><th>Tesouro</th><th>Renda var.</th></tr></thead><tbody>${keys.map(k => { const s = state.snapshots[k]; return `<tr><td>${mlabel(k)}</td><td class="num">${brl(s.patrimonio)}</td><td class="num mut">${brl(s.caixa)}</td><td class="num mut">${brl(s.tesouro)}</td><td class="num mut">${brl(s.fiis)}</td></tr>`; }).join('')}</tbody></table></div></div>`;
+}
+
+function viewRenda() {
+  const m = state.selectedMonth, inc = incomeFor(m), exp = totalExpenses(), sobra = inc.value - exp;
+  const active = s => srcFactor(s, m) > 0 || srcHasReal(s, m);
+  const srcs = [...state.incomeSources].sort((a, b) => (a.end || '9999').localeCompare(b.end || '9999'));
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <h2>Fontes de renda <button class="btn sm" data-act="addSource">+ Fonte</button></h2>
+      ${srcs.length ? srcs.map(s => `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(s.name)}</span>${active(s) ? '<span class="tag g">ativo em ' + mlabel(m) + '</span>' : '<span class="tag">inativo</span>'}<div class="hint">${s.lag === '1' && !s.once ? 'paga no mês seguinte · ' : ''}${s.once ? 'pagamento único em ' + fmtSrcDate(s.start) : (s.start ? 'de ' + fmtSrcDate(s.start) : '') + ' ' + (s.end ? 'até ' + fmtSrcDate(s.end) : '· sem data de término')}${srcHasReal(s, m) ? ` · <b class="green">valor real informado</b>` : srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? ` · <b class="amber">proporcional em ${mlabel(m)}: ${Math.round(srcFactor(s, m) * 100)}% do mês</b>` : ''}</div></div>
+        <div class="num ${active(s) ? 'green' : 'mut'}" style="font-weight:700">${brl(srcAmount(s, m))}${srcHasReal(s, m) ? `<div class="hint" style="text-align:right">previsto ${brl(srcForecast(s, m))}</div>` : srcFactor(s, m) > 0 && srcFactor(s, m) < 1 ? `<div class="hint" style="text-align:right">de ${brl(s.amount)}</div>` : ''}</div></div>
+        <div class="row" style="margin-top:6px"><button class="btn sm" data-act="realSource" data-id="${s.id}">${srcHasReal(s, m) ? 'Alterar valor real' : 'Valor real do mês'}</button><button class="btn sm" data-act="editSource" data-id="${s.id}">Editar</button><button class="btn sm ghost danger" data-act="delSource" data-id="${s.id}">Remover</button></div></div>`).join('') : '<div class="empty">Cadastre suas bolsas e projetos.</div>'}
+      <div class="item"><div class="row between"><span class="lbl">Total previsto em ${mlabel(m)}</span><span class="num" style="font-weight:800;font-size:17px">${brl(state.incomeSources.reduce((s, x) => s + srcAmount(x, m), 0))}</span></div>
+        ${inc.manual ? `<div class="row between" style="margin-top:8px"><span class="hint">Você informou ${brl(inc.value)} para este mês</span><span></span></div>` : ''}
+        <div class="row" style="margin-top:8px"><button class="btn sm" data-act="setOverride">${inc.manual ? 'Alterar renda real' : 'Informar renda real do mês'}</button></div></div>
+    </div>
+
+    <div class="card">
+      <h2>Despesas fixas <button class="btn sm" data-act="addExpense">+ Despesa</button></h2>
+      ${state.expenses.map(e => `<div class="row between" style="padding:6px 0"><span>${esc(e.label)}</span><span class="row"><input class="inl num" type="number" step="5" value="${e.amount}" data-chg="expenseChange" data-id="${e.id}" /><button class="btn sm ghost danger" data-act="delExpense" data-id="${e.id}" title="Remover">✕</button></span></div>`).join('') || '<div class="empty">Sem despesas cadastradas.</div>'}
+      <div class="item"><div class="row between"><span class="lbl">Total</span><b class="num rose">${brl(exp)}</b></div>
+        <div class="row between" style="margin-top:8px"><span class="lbl">Sobra para investir</span><b class="num ${sobra >= 0 ? 'green' : 'rose'}" style="font-size:18px">${brl(sobra)}</b></div>
+        <div class="hint">Margem de poupança: ${inc.value > 0 ? pct(sobra / inc.value * 100) : '—'}</div></div>
+    </div>
+  </div>`;
+}
+
+function viewCaixa() {
+  const T = totals(), cushion = T.caixa;
+  const accHTML = state.accounts.map(a => {
+    const my = accYield(a, 12), td = todayStr(), earned = (a.earned && a.earned[curMonth()]) || 0, dd = accYield(a, 252);
+    const matTag = a.mat ? (a.mat < td ? '<span class="tag r">vencido</span>' : `<span class="tag a">vence ${dmy(a.mat)}</span>`) : '';
+    return `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(a.name)}</span>${a.taxed ? '' : '<span class="tag g">isento IR</span>'}${a.inv ? '<span class="tag g">investimentos</span>' : ''}${a.cap > 0 ? `<span class="tag a">teto ${brl(a.cap)}</span>` : ''}${matTag}<div class="hint">${esc(a.inst || '')} · ${accRateLabel(a)} · rende ≈ <b class="green">${brl(my)}</b>/mês</div><div class="hint">Conferir: ≈ ${brl(dd)} por dia útil · já rendeu <b class="green">${brl(earned)}</b> neste mês (líquido)</div></div><div class="num" style="font-weight:700">${brl(a.balance)}</div></div>
+      ${a.target ? `<div style="margin-top:7px">${progress(a.balance, a.target)}<div class="hint">${a.balance >= a.target ? '✓ meta atingida' : 'faltam ' + brl(a.target - a.balance) + ' para ' + brl(a.target)}</div></div>` : ''}
+      <div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="aporteTo" data-id="${a.id}">Aportar</button><button class="btn sm" data-act="retirarAccount" data-id="${a.id}">Retirar</button><button class="btn sm" data-act="adjustAccount" data-id="${a.id}">Ajustar saldo</button><button class="btn sm" data-act="editAccount" data-id="${a.id}">Editar</button><button class="btn sm ghost danger" data-act="delAccount" data-id="${a.id}">✕</button></div></div>`;
+  }).join('');
+  return `
+  <div class="grid cols2">
+    <div class="card">
+      <h2>Caixa de liquidez <button class="btn sm" data-act="addAccount">+ Conta</button></h2>
+      <div style="margin-bottom:14px"><div class="row between"><span class="hint">Colchão total</span><span class="num"><b>${brl(cushion)}</b> <span class="mut">/ ${brl(state.cushionTarget)}</span> <button class="btn sm ghost" data-act="editCushion">meta</button></span></div>
+        <div style="margin-top:6px">${progress(cushion, state.cushionTarget, 'linear-gradient(90deg,#3b82f6,#22d3ee)')}</div></div>
+      ${accHTML || '<div class="empty">Cadastre suas contas e cofrinhos.</div>'}
+      <div class="hint">O saldo cresce sozinho a cada dia útil usando o CDI de ${pct(state.cdiRateAnnual, 2)} a.a. (ajustável em ⚙). Ajuste o saldo quando quiser alinhar com o app do banco.</div>
+    </div>
+
+    <div>
+      <div class="card">
+        <h2>Tesouro Direto <span class="row"><b class="cyan num">${brl(T.tesouro)}</b><button class="btn sm" data-act="addTesouro">+ Título</button></span></h2>
+        ${state.tesouro.map(t => `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(t.name)}</span>${t.blocked ? '<span class="tag a">bloqueado</span>' : ''}<div class="hint">${esc(t.rate)}${t.coupon ? ` · cupom ≈ <b class="green">${brl(couponNet(t))}</b> em mai e nov` : ''}</div></div><div class="num cyan" style="font-weight:700">${brl(t.amount)}</div></div>
+          <div class="row" style="margin-top:8px">${t.blocked ? '' : `<button class="btn sm primary" data-act="aporteTesouro" data-id="${t.id}">Aportar</button>`}${t.coupon ? `<button class="btn sm" data-act="cupomTesouro" data-id="${t.id}">Cupom recebido</button>` : ''}<button class="btn sm" data-act="editTesouro" data-id="${t.id}">Atualizar / editar</button><button class="btn sm ghost danger" data-act="delTesouro" data-id="${t.id}">✕</button></div></div>`).join('') || '<div class="empty">Nenhum título.</div>'}
+        ${(() => { const cp = state.proventos.filter(x => x.kind === 'tesouro').sort((a, b) => (b.date || '').localeCompare(a.date || '')); return cp.length ? `<div class="item"><div class="row between"><span class="lbl">Cupons recebidos (total)</span><b class="green num">${brl(cp.reduce((t, x) => t + x.total, 0))}</b></div>${cp.map(x => `<div class="row between" style="margin-top:6px"><span class="hint">${(x.date || '').split('-').reverse().join('/')} · ${esc(x.ticker)}</span><span class="row"><span class="num green">${brl(x.total)}</span><button class="btn sm ghost danger" data-act="delProvento" data-id="${x.id}">✕</button></span></div>`).join('')}</div>` : ''; })()}
+        <div class="hint">Cupons: estimativa de ≈2,96% por semestre menos 15% de IR. Quando cair, toque em “Cupom recebido” no título e informe o valor real.</div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        ${(() => { const r = fxRate(), usd = state.meli.usd || 0, mm = curMonth(), mes = state.meli.entries.filter(e => (e.date || '').slice(0, 7) === mm).reduce((t, e) => t + e.usd, 0), ents = [...state.meli.entries].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 8);
+          return `<h2>Meli Dólar <span class="row"><b class="amber num">US$ ${nf(usd)}</b><button class="btn sm" data-act="addMeli">+ Cashback</button></span></h2>
+        <div class="row between"><span class="hint">Valor em reais${r ? ` (dólar a ${brl4(r)})` : ''}</span><b class="num">${r ? brl(usd * r) : '— busque o dólar'}</b></div>
+        <div class="hint">Cashback em ${mlabel(mm)}: <b class="green">US$ ${nf(mes)}</b> · já conta no patrimônio e na pizza da carteira.</div>
+        ${ents.map(e => `<div class="row between" style="margin-top:6px"><span class="hint">${dmy(e.date)}${e.note ? ' · ' + esc(e.note) : ''}</span><span class="row"><span class="num green">US$ ${nf(e.usd)}</span><button class="btn sm ghost danger" data-act="delMeli" data-id="${e.id}">✕</button></span></div>`).join('')}
+        <div class="row" style="margin-top:10px"><button class="btn sm" data-act="adjustMeli">Ajustar saldo</button><button class="btn sm" data-act="refreshFx">↻ Dólar</button></div>`; })()}
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h2>Financiamento — amortização <button class="btn sm" data-act="editAmort">Editar</button></h2>
+        <div class="big blue">${brl(state.amortAccumulated)}</div><div class="hint">Total amortizado até agora. Registre novas amortizações em “Registrar aporte”.</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function viewFiis() {
+  const T = totals(), pos = T.pos, P = passiveMonthly();
+  const pl = T.fiis - T.fiisCost, dy = T.fiisCost > 0 ? P.fii * 12 / T.fiisCost * 100 : 0;
+  const trades = [...state.fiis.trades].sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.id > a.id ? 1 : -1));
+  const provs = state.proventos.filter(x => x.kind !== 'tesouro').sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const recMes = state.proventos.filter(x => x.kind !== 'tesouro').filter(x => (x.date || '').slice(0, 7) === state.selectedMonth).reduce((s, x) => s + x.total, 0);
+  const hasToken = true, hasUS = pos.some(p => p.cur === 'USD');
+  const byCls = {}; pos.forEach(p => { byCls[p.cl.l] = (byCls[p.cl.l] || 0) + p.value; });
+  const fx = state.fx || {};
+  return `
+  <div class="grid kpis">
+    <div class="card"><div class="lbl">Valor atual</div><div class="big violet">${brl(T.fiis)}</div><div class="hint">Investido: ${brl(T.fiisCost)}</div></div>
+    <div class="card"><div class="lbl">Resultado</div><div class="big ${pl >= 0 ? 'green' : 'rose'}">${pl >= 0 ? '+' : ''}${brl(pl)}</div><div class="hint">${T.fiisCost > 0 ? pct(pl / T.fiisCost * 100) + ' sobre o custo' : '—'}</div></div>
+    <div class="card"><div class="lbl">Proventos / mês</div><div class="big amber">${brl(P.fii)}</div><div class="hint">Estimativa (média mensal)</div></div>
+    <div class="card"><div class="lbl">Recebido em ${mlabel(state.selectedMonth)}</div><div class="big green">${brl(recMes)}</div><div class="hint">Yield projetado: ${pct(dy)} a.a.</div></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h2>Carteira: FIIs, ações e ETFs <span class="row"><button class="btn sm" data-act="refreshQuotes">↻ Cotações</button><button class="btn sm" data-act="addProvento">+ Provento</button><button class="btn sm primary" data-act="addTrade" data-v="C">+ Registrar compra</button></span></h2>
+    <div class="hint" style="margin:-6px 0 10px">${esc(uiMsg.quotes) || (hasToken ? 'Cotações da B3 vêm do robô (a cada 30 min no pregão, ~30 min de atraso). Ativos novos precisam entrar em tickers.json. Ações dos EUA: chave do Finnhub em ⚙.' : '')}</div>
+    ${Object.keys(byCls).length > 1 ? `<div class="legend" style="margin:0 0 10px">${Object.entries(byCls).map(([k, v]) => `<span style="--c:var(--violet)">${k} <b>${brl(v)}</b></span>`).join('')}</div>` : ''}
+    ${hasUS ? `<div class="hint" style="margin:0 0 10px">Dólar: <b>${fxRate() ? 'R$ ' + fxRate().toFixed(4).replace('.', ',') : 'indisponível'}</b> (${fx.manual ? 'manual' : 'automático'}). O resultado dos ativos dos EUA usa o dólar de hoje sobre o preço médio em dólar — não inclui a variação do câmbio desde a compra. Proventos dos EUA na estimativa já descontam 30% retidos.</div>` : ''}
+    ${pos.length ? `<div class="scroll"><table><thead><tr><th>Ativo</th><th>Qtd.</th><th>Preço médio</th><th>Cotação</th><th>Dia</th><th>Valor (R$)</th><th>Resultado</th><th>Prov./cota</th><th>Renda/mês</th><th>Yield a.a.</th><th></th></tr></thead><tbody>
+      ${pos.map(p => `<tr><td><b>${esc(p.ticker)}</b><span class="tag">${p.cl.l}</span></td><td class="num">${p.qty}</td><td class="num">${money(p.avg, p.cur)}</td><td class="num">${money(p.price, p.cur)}${p.hasQuote ? '' : '<span class="tag">s/ cotação</span>'}</td>
+        <td class="num ${p.change > 0 ? 'green' : p.change < 0 ? 'rose' : 'mut'}">${p.change == null ? '—' : (p.change > 0 ? '+' : '') + pct(p.change, 2)}</td>
+        <td class="num">${p.noFx ? '<span class="tag a">sem dólar</span>' : brl(p.value)}</td><td class="num ${p.pl >= 0 ? 'green' : 'rose'}">${p.noFx ? '—' : (p.pl >= 0 ? '+' : '') + brl(p.pl) + '<br><small>' + pct(p.plPct) + '</small>'}</td>
+        <td class="num">${p.dps ? (p.cur === 'USD' ? usd4(p.dps) : brl4(p.dps)) + `<br><small class="mut">${p.freq}×/ano</small>` : '—'}</td><td class="num amber">${p.dps ? brl(p.income) : '—'}</td><td class="num">${p.dps ? pct(p.dyAnual) : '—'}</td>
+        <td><button class="btn sm" data-act="editFii" data-id="${esc(p.ticker)}">Editar</button></td></tr>`).join('')}
+    </tbody></table></div>` : `<div class="empty">Nenhum ativo ainda.<br><br><button class="btn primary" data-act="addTrade" data-v="C">+ Registrar sua primeira compra</button></div>`}
+  </div>
+
+  ${provs.length ? `<div class="card" style="margin-top:12px"><h2>Proventos recebidos</h2><div class="scroll"><table><thead><tr><th>Data</th><th class="l">Ativo</th><th>Por cota</th><th>Qtd.</th><th>Recebido (R$)</th><th></th></tr></thead><tbody>
+    ${provs.map(x => `<tr><td>${(x.date || '').split('-').reverse().join('/')}</td><td class="l"><b>${esc(x.ticker)}</b></td><td class="num">${x.cur === 'USD' ? usd4(x.perShare) : brl4(x.perShare)}</td><td class="num">${x.qty}</td><td class="num green">${brl(x.total)}</td><td><button class="btn sm ghost danger" data-act="delProvento" data-id="${x.id}">✕</button></td></tr>`).join('')}
+    </tbody></table></div></div>` : ''}
+
+  ${trades.length ? `<div class="card" style="margin-top:12px"><h2>Histórico de operações</h2><div class="scroll"><table><thead><tr><th>Data</th><th class="l">Ativo</th><th class="l">Tipo</th><th>Qtd.</th><th>Preço</th><th>Total</th><th></th></tr></thead><tbody>
+    ${trades.map(t => `<tr><td>${(t.date || '').split('-').reverse().join('/')}</td><td class="l"><b>${esc(t.ticker)}</b></td><td class="l ${t.side === 'V' ? 'rose' : 'green'}">${t.side === 'V' ? 'Venda' : 'Compra'}</td><td class="num">${t.qty}</td><td class="num">${money(t.price, t.cur)}</td><td class="num">${money(t.qty * t.price + (t.side === 'V' ? -(t.fees || 0) : (t.fees || 0)), t.cur)}</td><td><button class="btn sm ghost danger" data-act="delTrade" data-id="${t.id}">✕</button></td></tr>`).join('')}
+    </tbody></table></div></div>` : ''}`;
+}
+
+function viewProj() {
+  const N = 20, start = state.selectedMonth, T = totals(), P = passiveMonthly();
+  let patr = T.patrimonio; const rows = [];
+  for (let i = 0; i < N; i++) {
+    const m = addMonths(start, i), inc = incomeFor(m).value, exp = totalExpenses(), sobra = inc - exp;
+    const cup = couponsInMonth(m), passivo = P.caixa + P.fii + cup;
+    const invest = (sobra > 0 ? sobra * state.projSavePct / 100 : sobra);
+    patr += invest + passivo;
+    rows.push({ m, inc, exp, sobra, cup, passivo, patr });
+  }
+  const maxV = Math.max(...rows.map(r => Math.max(r.inc, r.exp)), 1);
+  return `
+  <div class="card">
+    <h2>Renda × despesas, mês a mês <span class="sub">${mlabel(rows[0].m)} → ${mlabel(rows[N - 1].m)}</span></h2>
+    <div class="chart">${rows.map(r => `<div class="col" title="${mlabel(r.m)} — renda ${brl(r.inc)} · despesas ${brl(r.exp)}"><div class="bars"><i style="height:${r.inc / maxV * 100}%;background:var(--brand)"></i><i style="height:${r.exp / maxV * 100}%;background:var(--rose)"></i></div><small>${mlabel(r.m)}</small></div>`).join('')}</div>
+    <div class="legend"><span style="--c:var(--brand)">Renda prevista</span><span style="--c:var(--rose)">Despesas fixas</span></div>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h2>Projeção de patrimônio e proventos
+      <span class="row"><label class="hint" for="sp" style="margin:0">Quanto da sobra vira investimento</label><input id="sp" class="inl num" style="width:62px" type="number" min="0" max="100" value="${state.projSavePct}" data-chg="setSavePct" /><span class="hint" style="margin:0">%</span></span></h2>
+    <div class="scroll"><table><thead><tr><th>Mês</th><th>Renda</th><th>Despesas</th><th>Sobra</th><th>Cupom Tesouro</th><th>Renda passiva</th><th>Patrimônio projetado</th></tr></thead><tbody>
+    ${rows.map(r => `<tr><td>${mlabel(r.m)}</td><td class="num green">${brl(r.inc)}</td><td class="num rose">${brl(r.exp)}</td><td class="num ${r.sobra >= 0 ? '' : 'rose'}">${brl(r.sobra)}</td><td class="num">${r.cup ? brl(r.cup) : '—'}</td><td class="num amber">${brl(r.passivo)}</td><td class="num" style="font-weight:700">${brl(r.patr)}</td></tr>`).join('')}
+    </tbody></table></div>
+    <div class="hint" style="margin-top:10px">Como é calculado: a renda de cada mês é a soma dos projetos ativos (aba Renda). A renda passiva usa os saldos e proventos <b>de hoje</b> (juros do caixa líquidos de IR + proventos de FIIs, ações e ETFs + cupons do Tesouro), reinvestida no patrimônio. Meses com despesa maior que a renda saem do patrimônio. É uma estimativa, não uma garantia: o CDI, os proventos e as cotações mudam.</div>
+  </div>`;
+}
+
+/* =========================================================
+   Render
+   ========================================================= */
+const TABS = [['resumo', 'Resumo'], ['renda', 'Renda & Despesas'], ['caixa', 'Caixa & Renda Fixa'], ['fiis', 'Ações & FIIs'], ['analise', 'Análise'], ['proj', 'Projeção']];
+let fxTry = 0;
+function ensureFx() {   // com Meli Dólar no saldo, mantém a cotação do dólar fresca (no máx. 1 consulta por hora)
+  if (!(state.meli.usd > 0) || (state.fx && state.fx.manual) || Date.now() - fxTry < 3600e3 || (fxRate() && Date.now() - (state.fx.at || 0) < 3600e3)) return;
+  fxTry = Date.now(); fetchFx().then(r => { state.fx = { rate: r, at: Date.now(), manual: false }; save(false); render(); }).catch(() => {});
+}
+function render() {
+  if (gateLocked) return;
+  try {
+    $('month').value = state.selectedMonth;
+    $('tabs').innerHTML = TABS.map(([k, l]) => `<button class="tab ${tab === k ? 'active' : ''}" data-act="tab" data-tab="${k}">${l}</button>`).join('');
+    const v = { resumo: viewResumo, renda: viewRenda, caixa: viewCaixa, fiis: viewFiis, analise: viewAnalise, proj: viewProj }[tab] || viewResumo;
+    const y = window.scrollY; $('view').innerHTML = v(); window.scrollTo(0, y);
+    setSyncPill(); ensureFx();
+  } catch (e) { console.error('Erro ao renderizar:', e); $('view').innerHTML = `<div class="empty">Erro ao desenhar a tela: ${esc(e.message)}<br>Seus dados estão salvos. Use ⚙ → Exportar backup.</div>`; }
+}
+
+/* importar backup */
+const imp = document.createElement('input'); imp.type = 'file'; imp.accept = 'application/json'; imp.id = 'importFile'; imp.style.display = 'none'; document.body.appendChild(imp);
+imp.addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { try { const o = JSON.parse(r.result); state = normalize(o); state.updatedAt = Date.now(); save(); closeSheet(); toast('Backup importado'); } catch (er) { alert('Arquivo de backup inválido.'); } };
+  r.readAsText(f); imp.value = '';
+});
+
+(function boot() {
+  try { persistLocal(); } catch (e) {}       // grava a versão migrada (e o backup da antiga já foi guardado)
+  if (initFirebase()) { window.__loaded = true; return; }                // com login ativo, tudo (juros, cotações, tela) acontece depois do login
+  synced = true; applyDailyCompound(true); render();
+  if (fiiPositions().length) refreshQuotes(true);
+})();
+window.__loaded = true;
+</script>
+</body>
+</html>
