@@ -710,19 +710,24 @@ const A = {
                { k: 'fii', label: 'Renda variável: FIIs, ações, ETFs (R$)', value: state.plan.fii }],
       onSubmit(v) { state.plan = { amort: num(v.amort), tesouro: num(v.tesouro), caixa: String(v.caixa).trim() === '' ? null : num(v.caixa), fii: num(v.fii) }; save(); } });
   },
-  addMeli() {
-    openForm({ title: 'Cashback em Meli Dólar', note: 'Cada compra no cartão do Mercado Pago devolve uma parte em Meli Dólar (1 Meli Dólar = 1 dólar). Informe quanto veio, em dólar; o valor é somado ao saldo.',
-      fields: [{ row: [{ k: 'u', label: 'Valor (US$)', required: true, value: '' }, { k: 'd', label: 'Data', type: 'date', value: todayStr() }] }, { k: 'n', label: 'Observação (opcional)', value: '', placeholder: 'ex.: compra no mercado' }],
-      onSubmit(v) { const u = num(v.u); if (!(u > 0)) { toast('Informe o valor em dólar'); return false; }
-        state.meli.entries.push({ id: uid('ml'), date: v.d || todayStr(), usd: u, note: v.n.trim() }); state.meli.usd = Math.round((state.meli.usd + u) * 1e4) / 1e4; save(); toast(`+ US$ ${nf(u)} em Meli Dólar`); } });
+  async addMeli() {
+    if (!fxRate()) { try { state.fx = { rate: await fetchFx(), at: Date.now(), manual: false }; } catch (e) { toast('Preciso da cotação do dólar: toque em ↻ Dólar ou informe em ⚙'); return; } }
+    const r = fxRate();
+    openForm({ title: 'Cashback em Meli Dólar', note: `Informe em reais, como aparece no app do Mercado Pago. O sistema converte para dólar pela cotação de hoje (R$ ${r.toFixed(4).replace('.', ',')}) e passa a acompanhar o dólar.`,
+      fields: [{ row: [{ k: 'b', label: 'Valor (R$)', required: true, value: '' }, { k: 'd', label: 'Data', type: 'date', value: todayStr() }] }, { k: 'n', label: 'Observação (opcional)', value: '', placeholder: 'ex.: compra no mercado' }],
+      onSubmit(v) { const b = num(v.b); if (!(b > 0)) { toast('Informe o valor em reais'); return false; }
+        const u = Math.round(b / r * 1e4) / 1e4;
+        state.meli.entries.push({ id: uid('ml'), date: v.d || todayStr(), usd: u, brl: Math.round(b * 100) / 100, note: v.n.trim() }); state.meli.usd = Math.round((state.meli.usd + u) * 1e4) / 1e4; save(); toast(`+ ${brl(b)} em Meli Dólar (US$ ${nf(u)})`); } });
   },
-  adjustMeli() {
-    openForm({ title: 'Saldo em Meli Dólar', note: 'Digite o saldo em dólar que aparece no app do Mercado Pago. Ele substitui o saldo atual do sistema.',
-      fields: [{ k: 'u', label: 'Saldo atual (US$)', value: state.meli.usd || '' }],
-      onSubmit(v) { const u = num(v.u); if (u < 0 || String(v.u).trim() === '') { toast('Informe o saldo'); return false; } state.meli.usd = u; save(); toast('Saldo atualizado'); } });
+  async adjustMeli() {
+    if (!fxRate()) { try { state.fx = { rate: await fetchFx(), at: Date.now(), manual: false }; } catch (e) { toast('Preciso da cotação do dólar: toque em ↻ Dólar ou informe em ⚙'); return; } }
+    const r = fxRate();
+    openForm({ title: 'Saldo em Meli Dólar', note: `Digite o saldo em reais que aparece no app do Mercado Pago. O sistema guarda em dólar (cotação de hoje: R$ ${r.toFixed(4).replace('.', ',')}), então o valor em reais varia com o dólar, como no app.`,
+      fields: [{ k: 'b', label: 'Saldo atual (R$)', value: state.meli.usd ? Math.round(state.meli.usd * r * 100) / 100 : '' }],
+      onSubmit(v) { const b = num(v.b); if (b < 0 || String(v.b).trim() === '') { toast('Informe o saldo'); return false; } state.meli.usd = Math.round(b / r * 1e4) / 1e4; save(); toast('Saldo atualizado'); } });
   },
   delMeli(id) {
-    const e = state.meli.entries.find(x => x.id === id); if (!e || !confirm(`Remover o cashback de US$ ${nf(e.usd)}? O saldo será reduzido.`)) return;
+    const e = state.meli.entries.find(x => x.id === id); if (!e || !confirm(`Remover este cashback (US$ ${nf(e.usd)})? O saldo será reduzido.`)) return;
     state.meli.entries = state.meli.entries.filter(x => x.id !== id); state.meli.usd = Math.max(0, Math.round((state.meli.usd - e.usd) * 1e4) / 1e4); save();
   },
   async refreshFx() { try { state.fx = { rate: await fetchFx(), at: Date.now(), manual: false }; save(); toast('Dólar atualizado'); } catch (e) { toast('Não consegui buscar o dólar agora'); } },
@@ -1466,11 +1471,11 @@ function viewCaixa() {
         <div class="hint">Cupons: estimativa de ≈2,96% por semestre menos 15% de IR. Quando cair, toque em “Cupom recebido” no título e informe o valor real.</div>
       </div>
       <div class="card" style="margin-top:12px">
-        ${(() => { const r = fxRate(), usd = state.meli.usd || 0, mm = curMonth(), mes = state.meli.entries.filter(e => (e.date || '').slice(0, 7) === mm).reduce((t, e) => t + e.usd, 0), ents = [...state.meli.entries].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 8);
-          return `<h2>Meli Dólar <span class="row"><b class="amber num">US$ ${nf(usd)}</b><button class="btn sm" data-act="addMeli">+ Cashback</button></span></h2>
-        <div class="row between"><span class="hint">Valor em reais${r ? ` (dólar a ${brl4(r)})` : ''}</span><b class="num">${r ? brl(usd * r) : '— busque o dólar'}</b></div>
-        <div class="hint">Cashback em ${mlabel(mm)}: <b class="green">US$ ${nf(mes)}</b> · já conta no patrimônio e na pizza da carteira.</div>
-        ${ents.map(e => `<div class="row between" style="margin-top:6px"><span class="hint">${dmy(e.date)}${e.note ? ' · ' + esc(e.note) : ''}</span><span class="row"><span class="num green">US$ ${nf(e.usd)}</span><button class="btn sm ghost danger" data-act="delMeli" data-id="${e.id}">✕</button></span></div>`).join('')}
+        ${(() => { const r = fxRate(), usd = state.meli.usd || 0, mm = curMonth(), inBRL = e => e.brl != null ? e.brl : e.usd * r, mes = state.meli.entries.filter(e => (e.date || '').slice(0, 7) === mm).reduce((t, e) => t + inBRL(e), 0), ents = [...state.meli.entries].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 8);
+          return `<h2>Meli Dólar <span class="row"><b class="amber num">${r ? brl(usd * r) : '—'}</b><button class="btn sm" data-act="addMeli">+ Cashback</button></span></h2>
+        <div class="row between"><span class="hint">Equivale a${r ? ` (dólar a ${brl4(r)})` : ''}</span><b class="num">US$ ${nf(usd)}</b></div>
+        <div class="hint">Cashback em ${mlabel(mm)}: <b class="green">${brl(mes)}</b> · o valor em reais acompanha o dólar, como no app, e já conta no patrimônio e na pizza.</div>
+        ${ents.map(e => `<div class="row between" style="margin-top:6px"><span class="hint">${dmy(e.date)}${e.note ? ' · ' + esc(e.note) : ''}</span><span class="row"><span class="num green">${brl(inBRL(e))} <span class="mut">· US$ ${nf(e.usd)}</span></span><button class="btn sm ghost danger" data-act="delMeli" data-id="${e.id}">✕</button></span></div>`).join('')}
         <div class="row" style="margin-top:10px"><button class="btn sm" data-act="adjustMeli">Ajustar saldo</button><button class="btn sm" data-act="refreshFx">↻ Dólar</button></div>`; })()}
       </div>
       <div class="card" style="margin-top:12px">
