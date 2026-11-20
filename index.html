@@ -891,10 +891,12 @@ const A = {
     const p = fiiPositions().find(x => x.ticker === ticker); if (!p) return;
     const sym = p.cur === 'USD' ? 'US$' : 'R$';
     openForm({ title: `${ticker} — preço e provento`, note: 'O preço é atualizado sozinho quando as cotações automáticas estão ligadas; aqui você pode corrigir à mão. Para o provento, informe o último valor por cota e quantas vezes ele é pago por ano.',
-      fields: [{ k: 'price', label: `Preço atual (${sym})`, value: p.hasQuote ? p.price.toFixed(2).replace('.', ',') : '' },
+      fields: [{ k: 'cls', label: 'Tipo do ativo', type: 'select', value: p.cls in CLASSES ? p.cls : 'fii', options: Object.entries(CLASSES).map(([k, c]) => [k, c.l]), hint: 'Corrija se foi cadastrado errado (ex.: ação marcada como FII).' },
+               { k: 'price', label: `Preço atual (${sym})`, value: p.hasQuote ? p.price.toFixed(2).replace('.', ',') : '' },
                { row: [{ k: 'dps', label: `Último provento por cota (${sym})`, value: p.dps ? p.dps.toFixed(4).replace('.', ',') : '' }, { k: 'freq', label: 'Pagamentos por ano', type: 'number', step: '1', value: p.freq, hint: 'FII: 12 · EUA: 4 · ações BR: 2 a 4' }] }],
       onSubmit(v) {
         const key = tkKey(ticker);
+        if (v.cls && v.cls !== p.cls) state.fiis.trades.forEach(t => { if (t.ticker === ticker) t.cls = v.cls; });
         if (String(v.price).trim()) state.fiis.quotes[key] = { price: num(v.price), change: null, at: Date.now(), manual: true };
         if (String(v.dps).trim()) state.fiis.divs[key] = { value: num(v.dps), freq: Math.max(1, Math.round(num(v.freq)) || p.freq), date: todayStr(), manual: true };
         else if (state.fiis.divs[key]) state.fiis.divs[key].freq = Math.max(1, Math.round(num(v.freq)) || p.freq);
