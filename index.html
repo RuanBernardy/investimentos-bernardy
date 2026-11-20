@@ -113,6 +113,9 @@
   .gate .field{text-align:left}
   .gate .err{color:var(--rose);font-size:12.5px;min-height:18px;margin-bottom:8px}
   .linkbtn{background:none;border:0;color:var(--mut);font-size:12px;cursor:pointer;text-decoration:underline;margin-top:10px}
+  .fab{position:fixed;right:16px;bottom:18px;z-index:20;border-radius:999px;padding:13px 20px;font-size:15px;font-weight:800;box-shadow:0 6px 20px rgba(0,0,0,.45)}
+  .lbtn{display:block;width:100%;text-align:left;margin:0 0 8px;padding:13px 14px;font-size:14px}
+  .lbtn small{display:block;color:var(--mut);font-weight:500;margin-top:2px}
   #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#16223a;border:1px solid #2a3a5e;padding:9px 16px;border-radius:12px;font-size:13px;z-index:80;opacity:0;pointer-events:none;transition:opacity .25s}
   #toast.show{opacity:1}
 
@@ -156,6 +159,7 @@
 <main class="wrap" id="view"></main>
 
 <div class="modal hidden" id="modal"><div class="sheet" id="sheet"></div></div>
+<button class="btn primary fab" data-act="lancar">+ Lançar</button>
 <div id="toast"></div>
 <div id="fatal" style="display:none;position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;background:#3b0d12;color:#fff;border:1px solid #f43f5e;border-radius:12px;padding:12px;font:14px/1.4 system-ui,sans-serif"></div>
 <script>
@@ -204,7 +208,7 @@ const CK = 'FINANCE_CLOUD_SYNC_BIN_ID';
 const FK = 'FINANCE_FINNHUB_KEY';      // chave do Finnhub (cotações EUA): também só neste aparelho
 try { localStorage.removeItem('FINANCE_BRAPI_TOKEN'); } catch (e) {}   // a chave da brapi não fica mais no navegador: quem usa é o robô do GitHub Actions
 const BK = 'FINANCE_BACKUP_PRE_V2';
-const TABK = 'FINANCE_LAST_TAB';
+const TABK = 'FINANCE_LAST_TAB', LBK = 'FINANCE_LAST_BACKUP';
 
 /* ---------- utilidades ---------- */
 const $ = id => document.getElementById(id);
@@ -341,7 +345,7 @@ function loadState() {
 }
 
 let state = loadState();
-let tab = (() => { try { return localStorage.getItem(TABK) || 'resumo'; } catch (e) { return 'resumo'; } })();
+let tab = (() => { try { return localStorage.getItem(TABK) || 'hoje'; } catch (e) { return 'hoje'; } })();
 let uiMsg = { quotes: '' };
 
 /* =========================================================
@@ -751,6 +755,31 @@ const A = {
       fields: [{ k: 'v', label: 'Valor recebido (R$)', value: srcHasReal(x, m) ? x.real[m] : f }],
       onSubmit(v) { x.real = x.real || {}; if (String(v.v).trim() === '') delete x.real[m]; else x.real[m] = num(v.v); save(); toast(String(v.v).trim() === '' ? 'Voltou ao valor previsto' : 'Valor real registrado'); } });
   },
+  lancar() {
+    const tes = state.tesouro.filter(t => !t.blocked), cps = tes.filter(t => t.coupon), pos = fiiPositions();
+    const b = (act, t, sub, extra = '') => `<button class="btn lbtn" data-act="${act}" ${extra}>${t}<small>${sub}</small></button>`;
+    openSheet(`<h3>O que aconteceu?</h3>
+      ${b('lcAporte', '💰 Investi dinheiro', 'Poupança, cofrinho, CDB ou Tesouro (aporte)')}
+      ${b('lcCompra', '📈 Comprei um ativo', 'FII, ação ou ETF', 'data-v="C"')}
+      ${b('lcVenda', '📉 Vendi um ativo', 'Registra a venda', 'data-v="V"')}
+      ${b('lcProv', '🪙 Recebi provento', 'Dividendo, rendimento de FII ou JCP')}
+      ${cps.length ? b('lcCupom', '🏛 Recebi cupom do Tesouro', 'Juros semestrais do título') : ''}
+      ${b('lcAmort', '🏠 Amortizei o financiamento', 'Não conta como investimento')}
+      ${b('lcRetirar', '⬇ Retirei dinheiro de uma conta', 'Resgate ou transferência')}
+      <div class="row" style="margin-top:6px"><button class="btn ghost" data-act="closeSheetBtn">Cancelar</button></div>`);
+  },
+  closeSheetBtn() { closeSheet(); },
+  lcAporte() { aporteForm(''); }, lcCompra() { tradeForm('C'); }, lcVenda() { tradeForm('V'); }, lcProv() { A.addProvento(); }, lcAmort() { A.amortizar(); },
+  lcCupom() {
+    const cps = state.tesouro.filter(t => !t.blocked && t.coupon);
+    if (cps.length === 1) return A.cupomTesouro(cps[0].id);
+    openSheet(`<h3>Cupom de qual título?</h3>${cps.map(t => `<button class="btn lbtn" data-act="cupomTesouro" data-id="${t.id}">${esc(t.name)}</button>`).join('')}<div class="row"><button class="btn ghost" data-act="lancar">← Voltar</button></div>`);
+  },
+  lcRetirar() {
+    const ac = state.accounts;
+    if (ac.length === 1) return A.retirarAccount(ac[0].id);
+    openSheet(`<h3>Retirar de qual conta?</h3>${ac.map(a => `<button class="btn lbtn" data-act="retirarAccount" data-id="${a.id}">${esc(a.name)}<small>Saldo ${brl(a.balance)}</small></button>`).join('')}<div class="row"><button class="btn ghost" data-act="lancar">← Voltar</button></div>`);
+  },
   amortizar() {
     openForm({ title: 'Registrar amortização do financiamento', note: 'Pagamento para reduzir o saldo devedor. Não conta como investimento. Escolha de qual conta saiu o dinheiro; para pagar com duas contas, preencha a segunda (o que faltar sai dela).',
       fields: [{ row: [{ k: 'v', label: 'Valor (R$)', value: '', required: true }, { k: 'd', label: 'Data', type: 'date', value: todayStr() }] },
@@ -905,7 +934,7 @@ const A = {
   exportJSON() {
     const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `investimentos_backup_${todayStr()}.json`;
-    document.body.appendChild(a); a.click(); a.remove(); toast('Backup exportado');
+    document.body.appendChild(a); a.click(); a.remove(); try { localStorage.setItem(LBK, String(Date.now())); } catch (e) {} toast('Backup exportado'); render();
   },
   importJSON() { $('importFile').click(); },
   logout() { closeSheet(); if (fb) firebase.auth().signOut(); }
@@ -1396,6 +1425,51 @@ function viewAnalise() {
    ========================================================= */
 const progress = (v, t, color) => `<div class="bar"><i style="width:${t > 0 ? Math.min(100, v / t * 100) : 0}%;${color ? `background:${color}` : ''}"></i></div>`;
 
+function lastBackupAt() { try { return Number(localStorage.getItem(LBK)) || 0; } catch (e) { return 0; } }
+function daysTo(ds) { const a = new Date(todayStr() + 'T12:00:00'), b = new Date(ds + 'T12:00:00'); return Math.round((b - a) / 864e5); }
+function viewHoje() {
+  const m = curMonth(), T = totals(), inc = incomeFor(m), exp = totalExpenses(), sobra = inc.value - exp, plan = state.plan;
+  const ap = aportesOfMonth(m).filter(a => a.cat !== 'amort'), invested = ap.reduce((s, a) => s + a.amount, 0), metaInv = Math.max(0, sobra - plan.amort);
+  const rend = state.yieldByMonth[m] || 0;
+  // pendências
+  const todo = [];
+  state.tesouro.filter(t => t.coupon && toArr(t.couponMonths).includes(monthNum(m))).forEach(t => {
+    const got = state.proventos.some(x => x.kind === 'tesouro' && x.tid === t.id && (x.date || '').slice(0, 7) === m);
+    if (!got) todo.push({ ic: '🏛', t: `Cupom do ${esc(t.name)} previsto neste mês`, s: `Estimativa ${brl(couponNet(t))} — registre o valor real quando cair`, act: 'cupomTesouro', id: t.id, btn: 'Registrar' });
+  });
+  state.accounts.forEach(a => {
+    if (a.until) { const d = daysTo(a.until); if (d >= 0 && d <= 30) todo.push({ ic: '⏳', t: `${esc(a.name)}: a taxa promocional acaba ${d === 0 ? 'hoje' : `em ${d} dia${d === 1 ? '' : 's'}`}`, s: `${toArr(a.tiersAfter).length ? 'Depois vale ' + tiersLabel(a.tiersAfter) + '. ' : ''}Veja se compensa mover o dinheiro.`, act: 'editAccount', id: a.id, btn: 'Ver conta' }); }
+    if (a.mat) { const d = daysTo(a.mat); if (d >= 0 && d <= 30) todo.push({ ic: '📅', t: `${esc(a.name)} vence ${d === 0 ? 'hoje' : `em ${d} dia${d === 1 ? '' : 's'}`} (${dmy(a.mat)})`, s: 'Decida o que fazer com o dinheiro', act: 'editAccount', id: a.id, btn: 'Ver conta' }); }
+  });
+  if (metaInv > 0 && invested < metaInv) todo.push({ ic: '🎯', t: `Faltam ${brl(metaInv - invested)} para a meta de investimento do mês`, s: `Investido ${brl(invested)} de ${brl(metaInv)}`, act: 'addAporte', btn: 'Aportar' });
+  const lb = lastBackupAt(), bd = lb ? Math.floor((Date.now() - lb) / 864e5) : null;
+  if (bd == null || bd >= 7) todo.push({ ic: '💾', t: bd == null ? 'Você ainda não baixou um backup' : `Último backup há ${bd} dias`, s: 'Um arquivo com todos os seus dados, para restaurar se algo der errado', act: 'exportJSON', btn: 'Baixar agora' });
+  // últimos lançamentos
+  const last = [
+    ...state.aportes.map(a => ({ d: a.date || '', id: a.id, t: a.cat === 'amort' ? 'Amortização' : (a.label || 'Aporte'), v: a.amount, act: 'delAporte' })),
+    ...state.fiis.trades.map(x => ({ d: x.date || '', id: x.id, t: `${x.side === 'V' ? 'Venda' : 'Compra'} ${x.ticker}`, v: x.qty * x.price + (x.side === 'V' ? 0 : (x.fees || 0)), act: 'delTrade' }))
+  ].sort((a, b) => b.d.localeCompare(a.d) || (a.id < b.id ? 1 : -1)).slice(0, 3);
+  return `
+  <div class="grid kpis">
+    <div class="card"><div class="lbl">Patrimônio total</div><div class="big">${brl(T.patrimonio)}</div><div class="hint">Rendimento das contas em ${mlabel(m)}: <b class="green">${brl(rend)}</b></div></div>
+    <div class="card"><div class="lbl">Investido em ${mlabel(m)}</div><div class="big cyan">${brl(invested)}</div><div style="margin-top:8px">${progress(invested, metaInv, 'var(--cyan)')}</div><div class="hint">${metaInv > 0 ? `Meta ${brl(metaInv)}` : 'Defina as metas em Resumo → Editar metas'}</div></div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2>O que precisa da sua atenção</h2>
+    ${todo.length ? todo.map(x => `<div class="item"><div class="row between"><span>${x.ic} <b>${x.t}</b><div class="hint">${x.s}</div></span><button class="btn sm primary" data-act="${x.act}" ${x.id ? `data-id="${x.id}"` : ''}>${x.btn}</button></div></div>`).join('') : '<div class="empty">Tudo em dia ✔</div>'}
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2>Últimos lançamentos</h2>
+    ${last.length ? last.map(x => `<div class="item"><div class="row between"><span><b>${esc(x.t)}</b> <small class="mut">${dmy(x.d)}</small></span><span class="row"><b class="num">${brl(x.v)}</b><button class="btn sm ghost danger" data-act="${x.act}" data-id="${x.id}" title="Desfazer este lançamento">Desfazer</button></span></div></div>`).join('') : '<div class="empty">Nenhum lançamento ainda. Toque em “+ Lançar”.</div>'}
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h2>Seus dados</h2>
+    <div class="hint">${lb ? `Último backup baixado: ${new Date(lb).toLocaleDateString('pt-BR')}` : 'Nenhum backup baixado neste aparelho.'} Seus dados também ficam salvos na nuvem (Firebase).</div>
+    <div class="row" style="margin-top:8px"><button class="btn primary" data-act="exportJSON">⬇ Baixar backup</button><button class="btn" data-act="importJSON">⬆ Restaurar de um backup</button></div>
+  </div>
+  <div style="height:70px"></div>`;
+}
+
 function viewResumo() {
   const m = state.selectedMonth, inc = incomeFor(m), exp = totalExpenses(), sobra = inc.value - exp;
   const T = totals(), P = passiveMonthly(), ap = aportesOfMonth(m);
@@ -1525,6 +1599,21 @@ function viewCaixa() {
   </div>`;
 }
 
+function divisaoCard(T) {
+  const COL = { fii: 'var(--violet)', acao: 'var(--brand)', etf: 'var(--cyan)', bdr: 'var(--amber)', us_acao: '#f472b6', us_etf: '#fb7185' };
+  const by = {}; T.pos.forEach(p => { const k = p.cls in CLASSES ? p.cls : 'fii'; by[k] = (by[k] || 0) + p.value; });
+  const items = Object.keys(CLASSES).filter(k => by[k] > 0).map(k => [CLASSES[k].l, by[k], COL[k]]);
+  if (T.meli > 0) items.push(['Dólar (Meli Dólar)', T.meli, '#facc15']);
+  const total = items.reduce((t, i) => t + i[1], 0); if (!(total > 0)) return '';
+  const ext = (by.us_acao || 0) + (by.us_etf || 0), dolar = ext + (T.meli || 0), br = total - ext - (T.meli || 0);
+  const pc = v => total > 0 ? (v / total * 100).toFixed(1).replace('.', ',') + '%' : '0%';
+  return `<div class="card" style="margin-top:12px"><h2>Divisão da carteira <span class="sub">por tipo de ativo</span></h2>
+    ${pieChart(items)}
+    <div class="grid kpis" style="margin-top:12px">
+      <div class="item"><div class="lbl">Brasil (reais)</div><b class="num">${brl(br)}</b> <small class="mut">${pc(br)}</small></div>
+      <div class="item"><div class="lbl">Exposição ao dólar</div><b class="num">${brl(dolar)}</b> <small class="mut">${pc(dolar)}</small><div class="hint">Ativos dos EUA + Meli Dólar</div></div>
+    </div></div>`;
+}
 function viewFiis() {
   const T = totals(), pos = T.pos, P = passiveMonthly();
   const pl = T.fiis - T.fiisCost, dy = T.fiisCost > 0 ? P.fii * 12 / T.fiisCost * 100 : 0;
@@ -1541,7 +1630,7 @@ function viewFiis() {
     <div class="card"><div class="lbl">Proventos / mês</div><div class="big amber">${brl(P.fii)}</div><div class="hint">Estimativa (média mensal)</div></div>
     <div class="card"><div class="lbl">Recebido em ${mlabel(state.selectedMonth)}</div><div class="big green">${brl(recMes)}</div><div class="hint">Yield projetado: ${pct(dy)} a.a.</div></div>
   </div>
-
+  ${divisaoCard(T)}
   <div class="card" style="margin-top:12px">
     <h2>Carteira: FIIs, ações e ETFs <span class="row"><button class="btn sm" data-act="refreshQuotes">↻ Cotações</button><button class="btn sm" data-act="addProvento">+ Provento</button><button class="btn sm primary" data-act="addTrade" data-v="C">+ Registrar compra</button></span></h2>
     <div class="hint" style="margin:-6px 0 10px">${esc(uiMsg.quotes) || (hasToken ? 'Cotações da B3 vêm do robô (a cada 30 min no pregão, ~30 min de atraso). Ativos novos precisam entrar em tickers.json. Ações dos EUA: chave do Finnhub em ⚙.' : '')}</div>
@@ -1595,7 +1684,7 @@ function viewProj() {
 /* =========================================================
    Render
    ========================================================= */
-const TABS = [['resumo', 'Resumo'], ['renda', 'Renda & Despesas'], ['caixa', 'Caixa & Renda Fixa'], ['fiis', 'Ações & FIIs'], ['analise', 'Análise'], ['proj', 'Projeção']];
+const TABS = [['hoje', 'Hoje'], ['resumo', 'Resumo'], ['renda', 'Renda & Despesas'], ['caixa', 'Caixa & Renda Fixa'], ['fiis', 'Ações & FIIs'], ['analise', 'Análise'], ['proj', 'Projeção']];
 let fxTry = 0;
 function ensureFx() {   // com Meli Dólar no saldo, mantém a cotação do dólar fresca (no máx. 1 consulta por hora)
   if (!(state.meli.usd > 0) || (state.fx && state.fx.manual) || Date.now() - fxTry < 3600e3 || (fxRate() && Date.now() - (state.fx.at || 0) < 3600e3)) return;
@@ -1606,7 +1695,7 @@ function render() {
   try {
     $('month').value = state.selectedMonth;
     $('tabs').innerHTML = TABS.map(([k, l]) => `<button class="tab ${tab === k ? 'active' : ''}" data-act="tab" data-tab="${k}">${l}</button>`).join('');
-    const v = { resumo: viewResumo, renda: viewRenda, caixa: viewCaixa, fiis: viewFiis, analise: viewAnalise, proj: viewProj }[tab] || viewResumo;
+    const v = { hoje: viewHoje, resumo: viewResumo, renda: viewRenda, caixa: viewCaixa, fiis: viewFiis, analise: viewAnalise, proj: viewProj }[tab] || viewResumo;
     const y = window.scrollY; $('view').innerHTML = v(); window.scrollTo(0, y);
     setSyncPill(); ensureFx();
   } catch (e) { console.error('Erro ao renderizar:', e); $('view').innerHTML = `<div class="empty">Erro ao desenhar a tela: ${esc(e.message)}<br>Seus dados estão salvos. Use ⚙ → Exportar backup.</div>`; }
