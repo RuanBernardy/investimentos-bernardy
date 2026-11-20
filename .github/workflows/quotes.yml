@@ -25,6 +25,8 @@ jobs:
       - name: Buscar dados na brapi
         env:
           BRAPI_TOKEN: ${{ secrets.BRAPI_TOKEN }}
+          # rodada de 30 min = só cotações; diária, manual ou ao mudar tickers.json = tudo
+          QUOTES_MODE: ${{ github.event.schedule == '*/30 13-21 * * 1-5' && 'quick' || 'full' }}
         run: node scripts/update-quotes.mjs
       - name: Publicar quotes.json
         run: |
