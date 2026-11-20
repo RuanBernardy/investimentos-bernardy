@@ -1,4 +1,4 @@
 {
-  "fiis": ["MXRF11","HGLG11","LVBI11", "TRXF11","XPML11"],
-  "acoes": ["EGIE3", "ALUP11"]
+  "fiis": ["MXRF11","HGLG11","LVBI11", "TRXF11","XPML11", "KNCR11", "BTLG11", "KNRI11", "RZTR11"],
+  "acoes": ["EGIE3", "ALUP11", "BBSE3", "ITUB4", "CMIG4", "WEGE3", "ITSA4", "PSSA3"]
 }
