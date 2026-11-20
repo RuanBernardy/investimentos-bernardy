@@ -10,6 +10,8 @@ const fiis = clean(cfg.fiis), outros = clean(cfg.acoes).filter(s => !fiis.includ
 const all = [...fiis, ...outros];
 
 let prev = {}; try { prev = JSON.parse(await readFile(OUT, 'utf8')); } catch {}
+// QUOTES_MODE=quick → só cotações (rodadas de 30 min). Qualquer outro valor → tudo (rodada diária / manual).
+const QUICK = process.env.QUOTES_MODE === 'quick';
 const out = { updatedAt: new Date().toISOString(), quotes: {}, dividends: {}, indicators: {}, fx: {}, macro: {}, errors: [] };
 const fail = (what, e) => { out.errors.push({ what, status: e.status ?? null, message: e.message }); console.warn(`✗ ${what}: ${e.message}`); };
 const chunks = (a, n) => Array.from({ length: Math.ceil(a.length / n) }, (_, i) => a.slice(i * n, i * n + n));
@@ -24,7 +26,7 @@ async function perSymbol(path, symbols, extra, pick, size = 20) {
     catch (e) {
       if (e.status === 401 || e.status === 403 && batch.length === 1) throw e;
       if (batch.length > 1 && [400, 402, 403, 404, 429].includes(e.status)) {
-        for (const s of batch) { try { await one([s]); } catch (e2) { if (e2.status === 401) throw e2; fail(`${path} ${s}`, e2); } }
+        for (const s of batch) { try { await one([s]); } catch (e2) { if (e2.status === 401) throw e2; fail(`${path} ${s}`, e2); if (e2.status === 402 || e2.status === 403) break; /* plano bloqueia este recurso: não gasta mais requisições */ } }
       } else throw e;
     }
   }
@@ -45,6 +47,14 @@ try {
       });
       for (const s of all) if (!out.quotes[s]) fail(`cotação ${s}`, new BrapiError(404, 'sem preço na resposta'));
     } catch (e) { if (e.status === 401) throw e; fail('cotações', e); keep('quotes'); }
+  }
+
+  if (QUICK) {   // rodada rápida: mantém tudo o que não é cotação como estava (economiza o limite mensal da brapi)
+    for (const k of ['dividends', 'indicators', 'fx', 'macro']) keep(k);
+    await writeFile(OUT, JSON.stringify(out, null, 2) + '\n');
+    console.log(`quotes.json (rápido): ${Object.keys(out.quotes).length} cotações, ${out.errors.length} aviso(s).`);
+    if (all.length && !Object.keys(out.quotes).length) process.exit(1);
+    process.exit(0);
   }
 
   // 2) Proventos — FIIs: /api/v2/fii/dividends · ações/ETFs: /api/v2/stocks/dividends
