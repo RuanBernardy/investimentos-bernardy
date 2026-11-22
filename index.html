@@ -530,9 +530,14 @@ function accTiers(acc, ds) {   // taxa vigente na data: depois do prazo da promo
   ds = ds || todayStr();
   return acc.until && ds > acc.until && toArr(acc.tiersAfter).length ? acc.tiersAfter : acc.tiers;
 }
+const poolKey = a => String(a.pool || '').trim().toLowerCase();
+const poolMembers = a => poolKey(a) ? state.accounts.filter(x => poolKey(x) === poolKey(a)) : [a];
+const poolBalance = a => poolMembers(a).reduce((t, x) => t + (x.balance || 0), 0);
 function accYield(acc, periods, ds) {  // rendimento líquido em 1 período (mês: 12, dia útil: 252)
-  const liq = liqOf(acc);
-  return tierSplit(acc.balance || 0, accTiers(acc, ds)).reduce((s, p) => s + p.amt * (Math.pow(1 + cdi() * p.pct / 100, 1 / periods) - 1) * liq, 0);
+  const liq = liqOf(acc), mine = acc.balance || 0, group = poolBalance(acc);   // contas do mesmo grupo dividem o limite da taxa maior
+  if (!(mine > 0)) return 0;
+  const share = group > 0 ? mine / group : 1;
+  return share * tierSplit(group, accTiers(acc, ds)).reduce((s, p) => s + p.amt * (Math.pow(1 + cdi() * p.pct / 100, 1 / periods) - 1) * liq, 0);
 }
 function tiersLabel(t) {
   t = toArr(t);
@@ -562,8 +567,9 @@ function applyDailyCompound(bump = true) {
     d.setDate(d.getDate() + 1); if (d > end) break;
     const w = d.getDay(); if (w === 0 || w === 6) continue;
     n++; const ds = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, m = ds.slice(0, 7);
-    state.accounts.forEach(a => {
-      const g = accYield(a, 252, ds); a.balance = (a.balance || 0) + g;
+    const gains = state.accounts.map(a => accYield(a, 252, ds));   // calcula todos antes de somar (o limite compartilhado usa os saldos do dia)
+    state.accounts.forEach((a, i) => {
+      const g = gains[i]; a.balance = (a.balance || 0) + g;
       a.earned = a.earned || {}; a.earned[m] = (a.earned[m] || 0) + g;
       state.yieldByMonth[m] = (state.yieldByMonth[m] || 0) + g;
     });
@@ -708,11 +714,11 @@ const A = {
 
   /* ---- plano / aportes ---- */
   editPlan() {
-    openForm({ title: 'Metas de aporte do mês', note: 'Quanto você pretende investir em cada categoria neste mês. Em Renda Fixa, deixe vazio para ser automático: vai para lá o que sobrar da renda depois das despesas e das outras metas.',
-      fields: [{ k: 'amort', label: 'Amortização do financiamento (R$)', value: state.plan.amort }, { k: 'tesouro', label: 'Tesouro Direto (R$)', value: state.plan.tesouro },
-               { k: 'caixa', label: 'Renda Fixa: cofrinhos, CDB… (R$)', value: state.plan.caixa ?? '', hint: 'Vazio = automático (o que sobrar).' },
-               { k: 'fii', label: 'Renda variável: FIIs, ações, ETFs (R$)', value: state.plan.fii }],
-      onSubmit(v) { state.plan = { amort: num(v.amort), tesouro: num(v.tesouro), caixa: String(v.caixa).trim() === '' ? null : num(v.caixa), fii: num(v.fii) }; save(); } });
+    openForm({ title: 'Metas do mês', note: 'Metas de investimento: Tesouro e renda variável. A Renda Fixa fica com o que sobrar (deixe vazio). A parcela do financiamento não é investimento: ela só é separada da renda antes de calcular o que sobra.',
+      fields: [{ k: 'tesouro', label: 'Meta — Tesouro Direto (R$)', value: state.plan.tesouro }, { k: 'fii', label: 'Meta — Renda variável: FIIs, ações, ETFs (R$)', value: state.plan.fii },
+               { k: 'caixa', label: 'Meta — Renda Fixa: cofrinhos, CDB… (R$)', value: Number(state.plan.caixa) > 0 ? state.plan.caixa : '', hint: 'Vazio = automático (o que sobrar depois das outras metas e do financiamento).' },
+               { k: 'amort', label: 'Financiamento — separar da renda (R$) · não é investimento', value: state.plan.amort, hint: 'Valor que você pretende amortizar no mês. Sai da conta antes de calcular as metas.' }],
+      onSubmit(v) { state.plan = { amort: num(v.amort), tesouro: num(v.tesouro), caixa: String(v.caixa).trim() === '' || !(num(v.caixa) > 0) ? null : num(v.caixa), fii: num(v.fii) }; save(); } });
   },
   async addMeli() {
     if (!fxRate()) { try { state.fx = { rate: await fetchFx(), at: Date.now(), manual: false }; } catch (e) { toast('Preciso da cotação do dólar: toque em ↻ Dólar ou informe em ⚙'); return; } }
@@ -817,15 +823,11 @@ const A = {
   delAporte(id) {
     const a = state.aportes.find(x => x.id === id); if (!a) return;
     if (!confirm(`Desfazer o aporte de ${brl(a.amount)}?${a.noBal ? ' Nenhum saldo será alterado.' : ' O saldo do destino será revertido.'}`)) return;
-    if (a.noBal) { state.aportes = state.aportes.filter(x => x.id !== id); save(); toast('Aporte removido'); return; }
+    if (a.noBal) { debitRefund(a); state.aportes = state.aportes.filter(x => x.id !== id); save(); toast('Aporte removido'); return; }
     if (a.kind === 'account') { const x = state.accounts.find(c => c.id === a.target); if (x) x.balance = Math.max(0, x.balance - a.amount); }
     if (a.kind === 'tesouro') { const x = state.tesouro.find(c => c.id === a.target); if (x) x.amount = Math.max(0, x.amount - a.amount); }
-    if (a.kind === 'amort') {
-      state.amortAccumulated = Math.max(0, state.amortAccumulated - a.amount);
-      const p2 = a.debit2 ? (a.debit2Amt || 0) : 0;   // devolve o dinheiro às contas de onde saiu
-      if (a.debit) { const x = state.accounts.find(c => c.id === a.debit); if (x) x.balance = Math.round((x.balance + a.amount - p2) * 100) / 100; }
-      if (p2) { const x = state.accounts.find(c => c.id === a.debit2); if (x) x.balance = Math.round((x.balance + p2) * 100) / 100; }
-    }
+    if (a.kind === 'amort') state.amortAccumulated = Math.max(0, state.amortAccumulated - a.amount);
+    debitRefund(a);
     state.aportes = state.aportes.filter(x => x.id !== id); save(); toast('Aporte desfeito');
   },
 
@@ -987,6 +989,7 @@ function accountForm(acc) {
              { k: 'p2', label: 'Acima do limite rende (% do CDI)', value: t[1] ? t[1].pct : '', type: 'number' },
              { row: [{ k: 'until', label: 'Essa taxa vale até (opcional)', type: 'date', value: acc.until || '', hint: 'Ex.: cofrinho promocional até fevereiro' }, { k: 'pa', label: 'Depois disso rende (% do CDI)', type: 'number', value: toArr(acc.tiersAfter)[0] ? toArr(acc.tiersAfter)[0].pct : '' }] },
              { row: [{ k: 'mat', label: 'Vencimento do CDB (opcional)', type: 'date', value: acc.mat || '' }, { k: 'cap', label: 'Máximo que a conta aceita (R$)', value: acc.cap ?? '', hint: 'Vazio = sem teto. Aportes acima dele são recusados.' }] },
+             { k: 'pool', label: 'Limite compartilhado com outras contas (opcional)', value: acc.pool || '', hint: `Contas com o mesmo nome aqui dividem UM limite da taxa maior (ex.: 120% até R$ 10.000 somando todos os cofrinhos comuns do Mercado Pago). Vazio = limite só desta conta.${[...new Set(state.accounts.map(x => x.pool).filter(Boolean))].length ? ' Já usados: ' + [...new Set(state.accounts.map(x => x.pool).filter(Boolean))].join(', ') : ''}` },
              { k: 'inv', label: 'É a conta de investimentos? (recebe os proventos e paga as compras)', type: 'select', value: acc.inv ? '1' : '0', options: [['0', 'Não'], ['1', 'Sim — usar como padrão em Provento e Compra']] },
              { k: 'tax', label: 'Sofre IR sobre o rendimento?', type: 'select', value: acc.taxed ? '1' : '0', options: [['1', 'Sim (CDB, cofrinhos em geral)'], ['0', 'Não (isento)']] }],
     onSubmit(v) {
@@ -994,7 +997,7 @@ function accountForm(acc) {
       const lim = String(v.lim).trim() === '' ? null : num(v.lim), p1 = num(v.p1) || 100;
       const tiers = lim ? [{ upTo: lim, pct: p1 }, { upTo: null, pct: String(v.p2).trim() === '' ? p1 : num(v.p2) }] : [{ upTo: null, pct: p1 }];
       const pa = String(v.pa).trim() === '' ? 0 : num(v.pa);
-      const data = { name: v.n.trim(), inst: v.inst.trim(), tiers, taxed: v.tax === '1', inv: v.inv === '1', until: v.until || '', mat: v.mat || '', cap: String(v.cap).trim() === '' ? null : num(v.cap), tiersAfter: v.until && pa > 0 ? [{ upTo: null, pct: pa }] : [] };
+      const data = { name: v.n.trim(), inst: v.inst.trim(), pool: v.pool.trim(), tiers, taxed: v.tax === '1', inv: v.inv === '1', until: v.until || '', mat: v.mat || '', cap: String(v.cap).trim() === '' ? null : num(v.cap), tiersAfter: v.until && pa > 0 ? [{ upTo: null, pct: pa }] : [] };
       if (data.inv) state.accounts.forEach(x => { if (x !== acc) x.inv = false; });   // só uma conta de investimentos
       if (isNew) state.accounts.push({ id: uid('acc'), balance: num(v.bal), target: null, ...data });
       else { Object.assign(acc, data); acc.target = String(v.tgt).trim() === '' ? null : num(v.tgt); }
@@ -1015,26 +1018,67 @@ function tesouroForm(t) {
       save();
     } });
 }
+/* Campos "descontar de qual conta" (com divisão opcional entre duas contas) usados por aporte e outros lançamentos */
+function debitFields() {
+  return [{ k: 'deb', label: 'Descontar de qual conta?', type: 'select', value: '', options: accOptions(true), hint: 'Opcional — se escolher, o saldo dessa conta diminui pelo valor do aporte.' },
+          { row: [{ k: 'deb2', label: 'Dividir com outra conta (opcional)', type: 'select', value: '', options: accOptions(true).map(([a, b]) => [a, a === '' ? '— só uma conta —' : b]) }, { k: 'v2', label: 'Valor tirado dela (R$)', value: '', placeholder: 'vazio = o que faltar' }] }];
+}
+function debitOnOpen() {
+  const row = $('f_v2').closest('.two'), box = document.createElement('div'); box.className = 'hint'; box.style.cssText = 'margin:-6px 0 12px;font-weight:600'; row.after(box);
+  const val = id => $('f_' + id).value, upd = () => {
+    const cost = num(val('v'));
+    if (!val('deb2') || !val('deb') || !(cost > 0) || val('deb') === val('deb2')) { box.textContent = ''; return; }
+    const a1 = state.accounts.find(x => x.id === val('deb')), a2 = state.accounts.find(x => x.id === val('deb2')), p2 = splitPart2(val('deb'), String(val('v2')).trim() === '' ? null : num(val('v2')), cost);
+    box.innerHTML = p2 <= 0 ? `Tudo sai de ${esc(a1.name)}: ${brl(cost)}` : p2 > cost + 0.005 ? '<span class="rose">O valor da segunda conta passa do total.</span>' : `Total ${brl(cost)} → ${esc(a1.name)}: <b>${brl(cost - p2)}</b> · ${esc(a2.name)}: <b>${brl(p2)}</b>`;
+  };
+  ['v', 'deb', 'deb2', 'v2'].forEach(id => { $('f_' + id).addEventListener('input', upd); $('f_' + id).addEventListener('change', upd); }); upd();
+}
+/* Valida e desconta. Retorna null (com aviso) se algo estiver errado, ou os campos a guardar no lançamento. */
+function debitApply(v, amount, notId) {
+  if (!v.deb) { if (v.deb2) { toast('Escolha a primeira conta para dividir'); return null; } return {}; }
+  if (notId && (v.deb === notId || v.deb2 === notId)) { toast('A conta de origem não pode ser a mesma do destino'); return null; }
+  let part2 = 0;
+  if (v.deb2) {
+    if (v.deb2 === v.deb) { toast('Escolha duas contas diferentes'); return null; }
+    part2 = splitPart2(v.deb, String(v.v2).trim() === '' ? null : num(v.v2), amount);
+    if (part2 < 0 || part2 > amount + 0.005) { toast(`O valor da segunda conta deve ficar entre 0 e ${brl(amount)}`); return null; }
+  }
+  const a1 = state.accounts.find(x => x.id === v.deb), a2 = part2 > 0 ? state.accounts.find(x => x.id === v.deb2) : null, p1 = Math.round((amount - part2) * 100) / 100;
+  if (a1 && (a1.balance || 0) + 0.005 < p1) { toast(`${a1.name} tem só ${brl(a1.balance)} e precisa pagar ${brl(p1)}`); return null; }
+  if (a2 && (a2.balance || 0) + 0.005 < part2) { toast(`${a2.name} tem só ${brl(a2.balance)} e precisa pagar ${brl(part2)}`); return null; }
+  if (a1) a1.balance = Math.round(Math.max(0, a1.balance - p1) * 100) / 100;
+  if (a2) a2.balance = Math.round(Math.max(0, a2.balance - part2) * 100) / 100;
+  return { debit: v.deb, ...(a2 ? { debit2: v.deb2, debit2Amt: part2 } : {}) };
+}
+function debitRefund(a) {   // devolve o dinheiro às contas de onde saiu
+  const p2 = a.debit2 ? (a.debit2Amt || 0) : 0;
+  if (a.debit) { const x = state.accounts.find(c => c.id === a.debit); if (x) x.balance = Math.round((x.balance + a.amount - p2) * 100) / 100; }
+  if (p2) { const x = state.accounts.find(c => c.id === a.debit2); if (x) x.balance = Math.round((x.balance + p2) * 100) / 100; }
+}
 function aporteForm(preset) {
   const opts = [...state.accounts.map(a => [`account:${a.id}`, `Renda fixa — ${a.name}`]),
                 ...state.tesouro.filter(t => !t.blocked).map(t => [`tesouro:${t.id}`, `Tesouro — ${t.name}`])];
   openForm({ title: 'Registrar aporte', note: 'O aporte conta na meta do mês. Escolha abaixo se o saldo do destino também deve ser alterado. Para FIIs, ações e ETFs use “Registrar compra” na aba Ações & FIIs.',
     fields: [{ k: 'dest', label: 'Destino', type: 'select', value: preset || opts[0][0], options: opts },
              { row: [{ k: 'v', label: 'Valor (R$)', value: '', required: true }, { k: 'd', label: 'Data', type: 'date', value: todayStr() }] },
-             { k: 'bal', label: 'O que fazer com os saldos?', type: 'select', value: '0', options: [['0', 'Só registrar (não muda nenhum saldo)'], ['1', 'Somar ao saldo do destino']], hint: 'Só registrar mostra o aporte na meta do mês sem mexer em valores. Depois você atualiza o saldo quando o dinheiro estiver investido.' }],
+             { k: 'bal', label: 'O que fazer com os saldos?', type: 'select', value: '0', options: [['0', 'Só registrar (não muda nenhum saldo)'], ['1', 'Somar ao saldo do destino']], hint: 'Só registrar mostra o aporte na meta do mês sem mexer em valores. Depois você atualiza o saldo quando o dinheiro estiver investido.' }, ...debitFields()],
+    onOpen: debitOnOpen,
     onSubmit(v) {
       const amount = num(v.v); if (amount <= 0) { toast('Informe um valor'); return false; }
       const [kind, target] = v.dest.split(':'); let label = '', cat = ''; const bal = v.bal === '1';
       if (!bal) {
         const a = kind === 'account' ? state.accounts.find(x => x.id === target) : null, t = kind === 'tesouro' ? state.tesouro.find(x => x.id === target) : null;
         label = a ? a.name : t ? t.name : 'Amortização do financiamento'; cat = kind === 'account' ? 'caixa' : kind === 'tesouro' ? 'tesouro' : 'amort';
-        state.aportes.push({ id: uid('ap'), date: v.d || todayStr(), cat, kind, target, label, amount, noBal: true });
-        save(); toast(`Aporte de ${brl(amount)} registrado (saldos intactos)`); return;
+        const dbt = debitApply(v, amount, kind === 'account' ? target : null); if (!dbt) return false;
+        state.aportes.push({ id: uid('ap'), date: v.d || todayStr(), cat, kind, target, label, amount, noBal: true, ...dbt });
+        save(); toast(dbt.debit ? `Aporte de ${brl(amount)} registrado e descontado da conta` : `Aporte de ${brl(amount)} registrado (saldos intactos)`); return;
       }
-      if (kind === 'account') { const a = state.accounts.find(x => x.id === target); if (a.cap > 0 && (a.balance || 0) + amount > a.cap + 0.005) { toast(`${a.name} aceita no máximo ${brl(a.cap)}: cabem mais ${brl(Math.max(0, a.cap - (a.balance || 0)))}`); return false; } a.balance = (a.balance || 0) + amount; label = a.name; cat = 'caixa'; }
+      if (kind === 'account') { const a = state.accounts.find(x => x.id === target); if (a.cap > 0 && (a.balance || 0) + amount > a.cap + 0.005) { toast(`${a.name} aceita no máximo ${brl(a.cap)}: cabem mais ${brl(Math.max(0, a.cap - (a.balance || 0)))}`); return false; } label = a.name; cat = 'caixa'; }
+      const dbt = debitApply(v, amount, kind === 'account' ? target : null); if (!dbt) return false;
+      if (kind === 'account') { const a = state.accounts.find(x => x.id === target); a.balance = (a.balance || 0) + amount; }
       if (kind === 'tesouro') { const t = state.tesouro.find(x => x.id === target); t.amount = (t.amount || 0) + amount; label = t.name; cat = 'tesouro'; }
       if (kind === 'amort') { state.amortAccumulated += amount; label = 'Amortização do financiamento'; cat = 'amort'; }
-      state.aportes.push({ id: uid('ap'), date: v.d || todayStr(), cat, kind, target, label, amount });
+      state.aportes.push({ id: uid('ap'), date: v.d || todayStr(), cat, kind, target, label, amount, ...dbt });
       save(); toast(`Aporte de ${brl(amount)} registrado`);
     } });
 }
@@ -1431,7 +1475,8 @@ function lastBackupAt() { try { return Number(localStorage.getItem(LBK)) || 0; }
 function daysTo(ds) { const a = new Date(todayStr() + 'T12:00:00'), b = new Date(ds + 'T12:00:00'); return Math.round((b - a) / 864e5); }
 function viewHoje() {
   const m = curMonth(), T = totals(), inc = incomeFor(m), exp = totalExpenses(), sobra = inc.value - exp, plan = state.plan;
-  const ap = aportesOfMonth(m).filter(a => a.cat !== 'amort'), invested = ap.reduce((s, a) => s + a.amount, 0), metaInv = Math.max(0, sobra - plan.amort);
+  const ap = aportesOfMonth(m).filter(a => a.cat !== 'amort'), invested = ap.reduce((s, a) => s + a.amount, 0), dn = c => ap.filter(a => a.cat === c).reduce((s, a) => s + a.amount, 0),
+    goalDone = dn('tesouro') + dn('fii'), goalPlan = (Number(plan.tesouro) || 0) + (Number(plan.fii) || 0);   // meta só de Tesouro e renda variável; a renda fixa é o que sobra, sem meta
   const rend = state.yieldByMonth[m] || 0;
   // pendências
   const todo = [];
@@ -1443,7 +1488,7 @@ function viewHoje() {
     if (a.until) { const d = daysTo(a.until); if (d >= 0 && d <= 30) todo.push({ ic: '⏳', t: `${esc(a.name)}: a taxa promocional acaba ${d === 0 ? 'hoje' : `em ${d} dia${d === 1 ? '' : 's'}`}`, s: `${toArr(a.tiersAfter).length ? 'Depois vale ' + tiersLabel(a.tiersAfter) + '. ' : ''}Veja se compensa mover o dinheiro.`, act: 'editAccount', id: a.id, btn: 'Ver conta' }); }
     if (a.mat) { const d = daysTo(a.mat); if (d >= 0 && d <= 30) todo.push({ ic: '📅', t: `${esc(a.name)} vence ${d === 0 ? 'hoje' : `em ${d} dia${d === 1 ? '' : 's'}`} (${dmy(a.mat)})`, s: 'Decida o que fazer com o dinheiro', act: 'editAccount', id: a.id, btn: 'Ver conta' }); }
   });
-  if (metaInv > 0 && invested < metaInv) todo.push({ ic: '🎯', t: `Faltam ${brl(metaInv - invested)} para a meta de investimento do mês`, s: `Investido ${brl(invested)} de ${brl(metaInv)}`, act: 'addAporte', btn: 'Aportar' });
+  [['tesouro', 'Tesouro Direto', 'addAporte'], ['fii', 'renda variável', 'addTrade']].forEach(([c, nm, act]) => { const g = Number(plan[c]) || 0, d = dn(c); if (g > 0 && d + 0.005 < g) todo.push({ ic: '🎯', t: `Faltam ${brl(g - d)} para a meta de ${nm}`, s: `Feito ${brl(d)} de ${brl(g)}`, act, btn: c === 'fii' ? 'Comprar' : 'Aportar' }); });
   const lb = lastBackupAt(), bd = lb ? Math.floor((Date.now() - lb) / 864e5) : null;
   if (bd == null || bd >= 7) todo.push({ ic: '💾', t: bd == null ? 'Você ainda não baixou um backup' : `Último backup há ${bd} dias`, s: 'Um arquivo com todos os seus dados, para restaurar se algo der errado', act: 'exportJSON', btn: 'Baixar agora' });
   // últimos lançamentos
@@ -1454,7 +1499,7 @@ function viewHoje() {
   return `
   <div class="grid kpis">
     <div class="card"><div class="lbl">Patrimônio total</div><div class="big">${brl(T.patrimonio)}</div><div class="hint">Rendimento das contas em ${mlabel(m)}: <b class="green">${brl(rend)}</b></div></div>
-    <div class="card"><div class="lbl">Investido em ${mlabel(m)}</div><div class="big cyan">${brl(invested)}</div><div style="margin-top:8px">${progress(invested, metaInv, 'var(--cyan)')}</div><div class="hint">${metaInv > 0 ? `Meta ${brl(metaInv)}` : 'Defina as metas em Resumo → Editar metas'}</div></div>
+    <div class="card"><div class="lbl">Investido em ${mlabel(m)}</div><div class="big cyan">${brl(invested)}</div><div style="margin-top:8px">${goalPlan > 0 ? progress(goalDone, goalPlan, 'var(--cyan)') : ''}</div><div class="hint">${goalPlan > 0 ? `Metas (Tesouro + renda variável): ${brl(goalDone)} de ${brl(goalPlan)}` : 'Defina as metas em Resumo → Editar metas'}</div></div>
   </div>
   <div class="card" style="margin-top:14px">
     <h2>O que precisa da sua atenção</h2>
@@ -1563,7 +1608,7 @@ function viewCaixa() {
   const accHTML = state.accounts.map(a => {
     const my = accYield(a, 12), td = todayStr(), earned = (a.earned && a.earned[curMonth()]) || 0, dd = accYield(a, 252);
     const matTag = a.mat ? (a.mat < td ? '<span class="tag r">vencido</span>' : `<span class="tag a">vence ${dmy(a.mat)}</span>`) : '';
-    return `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(a.name)}</span>${a.taxed ? '' : '<span class="tag g">isento IR</span>'}${a.inv ? '<span class="tag g">investimentos</span>' : ''}${a.cap > 0 ? `<span class="tag a">teto ${brl(a.cap)}</span>` : ''}${matTag}<div class="hint">${esc(a.inst || '')} · ${accRateLabel(a)} · rende ≈ <b class="green">${brl(my)}</b>/mês</div><div class="hint">Conferir: ≈ ${brl(dd)} por dia útil · já rendeu <b class="green">${brl(earned)}</b> neste mês (líquido)</div></div><div class="num" style="font-weight:700">${brl(a.balance)}</div></div>
+    return `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(a.name)}</span>${a.taxed ? '' : '<span class="tag g">isento IR</span>'}${a.inv ? '<span class="tag g">investimentos</span>' : ''}${a.cap > 0 ? `<span class="tag a">teto ${brl(a.cap)}</span>` : ''}${matTag}<div class="hint">${esc(a.inst || '')} · ${accRateLabel(a)} · rende ≈ <b class="green">${brl(my)}</b>/mês</div>${poolKey(a) ? (() => { const mem = poolMembers(a), used = poolBalance(a), lim = toArr(accTiers(a))[0] && toArr(accTiers(a))[0].upTo != null ? Number(toArr(accTiers(a))[0].upTo) : null; return `<div class="hint">🔗 Limite compartilhado “${esc(a.pool.trim())}” (${mem.map(x => esc(x.name)).join(' + ')}): ${brl(used)}${lim ? ` de ${brl(lim)} — ${used <= lim ? 'restam <b>' + brl(lim - used) + '</b> na taxa maior' : '<b class="rose">passou ' + brl(used - lim) + '</b> do limite'}` : ''}</div>`; })() : ''}<div class="hint">Conferir: ≈ ${brl(dd)} por dia útil · já rendeu <b class="green">${brl(earned)}</b> neste mês (líquido)</div></div><div class="num" style="font-weight:700">${brl(a.balance)}</div></div>
       ${a.target ? `<div style="margin-top:7px">${progress(a.balance, a.target)}<div class="hint">${a.balance >= a.target ? '✓ meta atingida' : 'faltam ' + brl(a.target - a.balance) + ' para ' + brl(a.target)}</div></div>` : ''}
       <div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="aporteTo" data-id="${a.id}">Aportar</button><button class="btn sm" data-act="retirarAccount" data-id="${a.id}">Retirar</button><button class="btn sm" data-act="adjustAccount" data-id="${a.id}">Ajustar saldo</button><button class="btn sm" data-act="editAccount" data-id="${a.id}">Editar</button><button class="btn sm ghost danger" data-act="delAccount" data-id="${a.id}">✕</button></div></div>`;
   }).join('');
