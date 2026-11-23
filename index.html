@@ -108,6 +108,8 @@
 
   .gate{position:fixed;inset:0;z-index:100;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px}
   .gate.hidden{display:none}
+  .gate .hidden{display:none!important}
+  .gate .btn.alt{width:100%;padding:10px;margin-top:14px;background:transparent;border:1px solid var(--line);color:var(--text)}
   .gate .sheet{max-width:360px;text-align:center}
   .gate img{width:64px;height:64px;object-fit:contain;margin:0 auto 10px;display:block}
   .gate .field{text-align:left}
@@ -149,6 +151,8 @@
       <div class="hright">
         <input type="month" id="month" title="Mês de referência" />
         <button class="pill" id="syncPill" data-act="settings" title="Sincronização e configurações"><span class="dot"></span><span id="syncTxt">Local</span></button>
+        <button class="btn sm" id="wxBtn" style="white-space:nowrap" data-act="weather" title="Previsão do tempo">🌤</button>
+        <button class="btn sm" data-act="backupSheet" title="Backup dos dados">💾</button>
         <button class="btn sm" data-act="settings" title="Configurações">⚙</button>
       </div>
     </div>
@@ -177,13 +181,14 @@
   <form class="sheet hidden" id="gateForm" autocomplete="on">
     <img src="./brasao.png" alt="" onerror="this.style.display='none'" />
     <h3>Investimentos Bernardy</h3>
-    <p class="hint" style="margin:-8px 0 16px">Acesso restrito. Entre com a sua conta.</p>
+    <p class="hint" id="gateSub" style="margin:-8px 0 16px">Acesso restrito. Entre com a sua conta.</p>
+    <div class="field hidden" id="gNameWrap"><label for="g_name">Seu nome</label><input id="g_name" type="text" autocomplete="given-name" placeholder="Como quer ser chamado" /></div>
     <div class="field"><label for="g_email">E-mail</label><input id="g_email" type="email" autocomplete="username" required /></div>
     <div class="field"><label for="g_pass">Senha</label><input id="g_pass" type="password" autocomplete="current-password" required /></div>
     <div class="err" id="gateErr"></div>
     <button class="btn primary" style="width:100%;padding:10px" id="gateBtn">Entrar</button>
     <button type="button" class="linkbtn" id="gateReset">Esqueci a senha</button>
-    <button type="button" class="linkbtn" id="gateToggle">Primeiro acesso? Criar conta</button>
+    <button type="button" class="btn alt" id="gateToggle">Primeiro acesso? Cadastre aqui</button>
   </form>
   <div class="sheet hidden" id="gateVerify">
     <h3>Confirme seu e-mail</h3>
@@ -333,6 +338,7 @@ function normalize(raw) {
   s.irRate = s.irRate ?? 17.5;
   s.projSavePct = s.projSavePct ?? 100;
   s.amortAccumulated = s.amortAccumulated || 0;
+  s.userName = typeof s.userName === 'string' ? s.userName : '';
   s.cushionTarget = s.cushionTarget || 100000;
   return s;
 }
@@ -394,7 +400,8 @@ async function onUser(u) {
     $('gateVerTxt').textContent = 'Enviamos um link de confirmação para ' + u.email + '. Abra o e-mail (veja também o spam), toque no link e volte aqui.';
     return;
   }
-  authUser = u; hideGate(); startSync();
+  authUser = u; hideGate(); startSync(); setTimeout(() => wxLoad().catch(() => {}), 1500);
+  try { const pn = localStorage.getItem('FINANCE_PENDING_NAME'); if (pn) { localStorage.removeItem('FINANCE_PENDING_NAME'); setTimeout(() => { if (!state.userName) { state.userName = pn; save(); render(); } }, 5000); } } catch (e) {}
 }
 $('gateVerOk').addEventListener('click', async () => {
   const u = firebase.auth().currentUser; if (!u) return; $('gateVerErr').textContent = '';
@@ -451,7 +458,10 @@ let gateMsg = '', gateSignup = false;
 function setGateMode(s) {
   gateSignup = s;
   $('gateBtn').textContent = s ? 'Criar conta' : 'Entrar';
-  $('gateToggle').textContent = s ? 'Já tenho conta. Entrar' : 'Primeiro acesso? Criar conta';
+  $('gateToggle').textContent = s ? 'Já tenho conta. Entrar' : 'Primeiro acesso? Cadastre aqui';
+  $('gNameWrap').classList.toggle('hidden', !s);
+  $('gateSub').textContent = s ? 'Primeiro acesso: crie sua conta.' : 'Acesso restrito. Entre com a sua conta.';
+  $('gateReset').classList.toggle('hidden', s);
   $('g_pass').autocomplete = s ? 'new-password' : 'current-password';
   $('gateErr').textContent = '';
 }
@@ -466,7 +476,7 @@ function showGate(mode) {
 function hideGate() { gateLocked = false; $('gate').classList.add('hidden'); $('g_pass').value = ''; $('gateErr').textContent = ''; }
 const AUTH_ERR = { 'auth/invalid-credential': 'E-mail ou senha incorretos.', 'auth/wrong-password': 'E-mail ou senha incorretos.', 'auth/user-not-found': 'E-mail ou senha incorretos.',
   'auth/invalid-email': 'E-mail inválido.', 'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos.', 'auth/network-request-failed': 'Sem conexão com a internet.', 'auth/user-disabled': 'Conta desativada.',
-  'auth/email-already-in-use': 'Este e-mail já tem conta. Toque em "Já tenho conta".', 'x/not-owner': 'Este e-mail não está autorizado a criar conta.', 'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.', 'auth/operation-not-allowed': 'Ative "E-mail/senha" no Firebase (Authentication → Método de login).' };
+  'auth/email-already-in-use': 'Este e-mail já tem conta. Toque em "Já tenho conta".', 'x/not-owner': 'Este e-mail não está autorizado a criar conta.', 'x/no-name': 'Digite seu nome.', 'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.', 'auth/operation-not-allowed': 'Ative "E-mail/senha" no Firebase (Authentication → Método de login).' };
 $('gateForm').addEventListener('submit', async e => {
   e.preventDefault(); $('gateErr').textContent = ''; $('gateBtn').disabled = true;
   try {
@@ -474,7 +484,9 @@ $('gateForm').addEventListener('submit', async e => {
     if (gateSignup) {
       if (em.toLowerCase() !== OWNER_EMAIL) throw { code: 'x/not-owner' };
       if (pw.length < 6) throw { code: 'auth/weak-password' };
+      const nome = $('g_name').value.trim(); if (!nome) throw { code: 'x/no-name' };
       const cred = await firebase.auth().createUserWithEmailAndPassword(em, pw);
+      try { await cred.user.updateProfile({ displayName: nome }); localStorage.setItem('FINANCE_PENDING_NAME', nome); } catch (e3) {}
       try { await cred.user.sendEmailVerification(); } catch (e2) {}
     }
     else await firebase.auth().signInWithEmailAndPassword(em, pw);
@@ -775,6 +787,16 @@ const A = {
       <div class="row" style="margin-top:6px"><button class="btn ghost" data-act="closeSheetBtn">Cancelar</button></div>`);
   },
   closeSheetBtn() { closeSheet(); },
+  backupSheet() {
+    const lb = lastBackupAt(), bd = lb ? Math.floor((Date.now() - lb) / 864e5) : null;
+    openSheet(`<h3>💾 Backup dos dados</h3>
+      <div class="hint" style="margin:-6px 0 12px">Um arquivo com todos os seus dados, para restaurar se algo der errado. Seus dados também ficam salvos na nuvem (Firebase).</div>
+      <div class="item"><b>${lb ? `Último backup: ${new Date(lb).toLocaleDateString('pt-BR')}${bd >= 7 ? ` <span class="rose">(há ${bd} dias)</span>` : ''}` : '<span class="rose">Nenhum backup baixado neste aparelho.</span>'}</b></div>
+      <div class="row" style="margin-top:12px"><button class="btn primary" data-act="exportJSON">⬇ Baixar backup</button><button class="btn" data-act="importJSON">⬆ Restaurar de um backup</button></div>
+      <div class="actions"><button type="button" class="btn" data-act="closeSheet">Fechar</button></div>`);
+  },
+  weather() { weatherSheet(); },
+  mktRefresh() { loadMarket(true); },
   lcAporte() { aporteForm(''); }, lcCompra() { tradeForm('C'); }, lcVenda() { tradeForm('V'); }, lcProv() { A.addProvento(); }, lcAmort() { A.amortizar(); },
   lcCupom() {
     const cps = state.tesouro.filter(t => !t.blocked && t.coupon);
@@ -1136,6 +1158,7 @@ function tradeForm(side) {
 }
 function settingsSheet() {
   openSheet(`<form id="setForm"><h3>Configurações</h3>
+    <div class="field"><label>Seu nome (aparece na saudação)</label><input id="s_name" value="${esc(state.userName || (authUser && authUser.displayName) || '')}" placeholder="Ruan" /></div>
     <div class="two">
       <div class="field"><label>CDI atual (% a.a.)</label><input id="s_cdi" type="number" step="0.01" value="${state.cdiRateAnnual}" /></div>
       <div class="field"><label>IR sobre rendimentos (%)</label><input id="s_ir" type="number" step="0.5" value="${state.irRate}" /><div class="hint">17,5% p/ prazos acima de 360 dias</div></div>
@@ -1148,7 +1171,7 @@ function settingsSheet() {
     <div class="actions"><button type="button" class="btn" data-act="closeSheet">Cancelar</button><button class="btn primary">Salvar</button></div></form>`);
   $('setForm').onsubmit = e => {
     e.preventDefault();
-    state.cdiRateAnnual = num($('s_cdi').value) || 13.15; state.irRate = num($('s_ir').value);
+    state.cdiRateAnnual = num($('s_cdi').value) || 13.15; state.irRate = num($('s_ir').value); state.userName = $('s_name').value.trim();
     const fk = $('s_fk').value.trim();
     try { fk ? localStorage.setItem(FK, fk) : localStorage.removeItem(FK); } catch (er) {}
     const fxv = num($('s_fx').value);
@@ -1462,8 +1485,8 @@ function viewAnalise() {
         <td><button class="btn sm" data-act="openAnalise" data-id="${a.id}">Ver</button> <button class="btn sm ghost danger" data-act="delAnalise" data-id="${a.id}">✕</button></td></tr>`; }).join('')}
     </tbody></table></div>` : `<div class="empty">Nenhuma análise ainda.<br><br><button class="btn primary" data-act="newAnalise">+ Analisar um ativo</button></div>`}
   </div>
-  <div class="card" style="margin-top:12px"><h2>Como a nota é calculada</h2>
-    <div class="hint" style="font-size:12.5px"><b>Linhas de corte da aula:</b> FII — P/VP &lt; 1 e vacância &lt; 5%; ações — ROE &gt; 15%, margem líquida &gt; 10%, dívida líquida/EBITDA &lt; 3 e P/L &lt; 15; renda fixa — taxa acima da Selic, pós-fixado no curto prazo e IPCA+ no longo (prefixado = mais risco). Itens qualitativos (governança, localização, inquilinos, padrão construtivo, emissor) você escolhe numa lista. Cada indicador recebe uma pontuação de 0 a 1 conforme faixas de referência (por exemplo, FII: P/VP até 0,95 pontua mais; vacância acima de 20% é alerta), multiplicada por um peso. A nota é a média ponderada dos indicadores que você preencheu. ≥ 75 = bom candidato; 60–74 = razoável; 45–59 = fraco; abaixo disso = evitar. Alertas graves (ex.: prejuízo, inadimplência alta, dívida acima de 4x EBITDA) impedem a nota máxima; dois ou mais alertas viram “evitar”. O DY dos FIIs é comparado ao CDI líquido (≈ CDI menos 15% de IR) definido em ⚙. É uma ferramenta de triagem para organizar a decisão — não substitui leitura do relatório gerencial, análise do setor e do seu perfil, nem é recomendação de investimento.</div></div>`;
+  <div class="card" style="margin-top:12px"><details><summary style="cursor:pointer;font-weight:700;font-size:15px">Como a nota é calculada</summary>
+    <div class="hint" style="font-size:12.5px;margin-top:10px"><b>Linhas de corte da aula:</b> FII — P/VP &lt; 1 e vacância &lt; 5%; ações — ROE &gt; 15%, margem líquida &gt; 10%, dívida líquida/EBITDA &lt; 3 e P/L &lt; 15; renda fixa — taxa acima da Selic, pós-fixado no curto prazo e IPCA+ no longo (prefixado = mais risco). Itens qualitativos (governança, localização, inquilinos, padrão construtivo, emissor) você escolhe numa lista. Cada indicador recebe uma pontuação de 0 a 1 conforme faixas de referência (por exemplo, FII: P/VP até 0,95 pontua mais; vacância acima de 20% é alerta), multiplicada por um peso. A nota é a média ponderada dos indicadores que você preencheu. ≥ 75 = bom candidato; 60–74 = razoável; 45–59 = fraco; abaixo disso = evitar. Alertas graves (ex.: prejuízo, inadimplência alta, dívida acima de 4x EBITDA) impedem a nota máxima; dois ou mais alertas viram “evitar”. O DY dos FIIs é comparado ao CDI líquido (≈ CDI menos 15% de IR) definido em ⚙. É uma ferramenta de triagem para organizar a decisão — não substitui leitura do relatório gerencial, análise do setor e do seu perfil, nem é recomendação de investimento.</div></details></div>`;
 }
 
 /* =========================================================
@@ -1471,6 +1494,81 @@ function viewAnalise() {
    ========================================================= */
 const progress = (v, t, color) => `<div class="bar"><i style="width:${t > 0 ? Math.min(100, v / t * 100) : 0}%;${color ? `background:${color}` : ''}"></i></div>`;
 
+/* ---------- Mercado ---------- */
+let mkt = { at: 0, fx: null, busy: false };
+async function loadMarket(force) {
+  if (mkt.busy || (!force && Date.now() - mkt.at < 5 * 60 * 1000)) return;
+  mkt.busy = true;
+  try { mkt.fx = await getJSON('https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL,BTC-BRL'); mkt.at = Date.now(); mkt.err = false; } catch (e) { mkt.err = true; }
+  mkt.busy = false; if (tab === 'hoje' && !gateLocked) render();
+}
+function mercadoCard() {
+  loadMarket();
+  const open = marketOpen(), d = new Date(), wk = d.getDay() >= 1 && d.getDay() <= 5;
+  const row = (nm, v, chg, fmt) => `<div class="item"><div class="row between"><span>${nm}</span><span class="row"><b class="num">${fmt(v)}</b>${chg == null ? '' : `<small class="${chg >= 0 ? 'green' : 'rose'}">${chg >= 0 ? '+' : ''}${nf(chg)}%</small>`}</span></div></div>`;
+  const q = k => mkt.fx && mkt.fx[k] ? { v: Number(mkt.fx[k].bid), c: Number(mkt.fx[k].pctChange) } : null, u = q('USDBRL'), e = q('EURBRL'), bt = q('BTCBRL');
+  const pos = fiiPositions().filter(p => p.change != null && p.hasQuote).sort((a, b) => b.change - a.change);
+  const pc = x => `${x.change >= 0 ? '+' : ''}${x.change.toFixed(2).replace('.', ',')}%`;
+  const cart = pos.length > 1 ? `<div class="item"><div class="lbl">Sua carteira hoje</div><div class="row between"><span>Melhor do dia: <b>${esc(pos[0].ticker)}</b> <small class="${pos[0].change >= 0 ? 'green' : 'rose'}">${pc(pos[0])}</small></span><span>Pior do dia: <b>${esc(pos[pos.length - 1].ticker)}</b> <small class="${pos[pos.length - 1].change >= 0 ? 'green' : 'rose'}">${pc(pos[pos.length - 1])}</small></span></div></div>` : '';
+  return `<div class="card" style="margin-top:14px">
+    <h2>Mercado <span class="sub"><span class="tag ${open ? 'g' : 'a'}">${open ? 'Pregão aberto' : wk ? 'Pregão fechado' : 'Fim de semana'}</span> <button class="btn sm ghost" data-act="mktRefresh" title="Atualizar">↻</button></span></h2>
+    ${mkt.fx ? [u && row('Dólar', u.v, u.c, v => 'R$ ' + v.toFixed(2).replace('.', ',')), e && row('Euro', e.v, e.c, v => 'R$ ' + v.toFixed(2).replace('.', ',')), bt && row('Bitcoin', bt.v, bt.c, v => brl(v))].filter(Boolean).join('') : `<div class="hint">${mkt.err ? 'Não consegui buscar as cotações agora.' : 'Carregando…'}</div>`}
+    <div class="item"><div class="row between"><span>CDI (configurado)</span><b class="num">${pct(state.cdiRateAnnual, 2)} a.a.</b></div></div>
+    ${cart}
+    <div class="hint">${mkt.at ? 'Moedas atualizadas às ' + new Date(mkt.at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '. ' : ''}Pregão da B3: seg–sex, ~10h às 18h. Ações e FIIs com atraso de ~30 min.</div>
+  </div>`;
+}
+
+/* ---------- Previsão do tempo (Open-Meteo, sem chave) ---------- */
+const WXK = 'FINANCE_WEATHER_LOC', wxCodes = c => c === 0 ? ['☀️', 'Céu limpo'] : c <= 2 ? ['🌤', 'Poucas nuvens'] : c === 3 ? ['☁️', 'Nublado'] : c <= 48 ? ['🌫', 'Neblina'] : c <= 57 ? ['🌦', 'Garoa'] : c <= 67 ? ['🌧', 'Chuva'] : c <= 77 ? ['❄️', 'Neve'] : c <= 82 ? ['🌧', 'Pancadas de chuva'] : c <= 86 ? ['❄️', 'Neve'] : ['⛈', 'Tempestade'];
+let wx = null;
+const wxLoc = () => { try { return JSON.parse(localStorage.getItem(WXK) || 'null'); } catch (e) { return null; } };
+async function wxLoad(force) {
+  const loc = wxLoc(); if (!loc) return null;
+  if (!force && wx && wx.key === loc.lat + ',' + loc.lon && Date.now() - wx.at < 30 * 60 * 1000) return wx;
+  const j = await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,apparent_temperature,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&forecast_days=6&timezone=auto`);
+  wx = { at: Date.now(), key: loc.lat + ',' + loc.lon, j, name: loc.name }; wxButton(); return wx;
+}
+function wxButton() { const b = $('wxBtn'); if (!b || !wx) return; const c = wx.j.current; b.textContent = `${wxCodes(c.weather_code)[0]} ${Math.round(c.temperature_2m)}°`; }
+async function weatherSheet(manualErr) {
+  const loc = wxLoc();
+  if (!loc) {
+    openSheet(`<h3>🌤 Previsão do tempo</h3><div class="hint" style="margin:-6px 0 12px">Escolha de onde mostrar a previsão (dados gratuitos do Open-Meteo).</div>
+      <div class="row"><button type="button" class="btn primary" data-act="wxGeo">📍 Usar minha localização</button></div>
+      <div class="field" style="margin-top:14px"><label>Ou digite a cidade</label><div class="row"><input id="wx_city" placeholder="ex.: Rio de Janeiro" style="flex:1" /><button type="button" class="btn" data-act="wxCity">Buscar</button></div></div>
+      <div class="err" id="wxErr" style="color:var(--rose);font-size:12.5px;min-height:18px">${manualErr || ''}</div>
+      <div class="actions"><button type="button" class="btn" data-act="closeSheet">Fechar</button></div>`);
+    return;
+  }
+  openSheet(`<h3>🌤 ${esc(loc.name || 'Previsão do tempo')}</h3><div class="hint">Carregando…</div>`);
+  try {
+    const w = await wxLoad(true), c = w.j.current, d = w.j.daily, [ic, tx] = wxCodes(c.weather_code);
+    const dn = i => i === 0 ? 'Hoje' : new Date(d.time[i] + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric' });
+    openSheet(`<h3>${esc(loc.name || 'Previsão do tempo')}</h3>
+      <div style="text-align:center;margin:4px 0 14px"><div style="font-size:54px;line-height:1">${ic}</div><div style="font-size:34px;font-weight:800">${Math.round(c.temperature_2m)}°C</div><div class="hint">${tx} · sensação de ${Math.round(c.apparent_temperature)}°</div></div>
+      ${d.time.map((_, i) => `<div class="item"><div class="row between"><span style="min-width:70px">${dn(i)}</span><span>${wxCodes(d.weather_code[i])[0]}</span><span class="mut">💧 ${d.precipitation_probability_max[i] ?? 0}%</span><span><b>${Math.round(d.temperature_2m_max[i])}°</b> <small class="mut">${Math.round(d.temperature_2m_min[i])}°</small></span></div></div>`).join('')}
+      <div class="actions"><button type="button" class="btn" data-act="wxChange">Trocar cidade</button><button type="button" class="btn" data-act="closeSheet">Fechar</button></div>`);
+  } catch (e) { openSheet(`<h3>🌤 Previsão do tempo</h3><div class="hint">Não consegui buscar a previsão agora. Tente de novo mais tarde.</div><div class="actions"><button type="button" class="btn" data-act="wxChange">Trocar cidade</button><button type="button" class="btn" data-act="closeSheet">Fechar</button></div>`); }
+}
+Object.assign(A, {
+  wxChange() { try { localStorage.removeItem(WXK); } catch (e) {} weatherSheet(); },
+  wxGeo() {
+    if (!navigator.geolocation) return weatherSheet('Este aparelho não permite localização. Digite a cidade.');
+    navigator.geolocation.getCurrentPosition(async pos => {
+      let name = 'Sua localização';
+      try { localStorage.setItem(WXK, JSON.stringify({ lat: +pos.coords.latitude.toFixed(3), lon: +pos.coords.longitude.toFixed(3), name })); } catch (e) {}
+      weatherSheet();
+    }, () => weatherSheet('Não consegui a localização (permissão negada?). Digite a cidade abaixo.'), { timeout: 10000, maximumAge: 3600000 });
+  },
+  async wxCity() {
+    const n = ($('wx_city').value || '').trim(); if (!n) return;
+    try {
+      const g = await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(n)}&count=1&language=pt`), r = g.results && g.results[0];
+      if (!r) { $('wxErr').textContent = 'Cidade não encontrada.'; return; }
+      localStorage.setItem(WXK, JSON.stringify({ lat: r.latitude, lon: r.longitude, name: [r.name, r.admin1].filter(Boolean).join(' — ') })); weatherSheet();
+    } catch (e) { $('wxErr').textContent = 'Não consegui buscar agora. Tente de novo.'; }
+  }
+});
 function lastBackupAt() { try { return Number(localStorage.getItem(LBK)) || 0; } catch (e) { return 0; } }
 function daysTo(ds) { const a = new Date(todayStr() + 'T12:00:00'), b = new Date(ds + 'T12:00:00'); return Math.round((b - a) / 864e5); }
 function viewHoje() {
@@ -1496,10 +1594,13 @@ function viewHoje() {
     ...state.aportes.map(a => ({ d: a.date || '', id: a.id, t: a.cat === 'amort' ? 'Amortização' : (a.label || 'Aporte'), v: a.amount, act: 'delAporte' })),
     ...state.fiis.trades.map(x => ({ d: x.date || '', id: x.id, t: `${x.side === 'V' ? 'Venda' : 'Compra'} ${x.ticker}`, v: x.qty * x.price + (x.side === 'V' ? 0 : (x.fees || 0)), act: 'delTrade' }))
   ].sort((a, b) => b.d.localeCompare(a.d) || (a.id < b.id ? 1 : -1)).slice(0, 3);
+  const hr = new Date().getHours(), hi = hr >= 5 && hr < 12 ? 'Bom dia' : hr >= 12 && hr < 18 ? 'Boa tarde' : 'Boa noite', who = (state.userName || (authUser && authUser.displayName) || 'Ruan').trim();
+  const dia = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
   return `
+  <div style="margin:2px 2px 14px"><div style="font-size:24px;font-weight:800;line-height:1.2">${hi}, <span style="color:var(--brand)">${esc(who)}</span></div><div class="hint" style="margin-top:3px">${dia.charAt(0).toUpperCase() + dia.slice(1)}</div></div>
   <div class="grid kpis">
-    <div class="card"><div class="lbl">Patrimônio total</div><div class="big">${brl(T.patrimonio)}</div><div class="hint">Rendimento das contas em ${mlabel(m)}: <b class="green">${brl(rend)}</b></div></div>
-    <div class="card"><div class="lbl">Investido em ${mlabel(m)}</div><div class="big cyan">${brl(invested)}</div><div style="margin-top:8px">${goalPlan > 0 ? progress(goalDone, goalPlan, 'var(--cyan)') : ''}</div><div class="hint">${goalPlan > 0 ? `Metas (Tesouro + renda variável): ${brl(goalDone)} de ${brl(goalPlan)}` : 'Defina as metas em Resumo → Editar metas'}</div></div>
+    <div class="card"><div class="lbl">Patrimônio total</div><div class="big">${brl(T.patrimonio)}</div><div class="hint" style="margin-top:2px"><b class="green">+${brl(rend)}</b> no mês</div></div>
+    <div class="card"><div class="lbl">Investido em ${mlabel(m)}</div><div class="big cyan">${brl(invested)}</div></div>
   </div>
   <div class="card" style="margin-top:14px">
     <h2>O que precisa da sua atenção</h2>
@@ -1509,11 +1610,7 @@ function viewHoje() {
     <h2>Últimos lançamentos</h2>
     ${last.length ? last.map(x => `<div class="item"><div class="row between"><span><b>${esc(x.t)}</b> <small class="mut">${dmy(x.d)}</small></span><span class="row"><b class="num">${brl(x.v)}</b><button class="btn sm ghost danger" data-act="${x.act}" data-id="${x.id}" title="Desfazer este lançamento">Desfazer</button></span></div></div>`).join('') : '<div class="empty">Nenhum lançamento ainda. Toque em “+ Lançar”.</div>'}
   </div>
-  <div class="card" style="margin-top:14px">
-    <h2>Seus dados</h2>
-    <div class="hint">${lb ? `Último backup baixado: ${new Date(lb).toLocaleDateString('pt-BR')}` : 'Nenhum backup baixado neste aparelho.'} Seus dados também ficam salvos na nuvem (Firebase).</div>
-    <div class="row" style="margin-top:8px"><button class="btn primary" data-act="exportJSON">⬇ Baixar backup</button><button class="btn" data-act="importJSON">⬆ Restaurar de um backup</button></div>
-  </div>
+  ${mercadoCard()}
   <div style="height:70px"></div>`;
 }
 
@@ -1529,8 +1626,8 @@ function viewResumo() {
   const ySoFar = state.yieldByMonth[curMonth()] || 0;
   return `
   <div class="grid kpis">
-    <div class="card"><div class="lbl">Patrimônio total</div><div class="big">${brl(T.patrimonio)}</div><div class="hint">Caixa + Tesouro + Renda variável</div></div>
-    <div class="card"><div class="lbl">Renda de ${mlabel(m)}</div><div class="big green">${brl(inc.value)}</div><div class="hint">${inc.manual ? 'Valor informado por você' : 'Soma dos projetos ativos'}</div></div>
+    <div class="card"><div class="lbl">Patrimônio total</div><div class="big">${brl(T.patrimonio)}</div><div class="hint" style="margin-top:2px"><b class="green">+${brl(state.yieldByMonth[m] || 0)}</b> no mês</div></div>
+    <div class="card"><div class="lbl">Renda de ${mlabel(m)}</div><div class="big green">${brl(inc.value)}</div></div>
     <div class="card"><div class="lbl">Despesas fixas</div><div class="big rose">${brl(exp)}</div><div class="hint">Sobra: <b class="${sobra >= 0 ? 'green' : 'rose'}">${brl(sobra)}</b></div></div>
     <div class="card"><div class="lbl">Renda passiva / mês</div><div class="big amber">${brl(P.total)}</div><div class="hint">Caixa ${brl(P.caixa)} · Ações/FIIs ${brl(P.fii)} · Cupons ${brl(P.cupons)}</div></div>
   </div>
@@ -1608,7 +1705,9 @@ function viewCaixa() {
   const accHTML = state.accounts.map(a => {
     const my = accYield(a, 12), td = todayStr(), earned = (a.earned && a.earned[curMonth()]) || 0, dd = accYield(a, 252);
     const matTag = a.mat ? (a.mat < td ? '<span class="tag r">vencido</span>' : `<span class="tag a">vence ${dmy(a.mat)}</span>`) : '';
-    return `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(a.name)}</span>${a.taxed ? '' : '<span class="tag g">isento IR</span>'}${a.inv ? '<span class="tag g">investimentos</span>' : ''}${a.cap > 0 ? `<span class="tag a">teto ${brl(a.cap)}</span>` : ''}${matTag}<div class="hint">${esc(a.inst || '')} · ${accRateLabel(a)} · rende ≈ <b class="green">${brl(my)}</b>/mês</div>${poolKey(a) ? (() => { const mem = poolMembers(a), used = poolBalance(a), lim = toArr(accTiers(a))[0] && toArr(accTiers(a))[0].upTo != null ? Number(toArr(accTiers(a))[0].upTo) : null; return `<div class="hint">🔗 Limite compartilhado “${esc(a.pool.trim())}” (${mem.map(x => esc(x.name)).join(' + ')}): ${brl(used)}${lim ? ` de ${brl(lim)} — ${used <= lim ? 'restam <b>' + brl(lim - used) + '</b> na taxa maior' : '<b class="rose">passou ' + brl(used - lim) + '</b> do limite'}` : ''}</div>`; })() : ''}<div class="hint">Conferir: ≈ ${brl(dd)} por dia útil · já rendeu <b class="green">${brl(earned)}</b> neste mês (líquido)</div></div><div class="num" style="font-weight:700">${brl(a.balance)}</div></div>
+    return `<div class="item"><div class="row between"><div class="grow"><span class="name">${esc(a.name)}</span>${a.taxed ? '' : '<span class="tag g">isento IR</span>'}${a.inv ? '<span class="tag g">investimentos</span>' : ''}${a.cap > 0 ? `<span class="tag a">teto ${brl(a.cap)}</span>` : ''}${matTag}${a.until && a.until < td && !toArr(a.tiersAfter).length ? '<span class="tag a">prazo da taxa venceu</span>' : ''}</div><div class="num" style="font-weight:700;white-space:nowrap">${brl(a.balance)}</div></div>
+      <div class="hint">${[esc(a.inst || ''), `${(toArr(accTiers(a))[0] || { pct: 100 }).pct}% CDI`].filter(Boolean).join(' · ')} · rende ≈ <b class="green">${brl(my)}</b>/mês</div>
+      <details style="margin-top:4px"><summary class="hint" style="cursor:pointer">Detalhes</summary><div class="hint">${accRateLabel(a)}</div>${poolKey(a) ? (() => { const mem = poolMembers(a), used = poolBalance(a), lim = toArr(accTiers(a))[0] && toArr(accTiers(a))[0].upTo != null ? Number(toArr(accTiers(a))[0].upTo) : null; return `<div class="hint">🔗 Limite compartilhado “${esc(a.pool.trim())}” (${mem.map(x => esc(x.name)).join(' + ')}): ${brl(used)}${lim ? ` de ${brl(lim)} — ${used <= lim ? 'restam <b>' + brl(lim - used) + '</b> na taxa maior' : '<b class="rose">passou ' + brl(used - lim) + '</b> do limite'}` : ''}</div>`; })() : ''}<div class="hint">Conferir: ≈ ${brl(dd)} por dia útil · já rendeu <b class="green">${brl(earned)}</b> neste mês (líquido)</div></details>
       ${a.target ? `<div style="margin-top:7px">${progress(a.balance, a.target)}<div class="hint">${a.balance >= a.target ? '✓ meta atingida' : 'faltam ' + brl(a.target - a.balance) + ' para ' + brl(a.target)}</div></div>` : ''}
       <div class="row" style="margin-top:8px"><button class="btn sm primary" data-act="aporteTo" data-id="${a.id}">Aportar</button><button class="btn sm" data-act="retirarAccount" data-id="${a.id}">Retirar</button><button class="btn sm" data-act="adjustAccount" data-id="${a.id}">Ajustar saldo</button><button class="btn sm" data-act="editAccount" data-id="${a.id}">Editar</button><button class="btn sm ghost danger" data-act="delAccount" data-id="${a.id}">✕</button></div></div>`;
   }).join('');
@@ -1682,7 +1781,9 @@ function viewFiis() {
   ${divisaoCard(T)}
   <div class="card" style="margin-top:12px">
     <h2>Carteira: FIIs, ações e ETFs <span class="row"><button class="btn sm" data-act="refreshQuotes">↻ Cotações</button><button class="btn sm" data-act="addProvento">+ Provento</button><button class="btn sm primary" data-act="addTrade" data-v="C">+ Registrar compra</button></span></h2>
-    <div class="hint" style="margin:-6px 0 10px">${esc(uiMsg.quotes) || (hasToken ? 'Cotações da B3 vêm do robô (a cada 30 min no pregão, ~30 min de atraso). Ativos novos precisam entrar em tickers.json. Ações dos EUA: chave do Finnhub em ⚙.' : '')}</div>
+    <details style="margin:-4px 0 10px"><summary class="hint" style="cursor:pointer">${/falhas|Não consegui/.test(uiMsg.quotes || '') ? '⚠ ' : ''}Detalhes das cotações${/falhas|Não consegui/.test(uiMsg.quotes || '') ? ' (há avisos)' : ''}</summary>
+      ${uiMsg.quotes ? `<div class="hint">${esc(uiMsg.quotes)}</div>` : ''}
+      <div class="hint">Cotações da B3 vêm do robô (a cada 30 min no pregão, ~30 min de atraso). Ativos novos precisam entrar em tickers.json. Ações dos EUA: chave do Finnhub em ⚙.</div></details>
     ${Object.keys(byCls).length > 1 ? `<div class="legend" style="margin:0 0 10px">${Object.entries(byCls).map(([k, v]) => `<span style="--c:var(--violet)">${k} <b>${brl(v)}</b></span>`).join('')}</div>` : ''}
     ${hasUS ? `<div class="hint" style="margin:0 0 10px">Dólar: <b>${fxRate() ? 'R$ ' + fxRate().toFixed(4).replace('.', ',') : 'indisponível'}</b> (${fx.manual ? 'manual' : 'automático'}). O resultado dos ativos dos EUA usa o dólar de hoje sobre o preço médio em dólar — não inclui a variação do câmbio desde a compra. Proventos dos EUA na estimativa já descontam 30% retidos.</div>` : ''}
     ${pos.length ? `<div class="scroll"><table><thead><tr><th>Ativo</th><th>Qtd.</th><th>Preço médio</th><th>Cotação</th><th>Dia</th><th>Valor (R$)</th><th>Resultado</th><th>Prov./cota</th><th>Renda/mês</th><th>Yield a.a.</th><th></th></tr></thead><tbody>
