@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-11-23T22:27:02.213Z",
+  "updatedAt": "2026-11-24T00:35:17.688Z",
   "quotes": {
     "MXRF11": {
       "price": 8.32,
@@ -243,36 +243,5 @@
   },
   "fx": {},
   "macro": {},
-  "errors": [
-    {
-      "what": "fii/dividends LVBI11",
-      "status": 403,
-      "message": "o seu plano da brapi não inclui este dado"
-    },
-    {
-      "what": "stocks/dividends EGIE3",
-      "status": 403,
-      "message": "o seu plano da brapi não inclui este dado"
-    },
-    {
-      "what": "fii/indicators LVBI11",
-      "status": 403,
-      "message": "o seu plano da brapi não inclui este dado"
-    },
-    {
-      "what": "stocks/statistics EGIE3",
-      "status": 403,
-      "message": "o seu plano da brapi não inclui este dado"
-    },
-    {
-      "what": "dólar",
-      "status": 403,
-      "message": "o seu plano da brapi não inclui este dado"
-    },
-    {
-      "what": "macro",
-      "status": 403,
-      "message": "o seu plano da brapi não inclui este dado"
-    }
-  ]
+  "errors": []
 }
