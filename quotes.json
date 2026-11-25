@@ -1,90 +1,90 @@
 {
-  "updatedAt": "2026-11-24T22:54:12.889Z",
+  "updatedAt": "2026-11-25T20:22:50.550Z",
   "quotes": {
     "MXRF11": {
-      "price": 8.37,
-      "change": 0.6,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 8.48,
+      "change": 1.31,
+      "time": "2026-11-25T20:22:30.000Z"
     },
     "HGLG11": {
-      "price": 140.8,
-      "change": 0.08,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 142.85,
+      "change": 1.46,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "LVBI11": {
-      "price": 100.58,
-      "change": 2.04,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 101.48,
+      "change": 0.89,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "TRXF11": {
-      "price": 53.81,
-      "change": 1.82,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 55.8,
+      "change": 3.7,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "XPML11": {
-      "price": 83.75,
-      "change": 0.9,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 86.26,
+      "change": 3,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "KNCR11": {
-      "price": 102.4,
-      "change": 0.68,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 102.81,
+      "change": 0.4,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "BTLG11": {
-      "price": 94.55,
-      "change": 0.31,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 95.81,
+      "change": 1.33,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "KNRI11": {
-      "price": 142,
-      "change": 1.07,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 145.77,
+      "change": 2.65,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "RZTR11": {
-      "price": 62.25,
-      "change": 0.57,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 63.78,
+      "change": 2.46,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "EGIE3": {
-      "price": 24.71,
-      "change": -0.32,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 24.93,
+      "change": 0.89,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "ALUP11": {
-      "price": 32.86,
-      "change": 0.24,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 33.86,
+      "change": 3.04,
+      "time": "2026-11-25T20:19:30.000Z"
     },
     "BBSE3": {
-      "price": 36.22,
-      "change": -0.79,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 36.44,
+      "change": 0.61,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "ITUB4": {
-      "price": 39.74,
-      "change": 0.03,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 40.04,
+      "change": 0.75,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "CMIG4": {
-      "price": 10.82,
-      "change": 0.37,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 10.78,
+      "change": -0.37,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "WEGE3": {
-      "price": 50.2,
-      "change": 0.58,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 49.64,
+      "change": -1.12,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "ITSA4": {
-      "price": 12.93,
-      "change": 0.15,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 13.1,
+      "change": 1.31,
+      "time": "2026-11-25T20:21:30.000Z"
     },
     "PSSA3": {
-      "price": 41.93,
-      "change": -2.28,
-      "time": "2026-11-24T21:31:30.000Z"
+      "price": 41.63,
+      "change": -0.72,
+      "time": "2026-11-25T20:20:30.000Z"
     }
   },
   "dividends": {
@@ -225,17 +225,17 @@
   },
   "indicators": {
     "MXRF11": {
-      "priceToNav": 0.90791416,
-      "dividendYield12m": 0.14302884,
-      "dividendYield1m": 0.011418269,
+      "priceToNav": 0.9133704,
+      "dividendYield12m": 0.14217444,
+      "dividendYield1m": 0.01135006,
       "navPerShare": 9.163862,
       "equity": 5197799914.65,
       "asOf": "2026-10-01 00:00:00+00"
     },
     "HGLG11": {
-      "priceToNav": 0.8525388,
-      "dividendYield12m": 0.09581349,
-      "dividendYield1m": 0.008316156,
+      "priceToNav": 0.8532054,
+      "dividendYield12m": 0.095738634,
+      "dividendYield1m": 0.00830966,
       "navPerShare": 165.02474631029,
       "equity": 7656899371.48,
       "asOf": "2026-10-01 00:00:00+00"
@@ -243,5 +243,36 @@
   },
   "fx": {},
   "macro": {},
-  "errors": []
+  "errors": [
+    {
+      "what": "fii/dividends LVBI11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "stocks/dividends EGIE3",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "fii/indicators LVBI11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "stocks/statistics EGIE3",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "dólar",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "macro",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    }
+  ]
 }
