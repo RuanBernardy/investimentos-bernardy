@@ -339,6 +339,7 @@ function normalize(raw) {
   s.projSavePct = s.projSavePct ?? 100;
   s.amortAccumulated = s.amortAccumulated || 0;
   s.userName = typeof s.userName === 'string' ? s.userName : '';
+  s.tax = { paid: (s.tax && s.tax.paid) || {}, rules: (s.tax && s.tax.rules) || {}, extra: (s.tax && s.tax.extra) || {}, year: (s.tax && s.tax.year) || 0 };
   s.cushionTarget = s.cushionTarget || 100000;
   return s;
 }
@@ -735,18 +736,20 @@ const A = {
   async addMeli() {
     if (!fxRate()) { try { state.fx = { rate: await fetchFx(), at: Date.now(), manual: false }; } catch (e) { toast('Preciso da cotação do dólar: toque em ↻ Dólar ou informe em ⚙'); return; } }
     const r = fxRate();
-    openForm({ title: 'Cashback em Meli Dólar', note: `Informe em reais, como aparece no app do Mercado Pago. O sistema converte para dólar pela cotação de hoje (R$ ${r.toFixed(4).replace('.', ',')}) e passa a acompanhar o dólar.`,
-      fields: [{ row: [{ k: 'b', label: 'Valor (R$)', required: true, value: '' }, { k: 'd', label: 'Data', type: 'date', value: todayStr() }] }, { k: 'n', label: 'Observação (opcional)', value: '', placeholder: 'ex.: compra no mercado' }],
-      onSubmit(v) { const b = num(v.b); if (!(b > 0)) { toast('Informe o valor em reais'); return false; }
-        const u = Math.round(b / r * 1e4) / 1e4;
-        state.meli.entries.push({ id: uid('ml'), date: v.d || todayStr(), usd: u, brl: Math.round(b * 100) / 100, note: v.n.trim() }); state.meli.usd = Math.round((state.meli.usd + u) * 1e4) / 1e4; save(); toast(`+ ${brl(b)} em Meli Dólar (US$ ${nf(u)})`); } });
+    openForm({ title: 'Cashback em Meli Dólar', note: `O cashback vem em reais: digite o valor como aparece no app. O sistema converte para dólar pela cotação de hoje (R$ ${r.toFixed(4).replace('.', ',')}) e soma ao saldo, que fica fixo em US$. Se já souber em dólares, troque a moeda.`,
+      fields: [{ row: [{ k: 'b', label: 'Valor', required: true, value: '' }, { k: 'mo', label: 'Moeda', type: 'select', value: 'brl', options: [['brl', 'R$ (reais)'], ['usd', 'US$ (dólar)']] }] }, { k: 'd', label: 'Data', type: 'date', value: todayStr() }, { k: 'n', label: 'Observação (opcional)', value: '', placeholder: 'ex.: compra no mercado' }],
+      onOpen() { meliPreview(r); },
+      onSubmit(v) { const x = num(v.b); if (!(x > 0)) { toast('Informe o valor'); return false; }
+        const u = v.mo === 'brl' ? Math.round(x / r * 1e4) / 1e4 : Math.round(x * 1e4) / 1e4;
+        state.meli.entries.push({ id: uid('ml'), date: v.d || todayStr(), usd: u, brl: Math.round(u * r * 100) / 100, note: v.n.trim() }); state.meli.usd = Math.round((state.meli.usd + u) * 1e4) / 1e4; save(); toast(`+ US$ ${nf(u)} em Meli Dólar (${brl(u * r)})`); } });
   },
   async adjustMeli() {
     if (!fxRate()) { try { state.fx = { rate: await fetchFx(), at: Date.now(), manual: false }; } catch (e) { toast('Preciso da cotação do dólar: toque em ↻ Dólar ou informe em ⚙'); return; } }
     const r = fxRate();
-    openForm({ title: 'Saldo em Meli Dólar', note: `Digite o saldo em reais que aparece no app do Mercado Pago. O sistema guarda em dólar (cotação de hoje: R$ ${r.toFixed(4).replace('.', ',')}), então o valor em reais varia com o dólar, como no app.`,
-      fields: [{ k: 'b', label: 'Saldo atual (R$)', value: state.meli.usd ? Math.round(state.meli.usd * r * 100) / 100 : '' }],
-      onSubmit(v) { const b = num(v.b); if (b < 0 || String(v.b).trim() === '') { toast('Informe o saldo'); return false; } state.meli.usd = Math.round(b / r * 1e4) / 1e4; save(); toast('Saldo atualizado'); } });
+    openForm({ title: 'Saldo em Meli Dólar', note: `Digite o saldo em dólares. O valor em reais é calculado pela cotação (hoje R$ ${r.toFixed(4).replace('.', ',')}) e muda sozinho quando o dólar muda. Se só souber o valor em reais, escolha R$.`,
+      fields: [{ row: [{ k: 'b', label: 'Saldo atual', value: state.meli.usd ? String(Math.round(state.meli.usd * 100) / 100).replace('.', ',') : '' }, { k: 'mo', label: 'Moeda', type: 'select', value: 'usd', options: [['usd', 'US$ (dólar)'], ['brl', 'R$ (reais)']] }] }],
+      onOpen() { meliPreview(r); },
+      onSubmit(v) { const x = num(v.b); if (x < 0 || String(v.b).trim() === '') { toast('Informe o saldo'); return false; } state.meli.usd = v.mo === 'brl' ? Math.round(x / r * 1e4) / 1e4 : Math.round(x * 1e4) / 1e4; save(); toast('Saldo atualizado'); } });
   },
   delMeli(id) {
     const e = state.meli.entries.find(x => x.id === id); if (!e || !confirm(`Remover este cashback (US$ ${nf(e.usd)})? O saldo será reduzido.`)) return;
@@ -987,6 +990,7 @@ function sourceForm(src) {
              { k: 'once', label: 'Tipo', type: 'select', value: src.once ? '1' : '0', options: [['0', 'Recorrente (todo mês entre o início e o fim)'], ['1', 'Pagamento único (doação, trabalho de 1 dia)']], hint: 'Único: o valor inteiro entra só no mês da data de início, sem proporção.' },
              { row: [{ k: 's', label: 'Início (data)', type: 'date', value: asDate(src.start, false) }, { k: 'e', label: 'Fim (só recorrente)', type: 'date', value: asDate(src.end, true), hint: 'Vazio = sem fim' }] },
              { k: 'lag', label: 'Quando o dinheiro cai na conta', type: 'select', value: src.lag === '1' ? '1' : '0', options: [['0', 'No próprio mês'], ['1', 'No mês seguinte (paga o mês trabalhado)']], hint: 'Ex.: começou 19/10 e o 1º pagamento veio em novembro, proporcional aos dias de outubro.' },
+             { k: 'ir', label: 'Natureza para o Imposto de Renda', type: 'select', value: src.ir || '', options: [['', 'Não classificada'], ['bolsa', 'Bolsa de estudo/pesquisa (isenta)'], ['trib', 'Salário / serviço prestado (tributável)'], ['isento', 'Outro rendimento isento']], hint: 'Bolsa só é isenta se não for pagamento por trabalho. Veja o informe de rendimentos de quem paga.' },
              { k: 'prop', label: 'Primeiro e último mês', type: 'select', value: src.prop === '0' ? '0' : '1', options: [['1', 'Pagar proporcional aos dias'], ['0', 'Pagar o mês cheio']] }],
     onOpen() {   // pagamento único: esconde o que só vale para bolsas recorrentes
       const sel = $('f_once'), box = id => $(id).closest('.field');
@@ -995,7 +999,7 @@ function sourceForm(src) {
     },
     onSubmit(v) {
       if (!v.n.trim()) return false;
-      const data = { name: v.n.trim(), amount: num(v.v), start: v.s || '', end: v.once === '1' ? '' : (v.e || ''), prop: v.prop === '0' ? '0' : '1', lag: v.lag === '1' ? '1' : '0', once: v.once === '1' };
+      const data = { name: v.n.trim(), amount: num(v.v), start: v.s || '', end: v.once === '1' ? '' : (v.e || ''), prop: v.prop === '0' ? '0' : '1', lag: v.lag === '1' ? '1' : '0', once: v.once === '1', ir: v.ir || '' };
       if (isNew) state.incomeSources.push({ id: uid('src'), ...data }); else Object.assign(src, data);
       save();
     } });
@@ -1153,6 +1157,7 @@ function tradeForm(side) {
       if (v.deb) { const acc = state.accounts.find(a => a.id === v.deb); if (acc) acc.balance = Math.round(Math.max(0, (acc.balance || 0) + (v.sd === 'V' ? k * (total - fees) : -(costBRL - part2))) * 100) / 100; }
       if (v.sd === 'C') state.aportes.push({ id: uid('ap'), date: v.d || todayStr(), cat: 'fii', kind: 'fii', target: tk, label: `${cl.l} ${tk} (${q})`, amount: (total + fees) * k, tradeId: id });
       save(); toast(`${v.sd === 'V' ? 'Venda' : 'Compra'} de ${q} ${tk} registrada`);
+      if (v.sd === 'V') setTimeout(() => taxAlertSheet(id), 350);
       refreshQuotes(true);
     } });
 }
@@ -1494,6 +1499,191 @@ function viewAnalise() {
    ========================================================= */
 const progress = (v, t, color) => `<div class="bar"><i style="width:${t > 0 ? Math.min(100, v / t * 100) : 0}%;${color ? `background:${color}` : ''}"></i></div>`;
 
+/* ---------- Imposto de renda ---------- */
+/* Regras (estimativa). Ficam num lugar só para ajustar se a lei mudar; limites editáveis em Imposto → Regras. */
+const TAXD = { acaoIsenta: 20000, aliqComum: 0.15, aliqFii: 0.20, aliqDay: 0.20, aliqExt: 0.15, darfMin: 10, limTrib: 33888, limIsentos: 200000, limBens: 800000, limBolsa: 40000 };
+const taxRule = k => { const r = state.tax && state.tax.rules && state.tax.rules[k]; return r != null && r !== '' && !isNaN(Number(r)) ? Number(r) : TAXD[k]; };
+function lastBizDay(y, m) { const d = new Date(y, m, 0); while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+function darfDue(ym) { const [y, m] = ym.split('-').map(Number); return lastBizDay(m === 12 ? y + 1 : y, m === 12 ? 1 : m + 1); }   // último dia útil do mês seguinte (feriados não considerados)
+
+function taxEngine() {
+  const all = [...state.fiis.trades].sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.id > b.id ? 1 : -1));
+  const isUS = t => clsOf(t.cls).cur === 'USD';
+  // 1) day trade: compra e venda do mesmo papel no mesmo dia (só B3)
+  const groups = {}, adj = new Map(), tradeGain = {}, dayByMonth = {};
+  all.forEach(t => { if (isUS(t)) return; const k = t.ticker + '|' + t.date; (groups[k] = groups[k] || { b: [], s: [] })[t.side === 'V' ? 's' : 'b'].push(t); });
+  Object.values(groups).forEach(g => {
+    const qb = g.b.reduce((s, t) => s + t.qty, 0), qs = g.s.reduce((s, t) => s + t.qty, 0), dt = Math.min(qb, qs); if (!(dt > 0)) return;
+    const buyCost = g.b.reduce((s, t) => s + t.qty * t.price + (t.fees || 0), 0) / qb, sellNet = g.s.reduce((s, t) => s + t.qty * t.price - (t.fees || 0), 0) / qs;
+    const ym = g.s[0].date.slice(0, 7), gain = dt * (sellNet - buyCost), sold = dt * g.s.reduce((s, t) => s + t.price * t.qty, 0) / qs;
+    const d = dayByMonth[ym] || (dayByMonth[ym] = { gain: 0, sales: 0 }); d.gain += gain; d.sales += sold;
+    g.b.forEach(t => adj.set(t.id, (qb - dt) / qb)); g.s.forEach(t => { adj.set(t.id, (qs - dt) / qs); tradeGain[t.id] = (tradeGain[t.id] || 0) + gain * t.qty / qs; });
+  });
+  // 2) replay das operações com preço médio (custo em R$; EUA usa o dólar de cada operação)
+  const pos = {}, months = {}, ext = {};
+  const Mo = ym => months[ym] || (months[ym] = { ym, acao: { sales: 0, gain: 0 }, fii: { sales: 0, gain: 0 }, other: { sales: 0, gain: 0 }, day: dayByMonth[ym] || { sales: 0, gain: 0 }, hasSale: false });
+  Object.keys(dayByMonth).forEach(ym => Mo(ym));
+  all.forEach(t => {
+    const f = adj.has(t.id) ? adj.get(t.id) : 1, q = t.qty * f; if (!(q > 0)) return;
+    const us = isUS(t), k = us ? (t.fx || fxRate() || 1) : 1, fees = (t.fees || 0) * f;
+    const p = pos[t.ticker] || (pos[t.ticker] = { ticker: t.ticker, cls: t.cls || 'fii', qty: 0, costBRL: 0 });
+    p.cls = t.cls || p.cls;
+    if (t.side === 'V') {
+      const avg = p.qty > 0 ? p.costBRL / p.qty : 0, sq = Math.min(q, p.qty), net = (sq * t.price - fees * (sq / q)) * k, gain = net - avg * sq, gross = sq * t.price * k;
+      p.costBRL -= avg * sq; p.qty -= sq; tradeGain[t.id] = (tradeGain[t.id] || 0) + gain;
+      const ym = (t.date || '').slice(0, 7);
+      if (us) { const y = ym.slice(0, 4), e = ext[y] || (ext[y] = { gain: 0, sales: 0 }); e.gain += gain; e.sales += gross; }
+      else { const m = Mo(ym), b = t.cls === 'acao' ? m.acao : t.cls === 'fii' ? m.fii : m.other; b.gain += gain; b.sales += gross; m.hasSale = true; }
+    } else { p.qty += q; p.costBRL += (q * t.price + fees) * k; }
+  });
+  // 3) apuração mês a mês com compensação de prejuízos
+  const carry = { comum: 0, fii: 0, day: 0 }, list = [];
+  const apply = (b, res, aliq) => { let used = 0, taxable = 0; if (res <= 0) carry[b] += -res; else { used = Math.min(carry[b], res); carry[b] -= used; taxable = res - used; } return { taxable, used, tax: taxable * aliq }; };
+  let accum = 0;
+  Object.keys(months).sort().forEach(ym => {
+    const m = months[ym];
+    let exempt = 0, acaoRes = m.acao.gain;
+    if (m.acao.sales <= taxRule('acaoIsenta') && m.acao.gain > 0) { exempt = m.acao.gain; acaoRes = 0; }
+    const c = apply('comum', acaoRes + m.other.gain, taxRule('aliqComum')), fi = apply('fii', m.fii.gain, taxRule('aliqFii')), dy = apply('day', m.day.gain, taxRule('aliqDay'));
+    const tax = c.tax + fi.tax + dy.tax, total = tax + accum, pay = total >= taxRule('darfMin') ? total : 0;
+    const row = { ...m, exempt, tax, taxComum: c.tax, taxFii: fi.tax, taxDay: dy.tax, accumIn: accum, darf: pay, due: darfDue(ym), carryAfter: { ...carry }, sales: m.acao.sales + m.fii.sales + m.other.sales + m.day.sales };
+    accum = pay > 0 ? 0 : total; row.accumOut = accum; list.push(row);
+  });
+  Object.keys(ext).forEach(y => { ext[y].tax = Math.max(0, ext[y].gain) * taxRule('aliqExt'); });
+  const holdings = Object.values(pos).filter(p => p.qty > 0.0000001);
+  return { months: list, carry, ext, holdings, tradeGain, accum };
+}
+
+function irYearData(year) {
+  const E = taxEngine(), y = String(year), ex = (state.tax && state.tax.extra) || {};
+  const sums = { trib: 0, bolsa: 0, isento: 0, nc: 0 };
+  for (let mo = 1; mo <= 12; mo++) { const m = `${y}-${pad(mo)}`; state.incomeSources.forEach(x => { const v = srcAmount(x, m); sums[x.ir === 'bolsa' ? 'bolsa' : x.ir === 'trib' ? 'trib' : x.ir === 'isento' ? 'isento' : 'nc'] += v; }); }
+  const prov = state.proventos.filter(p => (p.date || '').slice(0, 4) === y), provIsentos = prov.filter(p => p.kind !== 'tesouro').reduce((s, p) => s + (p.total || 0) * (clsOf((state.fiis.trades.find(t => t.ticker === p.ticker) || {}).cls).cur === 'USD' ? (fxRate() || 1) : 1), 0), cupons = prov.filter(p => p.kind === 'tesouro').reduce((s, p) => s + (p.total || 0), 0);
+  const yieldYear = Object.keys(state.yieldByMonth || {}).filter(k => k.slice(0, 4) === y).reduce((s, k) => s + (state.yieldByMonth[k] || 0), 0);
+  const rows = E.months.filter(m => m.ym.slice(0, 4) === y);
+  const salesBolsa = rows.reduce((s, m) => s + m.sales, 0), taxableGain = rows.some(m => m.tax > 0 || m.darf > 0);
+  const eExt = E.ext[y] || { gain: 0, sales: 0, tax: 0 };
+  const T = totals(), bensSistema = T.caixa + T.tesouro + E.holdings.reduce((s, p) => s + p.costBRL, 0) + T.meli, bens = bensSistema + (Number(ex.bens) || 0);
+  const trib = sums.trib + sums.nc + (Number(ex.trib) || 0), isentos = sums.bolsa + sums.isento + provIsentos + cupons + (Number(ex.isentos) || 0);
+  const temEUA = state.fiis.trades.some(t => clsOf(t.cls).cur === 'USD');
+  const reasons = [];
+  if (trib > taxRule('limTrib')) reasons.push(`Rendimentos tributáveis de ${brl(trib)} passam do limite de ${brl(taxRule('limTrib'))}.`);
+  if (isentos > taxRule('limIsentos')) reasons.push(`Rendimentos isentos e de tributação exclusiva de ${brl(isentos)} passam de ${brl(taxRule('limIsentos'))}.`);
+  if (bens > taxRule('limBens')) reasons.push(`Bens e direitos de ${brl(bens)} passam de ${brl(taxRule('limBens'))} em 31/12.`);
+  if (salesBolsa > taxRule('limBolsa')) reasons.push(`Vendas na bolsa de ${brl(salesBolsa)} no ano passam de ${brl(taxRule('limBolsa'))}.`);
+  if (taxableGain) reasons.push('Você teve lucro em bolsa sujeito a imposto (DARF).');
+  if (eExt.gain > 0) reasons.push(`Ganho em ativos no exterior de ${brl(eExt.gain)}: o imposto de 15% é apurado na declaração.`);
+  return { E, rows, trib, isentos, bens, bensSistema, sums, prov: { isentos: provIsentos, cupons }, yieldYear, salesBolsa, taxableGain, eExt, temEUA, reasons, nc: sums.nc, obrigado: reasons.length > 0 };
+}
+
+function taxAlertSheet(id) {   // aviso logo depois de registrar uma venda
+  const E = taxEngine(), t = state.fiis.trades.find(x => x.id === id); if (!t || t.side !== 'V') return;
+  const ym = (t.date || '').slice(0, 7), g = E.tradeGain[id] || 0, cl = clsOf(t.cls), m = E.months.find(x => x.ym === ym);
+  const sign = v => (v >= 0 ? '+' : '−') + brl(Math.abs(v));
+  let body = '';
+  if (cl.cur === 'USD') body = `<p>${g >= 0 ? 'Lucro' : 'Prejuízo'} estimado nesta venda: <b>${sign(g)}</b>.</p><p>Ativos dos EUA não geram DARF mensal: o imposto de <b>15%</b> sobre o ganho (e os dividendos) é apurado na <b>declaração anual</b>. Guarde a data e o dólar da operação.</p>`;
+  else if (!m) body = '<p>Não consegui apurar este mês.</p>';
+  else {
+    const acao = t.cls === 'acao';
+    body = `<p>${g >= 0 ? 'Lucro' : 'Prejuízo'} estimado nesta venda: <b class="${g >= 0 ? 'green' : 'rose'}">${sign(g)}</b>.</p>`;
+    if (acao && m.exempt > 0) body += `<p>✅ As suas vendas de ações em ${mlabel(ym)} somam ${brl(m.acao.sales)}, abaixo do limite de ${brl(taxRule('acaoIsenta'))}: o lucro das ações é <b>isento</b> neste mês. Se passar do limite, o lucro do mês inteiro passa a ser tributado.</p>`;
+    else if (m.darf > 0) body += `<p>🧾 Imposto estimado do mês: <b>${brl(m.darf)}</b>. Pague o <b>DARF código 6015</b> até <b>${dmy(m.due)}</b>.</p>`;
+    else if (m.tax > 0) body += `<p>Imposto estimado de ${brl(m.tax)}, abaixo do mínimo de ${brl(taxRule('darfMin'))} para emitir o DARF: o valor acumula para o mês seguinte.</p>`;
+    else if (g < 0) body += `<p>Sem imposto neste mês. O prejuízo fica guardado para compensar lucros futuros da mesma modalidade.</p>`;
+    else body += '<p>Sem imposto a pagar neste mês (lucro compensado por prejuízos anteriores ou isento).</p>';
+    if (m.day.gain !== 0 && (m.day.sales > 0)) body += '<p>⚡ Há <b>day trade</b> neste mês (compra e venda do mesmo papel no mesmo dia): 20% sobre o lucro, sem isenção.</p>';
+  }
+  openSheet(`<h3>🧾 Imposto desta venda</h3><div class="hint" style="margin:-6px 0 8px">${esc(t.ticker)} · ${t.qty} un. · ${dmy(t.date)}</div>${body}<div class="hint">É uma estimativa pelo seu preço médio, sem as taxas exatas da corretora. Confira com a nota e o informe da corretora.</div>
+    <div class="actions"><button type="button" class="btn" data-act="tab" data-tab="imposto" onclick="closeSheet()">Abrir aba Imposto</button><button type="button" class="btn primary" data-act="closeSheet">Entendi</button></div>`);
+}
+
+function viewImposto() {
+  const year = (state.tax && state.tax.year) || new Date().getFullYear(), D = irYearData(year), E = D.E;
+  const sg = v => `<b class="${v >= 0 ? 'green' : 'rose'}">${v >= 0 ? '+' : '−'}${brl(Math.abs(v))}</b>`;
+  const td = todayStr();
+  const monthRows = [...E.months].reverse().slice(0, 8).map(m => {
+    const paid = !!(state.tax.paid && state.tax.paid[m.ym]), late = !paid && m.darf > 0 && m.due < td, dd = daysTo(m.due);
+    const stat = m.darf > 0 ? (paid ? '<span class="tag g">pago</span>' : late ? '<span class="tag r">atrasado</span>' : `<span class="tag a">vence ${dmy(m.due)}${dd >= 0 ? ` (${dd}d)` : ''}</span>`) : (m.accumOut > 0 ? '<span class="tag">acumula</span>' : m.exempt > 0 ? '<span class="tag g">isento</span>' : '<span class="tag">sem DARF</span>');
+    return `<div class="item"><div class="row between"><span><b>${mlabel(m.ym)}</b> ${stat}</span><b class="num">${m.darf > 0 ? brl(m.darf) : '—'}</b></div>
+      <div class="hint">Vendas ${brl(m.sales)} · resultado ${[m.acao.gain + m.other.gain + m.fii.gain + m.day.gain].map(v => (v >= 0 ? '+' : '−') + brl(Math.abs(v)))[0]}${m.exempt > 0 ? ` · lucro isento de ações ${brl(m.exempt)}` : ''}${m.day.sales > 0 ? ' · day trade' : ''}</div>
+      ${m.darf > 0 && !paid ? `<div class="row" style="margin-top:6px"><button class="btn sm primary" data-act="taxPaid" data-id="${m.ym}">Marcar como pago</button></div>` : m.darf > 0 ? `<div class="row" style="margin-top:6px"><button class="btn sm ghost" data-act="taxPaid" data-id="${m.ym}">Desfazer “pago”</button></div>` : ''}</div>`;
+  }).join('');
+  const bar = (v, lim) => progress(Math.min(v, lim), lim, v > lim ? 'var(--rose)' : v > lim * 0.8 ? 'var(--amber)' : 'var(--brand)');
+  const crit = (nm, v, lim, note) => `<div class="item"><div class="row between"><span>${nm}</span><span class="num ${v > lim ? 'rose' : ''}">${brl(v)} <span class="mut">/ ${brl(lim)}</span></span></div><div style="margin-top:6px">${bar(v, lim)}</div>${note ? `<div class="hint">${note}</div>` : ''}</div>`;
+  const hold = E.holdings.sort((a, b) => a.ticker.localeCompare(b.ticker)).map(p => {
+    const c = p.cls, ref = c === 'fii' ? 'Grupo 07 · código 03 (FII)' : c === 'acao' ? 'Grupo 03 · código 01 (ações)' : c === 'etf' ? 'Grupo 07 · código 06 (ETF)' : c === 'us_etf' ? 'Exterior · grupo 07 · código 99' : c === 'us_acao' ? 'Exterior · ações' : 'BDR';
+    return `<div class="item"><div class="row between"><span><b>${esc(p.ticker)}</b> <small class="mut">${p.qty % 1 === 0 ? p.qty : nf(p.qty)} un. · ${ref}</small></span><b class="num">${brl(p.costBRL)}</b></div></div>`;
+  }).join('');
+  const rf = [...state.accounts.map(a => [a.name + (a.inst ? ' — ' + a.inst : ''), a.balance || 0]), ...state.tesouro.map(t => ['Tesouro — ' + t.name, t.amount || 0])].filter(x => x[1] > 0).map(([n, v]) => `<div class="item"><div class="row between"><span>${esc(n)}</span><b class="num">${brl(v)}</b></div></div>`).join('');
+  const unclassified = D.nc > 0 ? `<div class="hint" style="color:var(--amber)">⚠ ${state.incomeSources.filter(x => !x.ir).length} fonte(s) de renda sem classificação: contadas como <b>tributáveis</b> (cenário mais cauteloso). Classifique em Renda &amp; Despesas → editar fonte.</div>` : '';
+  const verdict = D.obrigado ? `<div class="big rose" style="font-size:20px">Você deve declarar o IR de ${year}</div><div style="margin-top:6px">${D.reasons.map(r => `<div class="hint">• ${r}</div>`).join('')}</div>` : `<div class="big green" style="font-size:20px">Pelos dados do sistema, você não precisa declarar</div><div class="hint" style="margin-top:4px">Nenhum dos critérios abaixo foi atingido.</div>${[['rendimentos isentos', D.isentos, taxRule('limIsentos')], ['rendimentos tributáveis', D.trib, taxRule('limTrib')], ['bens e direitos', D.bens, taxRule('limBens')]].filter(x => x[1] > x[2] * 0.8).map(x => `<div class="hint" style="color:var(--amber)">⚠ Perto do limite: ${x[0]} em ${nf(x[1] / x[2] * 100)}% do limite. Pequenas mudanças podem tornar a declaração obrigatória.</div>`).join('')}`;
+  return `
+  <div class="card"><h2>DARF e imposto das vendas <span class="sub"><button class="btn sm ghost" data-act="editTaxRules">Regras</button></span></h2>
+    ${E.months.length ? monthRows : '<div class="empty">Nenhuma venda registrada ainda. Quando você vender um ativo, o sistema calcula o lucro e o DARF aqui.</div>'}
+    ${E.accum > 0 ? `<div class="hint">Imposto acumulado abaixo de ${brl(taxRule('darfMin'))}: ${brl(E.accum)} (entra no próximo DARF).</div>` : ''}
+    <div class="hint">DARF código <b>6015</b>, vence no último dia útil do mês seguinte (feriados não considerados). Valores estimados pelo seu preço médio: confira com a nota da corretora.</div>
+  </div>
+  <div class="card" style="margin-top:14px"><h2>Prejuízos a compensar</h2>
+    <div class="item"><div class="row between"><span>Ações, ETFs e BDRs</span><b class="num">${brl(E.carry.comum)}</b></div></div>
+    <div class="item"><div class="row between"><span>FIIs</span><b class="num">${brl(E.carry.fii)}</b></div></div>
+    <div class="item"><div class="row between"><span>Day trade</span><b class="num">${brl(E.carry.day)}</b></div></div>
+    <div class="hint">Cada modalidade só compensa com ela mesma. Esses saldos abatem lucros dos meses seguintes.</div>
+  </div>
+  <div class="card" style="margin-top:14px"><h2>Preciso declarar o IR de ${year}? <span class="sub"><button class="btn sm ghost" data-act="editTaxExtra">Outros dados</button></span></h2>
+    ${verdict}
+    ${unclassified}
+    <div style="margin-top:12px">
+    ${crit('Rendimentos tributáveis', D.trib, taxRule('limTrib'), 'Salários, serviços e bolsas que pagam por trabalho.')}
+    ${crit('Isentos + exclusivos', D.isentos, taxRule('limIsentos'), `Bolsas de estudo/pesquisa ${brl(D.sums.bolsa)} · outros isentos ${brl(D.sums.isento)} · proventos ${brl(D.prov.isentos)} · cupons ${brl(D.prov.cupons)}`)}
+    ${crit('Bens e direitos em 31/12', D.bens, taxRule('limBens'), `No sistema: ${brl(D.bensSistema)}${(state.tax.extra && Number(state.tax.extra.bens)) ? ` + outros bens ${brl(Number(state.tax.extra.bens))}` : ' — some imóvel, carro etc. em “Outros dados”'}`)}
+    ${crit('Vendas na bolsa no ano', D.salesBolsa, taxRule('limBolsa'), D.taxableGain ? 'Há lucro sujeito a imposto: declaração obrigatória.' : '')}
+    </div>
+    <details style="margin-top:8px"><summary class="hint" style="cursor:pointer">Como ler isto</summary>
+      <div class="hint">Quem recebeu bolsa de estudo ou pesquisa <b>sem prestar serviço</b> (ex.: CAPES, CNPq) tem renda isenta, mas ela conta no limite de ${brl(taxRule('limIsentos'))}. Se a “bolsa” paga um trabalho ou projeto, pode ser <b>tributável</b>: confirme no informe de rendimentos de quem paga. Rendimentos de jan–out que não estão no sistema entram em “Outros dados”. Mesmo sem obrigação, declarar pode compensar (restituição e histórico). Limites do ano-base 2025; a Receita publica os de ${year} em 2027 (editável em Regras).</div></details>
+  </div>
+  <div class="card" style="margin-top:14px"><h2>Para a declaração (ano-base ${year}) <span class="sub"><button class="btn sm ghost" data-act="taxExport">⬇ Baixar resumo</button></span></h2>
+    <div class="lbl">Bens e direitos — custo de aquisição</div>
+    ${hold || '<div class="hint">Sem ações/FIIs na carteira.</div>'}
+    <div class="lbl" style="margin-top:12px">Renda fixa, contas e cofrinhos (saldo hoje)</div>
+    ${rf || '<div class="hint">Sem saldos.</div>'}
+    ${(state.meli.usd || 0) > 0 ? `<div class="item"><div class="row between"><span>Meli Dólar <small class="mut">US$ ${nf(state.meli.usd)}</small></span><b class="num">${brl(totals().meli)}</b></div></div>` : ''}
+    <div class="lbl" style="margin-top:12px">Rendimentos do ano</div>
+    <div class="item"><div class="row between"><span>Isentos: proventos de ações/FIIs</span><b class="num">${brl(D.prov.isentos)}</b></div></div>
+    <div class="item"><div class="row between"><span>Isentos: bolsas de estudo/pesquisa</span><b class="num">${brl(D.sums.bolsa)}</b></div></div>
+    <div class="item"><div class="row between"><span>Exclusivos: cupons do Tesouro (líquidos)</span><b class="num">${brl(D.prov.cupons)}</b></div></div>
+    <div class="item"><div class="row between"><span>Exclusivos: rendimento das contas (estimativa do sistema)</span><b class="num">${brl(D.yieldYear)}</b></div></div>
+    ${D.eExt.sales > 0 || D.temEUA ? `<div class="lbl" style="margin-top:12px">Exterior (Lei 14.754)</div><div class="item"><div class="row between"><span>Ganho nas vendas em ${year}</span>${sg(D.eExt.gain)}</div><div class="hint">Imposto estimado de 15%: <b>${brl(D.eExt.tax)}</b>, pago na declaração. Dividendos recebidos também entram.</div></div>` : ''}
+    <div class="hint" style="margin-top:8px">Os grupos/códigos são de referência: confirme no programa da Receita. Para rendimentos de bancos e corretoras, vale o <b>informe de rendimentos</b> deles.</div>
+  </div>
+  <div style="height:70px"></div>`;
+}
+
+Object.assign(A, {
+  taxPaid(id) { state.tax.paid = state.tax.paid || {}; if (state.tax.paid[id]) delete state.tax.paid[id]; else state.tax.paid[id] = Date.now(); save(); },
+  editTaxRules() {
+    const f = (k, label, hint) => ({ k, label, value: String(taxRule(k)).replace('.', ','), hint });
+    openForm({ title: 'Regras de imposto usadas', note: 'Valores padrão da lei vigente quando foi feito o sistema. Altere se a lei ou os limites mudarem.',
+      fields: [f('acaoIsenta', 'Isenção: vendas de ações no mês (R$)'), { row: [f('aliqComum', 'Alíquota ações/ETFs (0,15 = 15%)'), f('aliqFii', 'Alíquota FIIs')] }, { row: [f('aliqDay', 'Alíquota day trade'), f('aliqExt', 'Alíquota exterior')] },
+               f('darfMin', 'DARF mínimo (R$)'), f('limTrib', 'Obrigatoriedade: rendimentos tributáveis (R$)'), f('limIsentos', 'Obrigatoriedade: isentos/exclusivos (R$)'), { row: [f('limBens', 'Bens e direitos (R$)'), f('limBolsa', 'Vendas na bolsa no ano (R$)')] }],
+      onSubmit(v) { state.tax.rules = {}; Object.keys(TAXD).forEach(k => { const n = num(v[k]); if (!isNaN(n) && n !== TAXD[k]) state.tax.rules[k] = n; }); save(); } });
+  },
+  editTaxExtra() {
+    const ex = state.tax.extra || {};
+    openForm({ title: 'Outros dados para o IR', note: 'Informe o que não está no sistema, no ano todo (ex.: meses antes de usar o sistema).',
+      fields: [{ k: 'trib', label: 'Rendimentos tributáveis fora do sistema no ano (R$)', value: ex.trib || '' }, { k: 'isentos', label: 'Rendimentos isentos/exclusivos fora do sistema (R$)', value: ex.isentos || '' }, { k: 'bens', label: 'Outros bens em 31/12: imóvel, veículo etc. (R$)', value: ex.bens || '', hint: 'Valor de aquisição, como na declaração.' }],
+      onSubmit(v) { state.tax.extra = { trib: num(v.trib) || 0, isentos: num(v.isentos) || 0, bens: num(v.bens) || 0 }; save(); } });
+  },
+  taxExport() {
+    const year = (state.tax && state.tax.year) || new Date().getFullYear(), D = irYearData(year), E = D.E, L = [];
+    L.push(`RESUMO PARA O IMPOSTO DE RENDA — ano-base ${year} (estimativa gerada em ${dmy(todayStr())})`, '', D.obrigado ? 'DEVE DECLARAR:' : 'Pelos dados do sistema, não obrigado a declarar.'); D.reasons.forEach(r => L.push(' - ' + r));
+    L.push('', 'BENS E DIREITOS (custo de aquisição)'); E.holdings.forEach(p => L.push(`${p.ticker}  ${p.qty} un.  R$ ${nf(p.costBRL)}`));
+    state.accounts.forEach(a => a.balance > 0 && L.push(`${a.name}${a.inst ? ' — ' + a.inst : ''}  saldo R$ ${nf(a.balance)}`)); state.tesouro.forEach(t => t.amount > 0 && L.push(`Tesouro — ${t.name}  R$ ${nf(t.amount)}`));
+    L.push('', 'RENDIMENTOS', `Isentos (proventos): R$ ${nf(D.prov.isentos)}`, `Isentos (bolsas de estudo/pesquisa): R$ ${nf(D.sums.bolsa)}`, `Exclusivos (cupons Tesouro): R$ ${nf(D.prov.cupons)}`, `Tributáveis: R$ ${nf(D.trib)}`);
+    L.push('', 'VENDAS NA BOLSA POR MÊS'); E.months.filter(m => m.ym.slice(0, 4) === String(year)).forEach(m => L.push(`${m.ym}  vendas R$ ${nf(m.sales)}  imposto R$ ${nf(m.tax)}  DARF R$ ${nf(m.darf)}  venc. ${dmy(m.due)}  ${state.tax.paid && state.tax.paid[m.ym] ? 'PAGO' : ''}`));
+    const blob = new Blob([L.join('\n')], { type: 'text/plain;charset=utf-8' }), a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `resumo-ir-${year}.txt`; document.body.appendChild(a); a.click(); a.remove(); toast('Resumo baixado');
+  }
+});
+
 /* ---------- Mercado ---------- */
 let mkt = { at: 0, fx: null, busy: false };
 async function loadMarket(force) {
@@ -1569,6 +1759,11 @@ Object.assign(A, {
     } catch (e) { $('wxErr').textContent = 'Não consegui buscar agora. Tente de novo.'; }
   }
 });
+function meliPreview(r) {   // mostra a conversão enquanto digita
+  const row = $('f_b').closest('.two') || $('f_b').parentElement, box = document.createElement('div'); box.className = 'hint'; box.style.cssText = 'margin:-6px 0 12px;font-weight:600'; row.after(box);
+  const upd = () => { const x = num($('f_b').value); box.textContent = !(x > 0) ? '' : $('f_mo').value === 'usd' ? `≈ ${brl(x * r)} (dólar a ${brl4(r)})` : `≈ US$ ${nf(x / r)} (dólar a ${brl4(r)})`; };
+  $('f_b').addEventListener('input', upd); $('f_mo').addEventListener('change', upd); upd();
+}
 function lastBackupAt() { try { return Number(localStorage.getItem(LBK)) || 0; } catch (e) { return 0; } }
 function daysTo(ds) { const a = new Date(todayStr() + 'T12:00:00'), b = new Date(ds + 'T12:00:00'); return Math.round((b - a) / 864e5); }
 function viewHoje() {
@@ -1587,6 +1782,11 @@ function viewHoje() {
     if (a.mat) { const d = daysTo(a.mat); if (d >= 0 && d <= 30) todo.push({ ic: '📅', t: `${esc(a.name)} vence ${d === 0 ? 'hoje' : `em ${d} dia${d === 1 ? '' : 's'}`} (${dmy(a.mat)})`, s: 'Decida o que fazer com o dinheiro', act: 'editAccount', id: a.id, btn: 'Ver conta' }); }
   });
   [['tesouro', 'Tesouro Direto', 'addAporte'], ['fii', 'renda variável', 'addTrade']].forEach(([c, nm, act]) => { const g = Number(plan[c]) || 0, d = dn(c); if (g > 0 && d + 0.005 < g) todo.push({ ic: '🎯', t: `Faltam ${brl(g - d)} para a meta de ${nm}`, s: `Feito ${brl(d)} de ${brl(g)}`, act, btn: c === 'fii' ? 'Comprar' : 'Aportar' }); });
+  try {   // imposto: DARF perto do vencimento ou atrasado; vendas de ações perto do limite de isenção
+    const TE = taxEngine();
+    TE.months.forEach(mm => { if (mm.darf > 0 && !(state.tax.paid && state.tax.paid[mm.ym])) { const d = daysTo(mm.due); if (d <= 10) todo.unshift({ ic: '🧾', t: d < 0 ? `DARF de ${mlabel(mm.ym)} atrasado (venceu ${dmy(mm.due)})` : `DARF de ${mlabel(mm.ym)}: ${brl(mm.darf)} vence ${d === 0 ? 'hoje' : `em ${d} dia${d === 1 ? '' : 's'}`}`, s: 'Código 6015. Depois de pagar, marque como pago na aba Imposto.', act: 'tab', id: '', btn: 'Ver DARF', tab: 'imposto' }); } });
+    const cm = TE.months.find(mm => mm.ym === m); if (cm && cm.acao.sales >= taxRule('acaoIsenta') * 0.75 && cm.acao.sales <= taxRule('acaoIsenta')) todo.push({ ic: '⚠️', t: `Vendas de ações no mês: ${brl(cm.acao.sales)} de ${brl(taxRule('acaoIsenta'))}`, s: 'Passando do limite, o lucro do mês inteiro deixa de ser isento.', act: 'tab', id: '', btn: 'Ver imposto', tab: 'imposto' });
+  } catch (e) {}
   const lb = lastBackupAt(), bd = lb ? Math.floor((Date.now() - lb) / 864e5) : null;
   if (bd == null || bd >= 7) todo.push({ ic: '💾', t: bd == null ? 'Você ainda não baixou um backup' : `Último backup há ${bd} dias`, s: 'Um arquivo com todos os seus dados, para restaurar se algo der errado', act: 'exportJSON', btn: 'Baixar agora' });
   // últimos lançamentos
@@ -1604,7 +1804,7 @@ function viewHoje() {
   </div>
   <div class="card" style="margin-top:14px">
     <h2>O que precisa da sua atenção</h2>
-    ${todo.length ? todo.map(x => `<div class="item"><div class="row between"><span>${x.ic} <b>${x.t}</b><div class="hint">${x.s}</div></span><button class="btn sm primary" data-act="${x.act}" ${x.id ? `data-id="${x.id}"` : ''}>${x.btn}</button></div></div>`).join('') : '<div class="empty">Tudo em dia ✔</div>'}
+    ${todo.length ? todo.map(x => `<div class="item"><div class="row between"><span>${x.ic} <b>${x.t}</b><div class="hint">${x.s}</div></span><button class="btn sm primary" data-act="${x.act}" ${x.id ? `data-id="${x.id}"` : ''} ${x.tab ? `data-tab="${x.tab}"` : ''}>${x.btn}</button></div></div>`).join('') : '<div class="empty">Tudo em dia ✔</div>'}
   </div>
   <div class="card" style="margin-top:14px">
     <h2>Últimos lançamentos</h2>
@@ -1834,7 +2034,7 @@ function viewProj() {
 /* =========================================================
    Render
    ========================================================= */
-const TABS = [['hoje', 'Hoje'], ['resumo', 'Resumo'], ['renda', 'Renda & Despesas'], ['caixa', 'Caixa & Renda Fixa'], ['fiis', 'Ações & FIIs'], ['analise', 'Análise'], ['proj', 'Projeção']];
+const TABS = [['hoje', 'Hoje'], ['resumo', 'Resumo'], ['renda', 'Renda & Despesas'], ['caixa', 'Caixa & Renda Fixa'], ['fiis', 'Ações & FIIs'], ['imposto', 'Imposto'], ['analise', 'Análise'], ['proj', 'Projeção']];
 let fxTry = 0;
 function ensureFx() {   // com Meli Dólar no saldo, mantém a cotação do dólar fresca (no máx. 1 consulta por hora)
   if (!(state.meli.usd > 0) || (state.fx && state.fx.manual) || Date.now() - fxTry < 3600e3 || (fxRate() && Date.now() - (state.fx.at || 0) < 3600e3)) return;
@@ -1845,7 +2045,7 @@ function render() {
   try {
     $('month').value = state.selectedMonth;
     $('tabs').innerHTML = TABS.map(([k, l]) => `<button class="tab ${tab === k ? 'active' : ''}" data-act="tab" data-tab="${k}">${l}</button>`).join('');
-    const v = { hoje: viewHoje, resumo: viewResumo, renda: viewRenda, caixa: viewCaixa, fiis: viewFiis, analise: viewAnalise, proj: viewProj }[tab] || viewResumo;
+    const v = { hoje: viewHoje, resumo: viewResumo, renda: viewRenda, caixa: viewCaixa, fiis: viewFiis, imposto: viewImposto, analise: viewAnalise, proj: viewProj }[tab] || viewResumo;
     const y = window.scrollY; $('view').innerHTML = v(); window.scrollTo(0, y);
     setSyncPill(); ensureFx();
   } catch (e) { console.error('Erro ao renderizar:', e); $('view').innerHTML = `<div class="empty">Erro ao desenhar a tela: ${esc(e.message)}<br>Seus dados estão salvos. Use ⚙ → Exportar backup.</div>`; }
