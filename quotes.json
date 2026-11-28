@@ -1,90 +1,90 @@
 {
-  "updatedAt": "2026-11-27T21:48:43.221Z",
+  "updatedAt": "2026-11-28T18:40:25.431Z",
   "quotes": {
     "MXRF11": {
       "price": 8.96,
       "change": 3.11,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "HGLG11": {
       "price": 146.3,
       "change": 0.92,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "LVBI11": {
       "price": 104,
       "change": 1.45,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "TRXF11": {
       "price": 57.07,
       "change": 4.99,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "XPML11": {
       "price": 90.25,
       "change": 5.56,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "KNCR11": {
       "price": 103.9,
       "change": 0.14,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "BTLG11": {
       "price": 97.8,
       "change": 1.35,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "KNRI11": {
       "price": 151.72,
       "change": 1.15,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "RZTR11": {
       "price": 69,
       "change": 5.34,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "EGIE3": {
       "price": 26.45,
       "change": -0.41,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "ALUP11": {
       "price": 34.54,
       "change": -1.31,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "BBSE3": {
       "price": 37.34,
       "change": -0.59,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "ITUB4": {
       "price": 42.73,
       "change": 0.4,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "CMIG4": {
       "price": 11.32,
       "change": 0.27,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "WEGE3": {
       "price": 49.87,
       "change": -2.9,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "ITSA4": {
       "price": 14.09,
       "change": 0.71,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     },
     "PSSA3": {
       "price": 43.65,
       "change": 1.37,
-      "time": "2026-11-27T21:31:30.000Z"
+      "time": "2026-11-28T05:25:12.000Z"
     }
   },
   "dividends": {
@@ -225,17 +225,17 @@
   },
   "indicators": {
     "MXRF11": {
-      "priceToNav": 0.94829017,
-      "dividendYield12m": 0.136939,
-      "dividendYield1m": 0.010932106,
+      "priceToNav": 0.9777537,
+      "dividendYield12m": 0.1328125,
+      "dividendYield1m": 0.010602678,
       "navPerShare": 9.163862,
       "equity": 5197799914.65,
       "asOf": "2026-10-01 00:00:00+00"
     },
     "HGLG11": {
-      "priceToNav": 0.8784743,
-      "dividendYield12m": 0.09298476,
-      "dividendYield1m": 0.008070636,
+      "priceToNav": 0.8865337,
+      "dividendYield12m": 0.09213944,
+      "dividendYield1m": 0.007997266,
       "navPerShare": 165.02474631029,
       "equity": 7656899371.48,
       "asOf": "2026-10-01 00:00:00+00"
@@ -243,5 +243,36 @@
   },
   "fx": {},
   "macro": {},
-  "errors": []
+  "errors": [
+    {
+      "what": "fii/dividends LVBI11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "stocks/dividends EGIE3",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "fii/indicators LVBI11",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "stocks/statistics EGIE3",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "dólar",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    },
+    {
+      "what": "macro",
+      "status": 403,
+      "message": "o seu plano da brapi não inclui este dado"
+    }
+  ]
 }
